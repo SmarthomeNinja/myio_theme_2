@@ -87,9 +87,18 @@ const MyIOLive = (function() {
       const text = await response.text();
       log('Command response:', text);
       
-      // Toast megjelenítése a válasszal
+      // Toast megjelenítése - ha HTML válasz jön, kinyerjük a parancsot
       if (text && text.trim()) {
-        toast(text.trim());
+        let toastMsg = text.trim();
+        // Ha HTML válasz, keressük meg a "parancs :" részt
+        const match = text.match(/parancs\s*:\s*([^\n<]+)/i);
+        if (match) {
+          toastMsg = '✓ ' + match[1].trim();
+        } else if (text.includes('<html')) {
+          // Ha HTML de nem találtuk a mintát, csak jelezzük a sikert
+          toastMsg = '✓ ' + cmd;
+        }
+        toast(toastMsg);
       }
       
       // Frissítés késleltetett végrehajtása
