@@ -86,7 +86,14 @@ function changed(obj, name = obj.name, multiplier = 1, forceRefresh = getCookie(
 			value = Math.round(value * 255 / 100);
 			console.log(value);
 		}
-		if (getCookie("AutoRefresh") == "1"
+		
+		// Index oldalon AJAX parancsküldés használata (ha MyIOLive elérhető)
+		const isIndexPage = window.location.pathname == "/" || window.location.pathname == "/index";
+		
+		if (isIndexPage && typeof MyIOLive !== 'undefined') {
+			// AJAX GET parancsküldés - nem tölti újra az oldalt!
+			MyIOLive.sendCommand(name + "=" + value, true);
+		} else if (getCookie("AutoRefresh") == "1"
 			|| forceRefresh == "1"
 			|| forceRefresh == 1
 			|| name == "ReInit"
