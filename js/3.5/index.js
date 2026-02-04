@@ -825,42 +825,53 @@ let isDraggingCard = false;
       let scaleMinTemp = defaultMinTemp;
       let scaleMaxTemp = defaultMaxTemp;
       
-      // Szög számítás - NYÍLÁS ALUL
-      // Az ív bal oldalt fent kezdődik (135°) és jobb oldalt fent végződik (45°)
-      // SVG-ben 0° = jobbra, 90° = le, 180° = balra, 270° = fel
-      // De mi -90°-kal eltoljuk a polarToCartesian-ben, így:
-      // 0° = fel, 90° = jobbra, 180° = le, 270° = balra
+      // Szög számítás - NYÍLÁS ALUL KÖZÉPEN
+      // polarToCartesian: (angleDeg - 90) => 0° = FEL, 90° = JOBBRA, 180° = LE, 270° = BALRA
       // 
-      // Nyílás alul: ív megy 225°-tól (bal-lent) -> 315°-ig (jobb-lent) - ez a HIÁNYZÓ rész
-      // Tehát az ív: -45° (=315°) -tól 225°-ig, azaz 270° ív
-      // Egyszerűbben: startAngle = -45, arcSpan = 270
+      // Nyílás alul középen kell legyen (180° körül, kb 60° széles gap)
+      // Tehát az ív: 210°-tól (bal-alsó) → 150°-ig (jobb-alsó), óramutató járásával ELLENTÉTESEN
+      // Vagy másképp: 150°-tól 210°-ig óramutató irányban (rövid út = gap)
+      //
+      // De az SVG arc mindig a "hosszú utat" rajzolja ha >180°
+      // Szóval: start = 210° (7 óra), end = 150° (5 óra) az óramutató járásával megegyezően
+      // = 210° + 300° = 510° = 150° (mod 360)
       
-      const arcStartDeg = -45;  // Jobb oldalon lent (kb 4-5 óra pozíció)
-      const arcEndDeg = 225;    // Bal oldalon lent (kb 7-8 óra pozíció)  
-      const arcSpan = 270;      // Teljes ív hossza fokban
+      const arcStartDeg = 210;   // Bal alsó (7 óra pozíció)
+      const arcSpan = 300;       // 300 fokos ív (60° gap alul)
+      const arcEndDeg = arcStartDeg + arcSpan; // = 510° = 150° (5 óra pozíció)
       
       const tempToAngle = (temp) => {
         const ratio = Math.max(0, Math.min(1, (temp - scaleMinTemp) / (scaleMaxTemp - scaleMinTemp)));
+        // 0 ratio = arcStartDeg (210°), 1 ratio = arcEndDeg (510° = 150°)
         return arcStartDeg + ratio * arcSpan;
       };
       
       const angleToTemp = (angle) => {
-        // Normalizáljuk a szöget az ív tartományára
+        // Normalizáljuk a szöget
         let normAngle = angle;
-        // Ha a szög kisebb mint arcStartDeg, adjunk hozzá 360-at
-        while (normAngle < arcStartDeg) normAngle += 360;
-        while (normAngle > arcStartDeg + 360) normAngle -= 360;
+        while (normAngle < 0) normAngle += 360;
+        while (normAngle >= 360) normAngle -= 360;
         
-        // Korlátozzuk az ív tartományára
-        if (normAngle > arcEndDeg && normAngle < arcStartDeg + 360) {
-          // A "tiltott" zónában vagyunk (alul középen)
-          // Döntjük el melyik végéhez van közelebb
-          const distToStart = Math.abs(normAngle - (arcStartDeg + 360));
-          const distToEnd = Math.abs(normAngle - arcEndDeg);
-          normAngle = distToStart < distToEnd ? arcStartDeg : arcEndDeg;
+        // A gap 150°-210° között van
+        // Az ív 210° -> 510° (=150°) azaz 210° -> 360° -> 0° -> 150°
+        
+        // Konvertáljuk az ív tartományára
+        let arcAngle;
+        if (normAngle >= arcStartDeg) {
+          // 210° - 360° tartomány
+          arcAngle = normAngle;
+        } else if (normAngle <= (arcEndDeg % 360)) {
+          // 0° - 150° tartomány  
+          arcAngle = normAngle + 360;
+        } else {
+          // Gap zónában vagyunk (150° - 210°)
+          // Melyik végéhez vagyunk közelebb?
+          const distToEnd = Math.abs(normAngle - (arcEndDeg % 360));
+          const distToStart = Math.abs(normAngle - arcStartDeg);
+          arcAngle = distToEnd < distToStart ? arcEndDeg : arcStartDeg;
         }
         
-        const ratio = (normAngle - arcStartDeg) / arcSpan;
+        const ratio = (arcAngle - arcStartDeg) / arcSpan;
         return scaleMinTemp + Math.max(0, Math.min(1, ratio)) * (scaleMaxTemp - scaleMinTemp);
       };
       
@@ -1039,15 +1050,32 @@ let isDraggingCard = false;
           }
           
           // Dinamikus zoom ha túl közel vannak
+          // Cél: min 30° vizuális szögtávolság a handlerek között
           const distance = Math.abs(currentOnVal - currentOffVal);
-          if (distance < minHandleDistance) {
+          const minVisualAngle = 30; // fok
+          const currentAngleSpan = (distance / (scaleMaxTemp - scaleMinTemp)) * arcSpan;
+          
+          if (currentAngleSpan < minVisualAngle || distance < minHandleDistance) {
+            // Számítsuk ki mekkora tartomány kell ahhoz, hogy minVisualAngle legyen a távolság
+            // minVisualAngle = (distance / range) * arcSpan
+            // range = distance * arcSpan / minVisualAngle
+            const neededRange = Math.max(distance * arcSpan / minVisualAngle, minHandleDistance * 4);
             const center = (currentOnVal + currentOffVal) / 2;
-            const zoomRange = minHandleDistance * 4;
-            scaleMinTemp = Math.max(defaultMinTemp, center - zoomRange);
-            scaleMaxTemp = Math.min(defaultMaxTemp, center + zoomRange);
             
-            // Háttér ív újrarajzolása nem kell, az marad
-            // De a handle pozíciókat frissíteni kell az új skálán
+            scaleMinTemp = Math.max(defaultMinTemp, center - neededRange / 2);
+            scaleMaxTemp = Math.min(defaultMaxTemp, center + neededRange / 2);
+            
+            // Ha az egyik határba ütköztünk, kompenzáljunk
+            const actualRange = scaleMaxTemp - scaleMinTemp;
+            if (actualRange < neededRange) {
+              if (scaleMinTemp === defaultMinTemp) {
+                scaleMaxTemp = Math.min(defaultMaxTemp, scaleMinTemp + neededRange);
+              } else if (scaleMaxTemp === defaultMaxTemp) {
+                scaleMinTemp = Math.max(defaultMinTemp, scaleMaxTemp - neededRange);
+              }
+            }
+            
+            // Handle pozíciókat frissíteni kell az új skálán
             updateHandlePosition(onHandle, currentOnVal);
             updateHandlePosition(offHandle, currentOffVal);
           }
