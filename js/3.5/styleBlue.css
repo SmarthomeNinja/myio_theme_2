@@ -1272,4 +1272,20 @@ body {
 	width: auto;
 	display: block;
   }
+  * {
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+  }
   
+  // KIVÉTEL: Input és Textarea elemek SELECTABLE-k
+  input,
+  textarea,
+  input::placeholder,
+  [contenteditable="true"] {
+	user-select: text;
+	-webkit-user-select: text;
+	-moz-user-select: text;
+	-ms-user-select: text;
+  }
