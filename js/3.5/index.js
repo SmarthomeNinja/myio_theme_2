@@ -802,53 +802,500 @@ let isDraggingCard = false;
       }
     }
 
-    function appendThermoChipsEditable(cardEl, onVal, offVal, onName, offName, unitText) {
-      const chips = el("div", { class: "myio-thermoChips" }, [
-        el("div", { class: "myio-chip" }, [
-          el("div", { class: "k", text: (str_On || "On") }),
-          el("div", { class: "v" }, [
-            el("input", {
-              type: "number",
-              min: "0",
-              max: "1000",
-              value: String(onVal),
-              name: onName,
-              onchange: (e) => changed(e.target, e.target.name, 10)
-            }),
-            document.createTextNode(" " + unitText)
-          ])
-        ]),
-        el("div", { class: "myio-chip" }, [
-          el("div", { class: "k", text: (str_Off || "Off") }),
-          el("div", { class: "v" }, [
-            el("input", {
-              type: "number",
-              min: "0",
-              max: "1000",
-              value: String(offVal),
-              name: offName,
-              onchange: (e) => changed(e.target, e.target.name, 10)
-            }),
-            document.createTextNode(" " + unitText)
-          ])
-        ])
-      ]);
-
-      cardEl.append(chips);
+    // ========== HA-style Circular Thermostat Card ==========
+    
+    function createCircularThermoCard(cardEl, onVal, offVal, onName, offName, unitText, sensorValue, isActive, isHeating, writable) {
+      const avgTemp = (onVal + offVal) / 2;
+      const hysteresis = Math.abs(offVal - onVal) / 2;
+      
+      // SVG paraméterek
+      const size = 180;
+      const cx = size / 2;
+      const cy = size / 2;
+      const radius = 70;
+      const strokeWidth = 8;
+      const handleRadius = 12;
+      
+      // Hőmérséklet tartomány (min-max)
+      const minTemp = 5;
+      const maxTemp = 40;
+      
+      // Szög számítás (arc: 240 fok, kezdés: 150 fok)
+      const arcStart = 150;
+      const arcSpan = 240;
+      
+      const tempToAngle = (temp) => {
+        const ratio = (temp - minTemp) / (maxTemp - minTemp);
+        return arcStart + ratio * arcSpan;
+      };
+      
+      const angleToTemp = (angle) => {
+        let normalizedAngle = angle - arcStart;
+        if (normalizedAngle < 0) normalizedAngle += 360;
+        if (normalizedAngle > arcSpan) normalizedAngle = arcSpan;
+        const ratio = normalizedAngle / arcSpan;
+        return minTemp + ratio * (maxTemp - minTemp);
+      };
+      
+      const polarToCartesian = (cx, cy, r, angleDeg) => {
+        const rad = (angleDeg - 90) * Math.PI / 180;
+        return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+      };
+      
+      const describeArc = (cx, cy, r, startAngle, endAngle) => {
+        const start = polarToCartesian(cx, cy, r, endAngle);
+        const end = polarToCartesian(cx, cy, r, startAngle);
+        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+        return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+      };
+      
+      // Színek meghatározása
+      const modeColor = isHeating ? "#FF6B35" : "#35B8FF";
+      const modeColorLight = isHeating ? "rgba(255, 107, 53, 0.2)" : "rgba(53, 184, 255, 0.2)";
+      const modeIcon = isHeating ? "🔥" : "❄️";
+      const modeText = isHeating ? (str_Heating || "Heating") : (str_Cooling || "Cooling");
+      
+      // Container
+      const thermoContainer = el("div", { class: "myio-thermo-circular" });
+      
+      // SVG elem
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+      svg.setAttribute("class", "myio-thermo-svg");
+      svg.style.width = "100%";
+      svg.style.maxWidth = "200px";
+      svg.style.height = "auto";
+      
+      // Háttér ív (szürke)
+      const bgArc = document.createElementNS(svgNS, "path");
+      bgArc.setAttribute("d", describeArc(cx, cy, radius, arcStart, arcStart + arcSpan));
+      bgArc.setAttribute("fill", "none");
+      bgArc.setAttribute("stroke", "#e0e0e0");
+      bgArc.setAttribute("stroke-width", strokeWidth);
+      bgArc.setAttribute("stroke-linecap", "round");
+      svg.appendChild(bgArc);
+      
+      // Aktív ív (ON és OFF közötti tartomány)
+      const onAngle = tempToAngle(onVal);
+      const offAngle = tempToAngle(offVal);
+      const startAngle = Math.min(onAngle, offAngle);
+      const endAngle = Math.max(onAngle, offAngle);
+      
+      const activeArc = document.createElementNS(svgNS, "path");
+      activeArc.setAttribute("d", describeArc(cx, cy, radius, startAngle, endAngle));
+      activeArc.setAttribute("fill", "none");
+      activeArc.setAttribute("stroke", modeColorLight);
+      activeArc.setAttribute("stroke-width", strokeWidth + 4);
+      activeArc.setAttribute("stroke-linecap", "round");
+      svg.appendChild(activeArc);
+      
+      // Aktuális érték ív (ha be van kapcsolva)
+      if (isActive && sensorValue >= minTemp && sensorValue <= maxTemp) {
+        const sensorAngle = tempToAngle(sensorValue);
+        const activeStartAngle = isHeating ? arcStart : sensorAngle;
+        const activeEndAngle = isHeating ? sensorAngle : arcStart + arcSpan;
+        
+        const currentArc = document.createElementNS(svgNS, "path");
+        currentArc.setAttribute("d", describeArc(cx, cy, radius, Math.min(onAngle, sensorAngle), Math.max(onAngle, sensorAngle)));
+        currentArc.setAttribute("fill", "none");
+        currentArc.setAttribute("stroke", modeColor);
+        currentArc.setAttribute("stroke-width", strokeWidth);
+        currentArc.setAttribute("stroke-linecap", "round");
+        svg.appendChild(currentArc);
+      }
+      
+      // Drag handlerek (ON és OFF pontok)
+      if (writable) {
+        const onPos = polarToCartesian(cx, cy, radius, onAngle);
+        const offPos = polarToCartesian(cx, cy, radius, offAngle);
+        
+        // ON handle
+        const onHandle = document.createElementNS(svgNS, "circle");
+        onHandle.setAttribute("cx", onPos.x);
+        onHandle.setAttribute("cy", onPos.y);
+        onHandle.setAttribute("r", handleRadius);
+        onHandle.setAttribute("fill", modeColor);
+        onHandle.setAttribute("stroke", "#fff");
+        onHandle.setAttribute("stroke-width", "2");
+        onHandle.setAttribute("class", "myio-thermo-handle myio-thermo-handle-on");
+        onHandle.style.cursor = "pointer";
+        svg.appendChild(onHandle);
+        
+        // OFF handle
+        const offHandle = document.createElementNS(svgNS, "circle");
+        offHandle.setAttribute("cx", offPos.x);
+        offHandle.setAttribute("cy", offPos.y);
+        offHandle.setAttribute("r", handleRadius);
+        offHandle.setAttribute("fill", "#888");
+        offHandle.setAttribute("stroke", "#fff");
+        offHandle.setAttribute("stroke-width", "2");
+        offHandle.setAttribute("class", "myio-thermo-handle myio-thermo-handle-off");
+        offHandle.style.cursor = "pointer";
+        svg.appendChild(offHandle);
+        
+        // Drag logika
+        let draggingHandle = null;
+        let currentOnVal = onVal;
+        let currentOffVal = offVal;
+        
+        const getSvgPoint = (e) => {
+          const rect = svg.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          const scaleX = size / rect.width;
+          const scaleY = size / rect.height;
+          return {
+            x: (clientX - rect.left) * scaleX,
+            y: (clientY - rect.top) * scaleY
+          };
+        };
+        
+        const getAngleFromPoint = (pt) => {
+          const dx = pt.x - cx;
+          const dy = pt.y - cy;
+          let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+          if (angle < 0) angle += 360;
+          return angle;
+        };
+        
+        const updateHandle = (handle, temp, isOn) => {
+          const angle = tempToAngle(temp);
+          const pos = polarToCartesian(cx, cy, radius, angle);
+          handle.setAttribute("cx", pos.x);
+          handle.setAttribute("cy", pos.y);
+        };
+        
+        const updateActiveArc = () => {
+          const onAng = tempToAngle(currentOnVal);
+          const offAng = tempToAngle(currentOffVal);
+          const sAngle = Math.min(onAng, offAng);
+          const eAngle = Math.max(onAng, offAng);
+          activeArc.setAttribute("d", describeArc(cx, cy, radius, sAngle, eAngle));
+        };
+        
+        const startDrag = (handle, isOn) => (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          draggingHandle = { handle, isOn };
+          handle.setAttribute("r", handleRadius + 4);
+        };
+        
+        const doDrag = (e) => {
+          if (!draggingHandle) return;
+          e.preventDefault();
+          
+          const pt = getSvgPoint(e);
+          let angle = getAngleFromPoint(pt);
+          
+          // Korlátozás az ív tartományára
+          if (angle < arcStart) angle = arcStart;
+          if (angle > arcStart + arcSpan) angle = arcStart + arcSpan;
+          
+          const temp = Math.round(angleToTemp(angle) * 10) / 10;
+          
+          if (draggingHandle.isOn) {
+            currentOnVal = temp;
+            updateHandle(draggingHandle.handle, temp, true);
+          } else {
+            currentOffVal = temp;
+            updateHandle(draggingHandle.handle, temp, false);
+          }
+          
+          updateActiveArc();
+          
+          // Frissítjük a kijelzőt
+          const newAvg = (currentOnVal + currentOffVal) / 2;
+          const newHyst = Math.abs(currentOffVal - currentOnVal) / 2;
+          avgDisplay.textContent = newAvg.toFixed(1).replace(".", ",");
+          hystDisplay.textContent = `±${newHyst.toFixed(1)} ${unitText}`;
+        };
+        
+        const endDrag = () => {
+          if (!draggingHandle) return;
+          draggingHandle.handle.setAttribute("r", handleRadius);
+          
+          // Küldjük el a változásokat
+          try {
+            const onInput = document.createElement("input");
+            onInput.name = onName;
+            onInput.value = String(Math.round(currentOnVal * 10));
+            changed(onInput, onInput.name, 10);
+            
+            const offInput = document.createElement("input");
+            offInput.name = offName;
+            offInput.value = String(Math.round(currentOffVal * 10));
+            changed(offInput, offInput.name, 10);
+          } catch (err) {
+            console.error("Thermostat update error:", err);
+          }
+          
+          draggingHandle = null;
+        };
+        
+        // Event listeners a handlekhez
+        onHandle.addEventListener("mousedown", startDrag(onHandle, true));
+        onHandle.addEventListener("touchstart", startDrag(onHandle, true), { passive: false });
+        offHandle.addEventListener("mousedown", startDrag(offHandle, false));
+        offHandle.addEventListener("touchstart", startDrag(offHandle, false), { passive: false });
+        
+        document.addEventListener("mousemove", doDrag);
+        document.addEventListener("touchmove", doDrag, { passive: false });
+        document.addEventListener("mouseup", endDrag);
+        document.addEventListener("touchend", endDrag);
+      }
+      
+      thermoContainer.appendChild(svg);
+      
+      // Középső kijelző (SVG-n kívül, pozícionálva)
+      const centerDisplay = el("div", { class: "myio-thermo-center" });
+      
+      // Mód kijelző (fűtés/hűtés)
+      const modeDisplay = el("div", { 
+        class: "myio-thermo-mode" + (isActive ? " active" : ""),
+        style: `color: ${isActive ? modeColor : "#999"}`
+      });
+      modeDisplay.textContent = isActive ? modeText : (str_Off || "Off");
+      centerDisplay.appendChild(modeDisplay);
+      
+      // Átlag hőmérséklet nagy számmal
+      const avgDisplay = el("div", { class: "myio-thermo-avgtemp" });
+      const avgWhole = Math.floor(avgTemp);
+      const avgDecimal = Math.round((avgTemp - avgWhole) * 10);
+      avgDisplay.innerHTML = `${avgWhole}<span class="decimal">,${avgDecimal}</span><span class="unit">°<span class="c">C</span></span>`;
+      centerDisplay.appendChild(avgDisplay);
+      
+      // Hiszterézis kijelző
+      const hystDisplay = el("div", { class: "myio-thermo-hyst" });
+      hystDisplay.textContent = `±${hysteresis.toFixed(1)} ${unitText}`;
+      centerDisplay.appendChild(hystDisplay);
+      
+      // Szenzor érték
+      const sensorDisplay = el("div", { class: "myio-thermo-sensor" });
+      sensorDisplay.innerHTML = `<span class="icon">${isActive ? modeIcon : "🌡️"}</span> ${sensorValue.toFixed(1)} ${unitText}`;
+      centerDisplay.appendChild(sensorDisplay);
+      
+      thermoContainer.appendChild(centerDisplay);
+      
+      // +/- gombok
+      if (writable) {
+        const btnContainer = el("div", { class: "myio-thermo-buttons" });
+        
+        const minusBtn = el("button", { class: "myio-thermo-btn minus", text: "−" });
+        const plusBtn = el("button", { class: "myio-thermo-btn plus", text: "+" });
+        
+        let currentOn = onVal;
+        let currentOff = offVal;
+        
+        const adjustTemp = (delta) => {
+          currentOn = Math.round((currentOn + delta) * 10) / 10;
+          currentOff = Math.round((currentOff + delta) * 10) / 10;
+          
+          // Korlátozás
+          if (currentOn < minTemp) { currentOn = minTemp; currentOff = currentOff - delta + (minTemp - (currentOn - delta)); }
+          if (currentOff > maxTemp) { currentOff = maxTemp; currentOn = currentOn - delta + (maxTemp - (currentOff - delta)); }
+          if (currentOn > maxTemp) currentOn = maxTemp;
+          if (currentOff < minTemp) currentOff = minTemp;
+          
+          // Frissítés
+          const newAvg = (currentOn + currentOff) / 2;
+          const newHyst = Math.abs(currentOff - currentOn) / 2;
+          avgDisplay.innerHTML = `${Math.floor(newAvg)}<span class="decimal">,${Math.round((newAvg - Math.floor(newAvg)) * 10)}</span><span class="unit">°<span class="c">C</span></span>`;
+          hystDisplay.textContent = `±${newHyst.toFixed(1)} ${unitText}`;
+          
+          // Handle pozíciók frissítése
+          const onHandle = svg.querySelector(".myio-thermo-handle-on");
+          const offHandle = svg.querySelector(".myio-thermo-handle-off");
+          if (onHandle && offHandle) {
+            const onAngle = tempToAngle(currentOn);
+            const offAngle = tempToAngle(currentOff);
+            const onPos = polarToCartesian(cx, cy, radius, onAngle);
+            const offPos = polarToCartesian(cx, cy, radius, offAngle);
+            onHandle.setAttribute("cx", onPos.x);
+            onHandle.setAttribute("cy", onPos.y);
+            offHandle.setAttribute("cx", offPos.x);
+            offHandle.setAttribute("cy", offPos.y);
+            
+            // Active arc frissítése
+            const sAngle = Math.min(onAngle, offAngle);
+            const eAngle = Math.max(onAngle, offAngle);
+            activeArc.setAttribute("d", describeArc(cx, cy, radius, sAngle, eAngle));
+          }
+          
+          // Küldjük el a változásokat
+          try {
+            const onInput = document.createElement("input");
+            onInput.name = onName;
+            onInput.value = String(Math.round(currentOn * 10));
+            changed(onInput, onInput.name, 10);
+            
+            const offInput = document.createElement("input");
+            offInput.name = offName;
+            offInput.value = String(Math.round(currentOff * 10));
+            changed(offInput, offInput.name, 10);
+          } catch (err) {
+            console.error("Thermostat adjust error:", err);
+          }
+        };
+        
+        minusBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          adjustTemp(-0.1);
+        });
+        
+        plusBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          adjustTemp(0.1);
+        });
+        
+        btnContainer.appendChild(minusBtn);
+        btnContainer.appendChild(plusBtn);
+        thermoContainer.appendChild(btnContainer);
+      }
+      
+      cardEl.appendChild(thermoContainer);
     }
 
-    function appendThermoChipsRO(cardEl, onVal, offVal, unitText) {
-      const chips = el("div", { class: "myio-thermoChips" }, [
-        el("div", { class: "myio-chip" }, [
-          el("div", { class: "k", text: (str_On || "On") }),
-          el("div", { class: "v", text: String(onVal) + " " + unitText })
-        ]),
-        el("div", { class: "myio-chip" }, [
-          el("div", { class: "k", text: (str_Off || "Off") }),
-          el("div", { class: "v", text: String(offVal) + " " + unitText })
-        ])
-      ]);
-      cardEl.append(chips);
+    // CSS injektálás a cirkuláris termosztáthoz
+    if (!document.getElementById("myio-thermo-circular-css")) {
+      const style = document.createElement("style");
+      style.id = "myio-thermo-circular-css";
+      style.textContent = `
+        .myio-thermo-circular {
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 10px 0;
+        }
+        .myio-thermo-svg {
+          display: block;
+        }
+        .myio-thermo-handle {
+          transition: r 0.15s ease;
+        }
+        .myio-thermo-handle:hover {
+          filter: brightness(1.1);
+        }
+        .myio-thermo-center {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -60%);
+          text-align: center;
+          pointer-events: none;
+        }
+        .myio-thermo-mode {
+          font-size: 12px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 2px;
+          opacity: 0.7;
+        }
+        .myio-thermo-mode.active {
+          opacity: 1;
+        }
+        .myio-thermo-avgtemp {
+          font-size: 42px;
+          font-weight: 300;
+          line-height: 1;
+          color: #333;
+        }
+        .myio-thermo-avgtemp .decimal {
+          font-size: 24px;
+          vertical-align: top;
+          margin-left: -2px;
+        }
+        .myio-thermo-avgtemp .unit {
+          font-size: 18px;
+          vertical-align: top;
+          margin-left: 2px;
+          font-weight: 400;
+        }
+        .myio-thermo-avgtemp .unit .c {
+          font-size: 14px;
+        }
+        .myio-thermo-hyst {
+          font-size: 11px;
+          color: #888;
+          margin-top: 2px;
+        }
+        .myio-thermo-sensor {
+          font-size: 14px;
+          color: #666;
+          margin-top: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+        }
+        .myio-thermo-sensor .icon {
+          font-size: 16px;
+        }
+        .myio-thermo-buttons {
+          display: flex;
+          justify-content: center;
+          gap: 20px;
+          margin-top: 15px;
+        }
+        .myio-thermo-btn {
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          border: 2px solid #ddd;
+          background: #fff;
+          font-size: 24px;
+          font-weight: 300;
+          color: #666;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.15s ease;
+        }
+        .myio-thermo-btn:hover {
+          border-color: #aaa;
+          color: #333;
+        }
+        .myio-thermo-btn:active {
+          transform: scale(0.95);
+          background: #f5f5f5;
+        }
+        
+        /* Dark theme support */
+        @media (prefers-color-scheme: dark) {
+          .myio-thermo-avgtemp {
+            color: #fff;
+          }
+          .myio-thermo-hyst {
+            color: #aaa;
+          }
+          .myio-thermo-sensor {
+            color: #ccc;
+          }
+          .myio-thermo-btn {
+            background: #333;
+            border-color: #555;
+            color: #ccc;
+          }
+          .myio-thermo-btn:hover {
+            border-color: #777;
+            color: #fff;
+          }
+        }
+        
+        /* Card variant styles */
+        .myio-card.myio-heat .myio-thermo-mode.active {
+          color: #FF6B35;
+        }
+        .myio-card.myio-cool .myio-thermo-mode.active {
+          color: #35B8FF;
+        }
+      `;
+      document.head.appendChild(style);
     }
 
     if (hasPCA) {
@@ -863,13 +1310,19 @@ let isDraggingCard = false;
 
           const isActive = (PCAVal[i] > (typeof PCAMIN !== "undefined" ? PCAMIN[i] : 0));
           let status = "myio-off";
+          let isHeating = true;
           if (isActive) {
             if (typeof PCA_min_temp_ON !== "undefined" && typeof PCA_max_temp_OFF !== "undefined") {
-              if (PCA_min_temp_ON[i] < PCA_max_temp_OFF[i]) status = "myio-on myio-heat";
-              else if (PCA_max_temp_OFF[i] < PCA_min_temp_ON[i]) status = "myio-on myio-cool";
+              if (PCA_min_temp_ON[i] < PCA_max_temp_OFF[i]) { status = "myio-on myio-heat"; isHeating = true; }
+              else if (PCA_max_temp_OFF[i] < PCA_min_temp_ON[i]) { status = "myio-on myio-cool"; isHeating = false; }
               else status = "myio-on";
             } else {
               status = "myio-on";
+            }
+          } else {
+            // Meghatározzuk a módot akkor is, ha nincs aktív
+            if (typeof PCA_min_temp_ON !== "undefined" && typeof PCA_max_temp_OFF !== "undefined") {
+              isHeating = PCA_min_temp_ON[i] < PCA_max_temp_OFF[i];
             }
           }
 
@@ -894,23 +1347,18 @@ let isDraggingCard = false;
           const onTh = (typeof PCA_min_temp_ON !== "undefined" ? (PCA_min_temp_ON[i] / 10) : 0);
           const offTh = (typeof PCA_max_temp_OFF !== "undefined" ? (PCA_max_temp_OFF[i] / 10) : 0);
 
-          if (PCAWrite[i]) {
-            appendThermoChipsEditable(
-              c,
-              onTh,
-              offTh,
-              "PCA_temp_MIN*" + (i + 1),
-              "PCA_temp_MAX*" + (i + 1),
-              unitText
-            );
-          } else {
-            appendThermoChipsRO(c, onTh, offTh, unitText);
-          }
-
-          c.append(el("div", { class: "myio-sensorLine" }, [
-            el("div", { class: "name", text: sensor.name }),
-            el("div", { class: "val", text: String(sensor.value) + " " + sensor.unit })
-          ]));
+          createCircularThermoCard(
+            c,
+            onTh,
+            offTh,
+            "PCA_temp_MIN*" + (i + 1),
+            "PCA_temp_MAX*" + (i + 1),
+            unitText,
+            sensor.value,
+            isActive,
+            isHeating,
+            PCAWrite[i]
+          );
 
           return c;
         };
@@ -932,13 +1380,19 @@ let isDraggingCard = false;
           const isOn = (relays[i] == 101 || relays[i] == 111 || relays[i] == 11);
 
           let status = "myio-off";
+          let isHeating = true;
           if (isOn) {
             if (typeof min_temp_ON !== "undefined" && typeof max_temp_OFF !== "undefined") {
-              if (min_temp_ON[i] < max_temp_OFF[i]) status = "myio-on myio-heat";
-              else if (max_temp_OFF[i] < min_temp_ON[i]) status = "myio-on myio-cool";
+              if (min_temp_ON[i] < max_temp_OFF[i]) { status = "myio-on myio-heat"; isHeating = true; }
+              else if (max_temp_OFF[i] < min_temp_ON[i]) { status = "myio-on myio-cool"; isHeating = false; }
               else status = "myio-on";
             } else {
               status = "myio-on";
+            }
+          } else {
+            // Meghatározzuk a módot akkor is, ha nincs aktív
+            if (typeof min_temp_ON !== "undefined" && typeof max_temp_OFF !== "undefined") {
+              isHeating = min_temp_ON[i] < max_temp_OFF[i];
             }
           }
 
@@ -965,23 +1419,18 @@ let isDraggingCard = false;
           const onTh = (typeof min_temp_ON !== "undefined" ? (min_temp_ON[i] / 10) : 0);
           const offTh = (typeof max_temp_OFF !== "undefined" ? (max_temp_OFF[i] / 10) : 0);
 
-          if (writable) {
-            appendThermoChipsEditable(
-              c,
-              onTh,
-              offTh,
-              "min_temp_ON*" + (i + 1),
-              "max_temp_OFF*" + (i + 1),
-              unitText
-            );
-          } else {
-            appendThermoChipsRO(c, onTh, offTh, unitText);
-          }
-
-          c.append(el("div", { class: "myio-sensorLine" }, [
-            el("div", { class: "name", text: sensor.name }),
-            el("div", { class: "val", text: String(sensor.value) + " " + sensor.unit })
-          ]));
+          createCircularThermoCard(
+            c,
+            onTh,
+            offTh,
+            "min_temp_ON*" + (i + 1),
+            "max_temp_OFF*" + (i + 1),
+            unitText,
+            sensor.value,
+            isOn,
+            isHeating,
+            writable
+          );
 
           return c;
         };
