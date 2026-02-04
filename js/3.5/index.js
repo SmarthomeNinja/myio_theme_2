@@ -828,17 +828,17 @@ let isDraggingCard = false;
       // Szög számítás - NYÍLÁS ALUL KÖZÉPEN
       // polarToCartesian: (angleDeg - 90) => 0° = FEL, 90° = JOBBRA, 180° = LE, 270° = BALRA
       // 
-      // Nyílás alul középen kell legyen (180° körül, kb 60° széles gap)
-      // Tehát az ív: 210°-tól (bal-alsó) → 150°-ig (jobb-alsó), óramutató járásával ELLENTÉTESEN
-      // Vagy másképp: 150°-tól 210°-ig óramutató irányban (rövid út = gap)
-      //
-      // De az SVG arc mindig a "hosszú utat" rajzolja ha >180°
-      // Szóval: start = 210° (7 óra), end = 150° (5 óra) az óramutató járásával megegyezően
-      // = 210° + 300° = 510° = 150° (mod 360)
+      // Óra pozíciók: 12h=0°, 3h=90°, 6h=180°, 9h=270°
+      // 
+      // Nyílás ALUL kell legyen (5-7 óra között, kb 150°-210°)
+      // Tehát az ív: 8 órától (240°) -> 4 óráig (120°, átmenve 360°-on)
+      // arcStart = 240° (8 óra), arcEnd = 480° (=120° = 4 óra)
+      // arcSpan = 240° (a "látható" ív hossza)
+      // Gap = 120° (alul, 4-8 óra között)
       
-      const arcStartDeg = 210;   // Bal alsó (7 óra pozíció)
-      const arcSpan = 300;       // 300 fokos ív (60° gap alul)
-      const arcEndDeg = arcStartDeg + arcSpan; // = 510° = 150° (5 óra pozíció)
+      const arcStartDeg = 240;   // 8 óra pozíció (bal-alsó)
+      const arcSpan = 240;       // 240 fokos ív
+      const arcEndDeg = arcStartDeg + arcSpan; // = 480° = 120° (4 óra pozíció, jobb-alsó)
       
       const tempToAngle = (temp) => {
         const ratio = Math.max(0, Math.min(1, (temp - scaleMinTemp) / (scaleMaxTemp - scaleMinTemp)));
@@ -847,27 +847,25 @@ let isDraggingCard = false;
       };
       
       const angleToTemp = (angle) => {
-        // Normalizáljuk a szöget
+        // Normalizáljuk a szöget 0-360 tartományra
         let normAngle = angle;
         while (normAngle < 0) normAngle += 360;
         while (normAngle >= 360) normAngle -= 360;
         
-        // A gap 150°-210° között van
-        // Az ív 210° -> 510° (=150°) azaz 210° -> 360° -> 0° -> 150°
-        
-        // Konvertáljuk az ív tartományára
+        // Az ív 240° -> 480° (=120°), a gap 120° -> 240° között
+        // Konvertáljuk az ív tartományára (240-480)
         let arcAngle;
         if (normAngle >= arcStartDeg) {
-          // 210° - 360° tartomány
+          // 240° - 360° tartomány -> közvetlenül használható
           arcAngle = normAngle;
         } else if (normAngle <= (arcEndDeg % 360)) {
-          // 0° - 150° tartomány  
+          // 0° - 120° tartomány -> +360°
           arcAngle = normAngle + 360;
         } else {
-          // Gap zónában vagyunk (150° - 210°)
+          // Gap zónában vagyunk (120° - 240°)
           // Melyik végéhez vagyunk közelebb?
-          const distToEnd = Math.abs(normAngle - (arcEndDeg % 360));
-          const distToStart = Math.abs(normAngle - arcStartDeg);
+          const distToEnd = normAngle - (arcEndDeg % 360);   // távolság 120°-tól
+          const distToStart = arcStartDeg - normAngle;       // távolság 240°-tól
           arcAngle = distToEnd < distToStart ? arcEndDeg : arcStartDeg;
         }
         
