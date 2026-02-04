@@ -841,7 +841,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       /* Ninja Menu Button Styling */
       .ninja-menu-btn {
         background: linear-gradient(135deg, #43E7F6 0%, #64d1ff 100%) !important;
-       color: #1e3a5f !important;
+        color: #1e3a5f !important;
         font-weight: 700 !important;
         box-shadow: 0 4px 12px rgba(67, 231, 246, 0.4) !important;
         border: 1px solid rgba(100, 209, 255, 0.5) !important;
