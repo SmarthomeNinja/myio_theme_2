@@ -1,87 +1,23 @@
-body {
-	font-family:Verdana, Geneva, sans-serif;
-	width: 98%;
-	background-color: #999;
-	display: block;
-	}
-	#overlay {
-		position: fixed;
-		display: none;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background-color: rgba(0,0,0,0.5);
-		z-index: 2;
-		cursor: pointer;
-	}
-	.header{
-	width:99%;
-	position:fixed;
-	left:0.5%;
-	top:5px;	
-	z-index:99;
-	}
-	.content{
-	left: 1%;
-	width:98%;
-	position:absolute;
-	top:100px;
-	z-index:-1;
-	}
-	h2{
-	background-color:#0397d6;
-	color:#fff;
-	padding:15px;
-	align:center;
-	margin:0px;
-	}
-	h{
-	background-color:#43E7F6;
-	padding:5px;
-	align:middle;
-	vertical-align:auto;
-	margin:0px;
-	calor:#333;
-	}
-	h4#l{
-		background-color:#43E7F6;
-		color:#333;
-	}
-	h4#d {
-		background-color:#666;
-		color:#fff;
-	}
-	
 
-/* Chrome, Safari, Edge, Opera */
-	input::-webkit-outer-spin-button,
-	input::-webkit-inner-spin-button {
-	  -webkit-appearance: none;  
-	}
+/* ========== ALKALMAZÁS SZERŰ UI - KEZDETE ========== */
 
+/* Alapértelmezett: összes elem nem selectable */
+* {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
 
-/* Firefox */
-	input[type=number] {
-	-moz-appearance: textfield;
-	margin:0px;
-	text-align: right;
-	}
-	r.on1 td{
-	background-color:#fcb034;
-	}
-	r.on2 td{
-	background-color:#dc9014;
-	}
-	th#top {
-	padding: 2px;
-	background: #0397d6;
-	order-bottom:dotted #ccc 1px;
-	align:center;
-	font-size:17px;
-	calor:#fff;
-	padding:5px 0 6px 0;
-	font-weight:normal;
-	}
+/* KIVÉTEL: Input és Textarea elemek szövege SELECTABLE */
+input,
+textarea,
+input::placeholder,
+[contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* ========== ALKALMAZÁS SZERŰ UI - VÉGE ========== */
