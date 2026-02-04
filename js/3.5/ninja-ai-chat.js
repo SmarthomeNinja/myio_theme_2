@@ -415,8 +415,11 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       createNinjaStyles();
     }
     const modal = document.getElementById('ninja-modal');
+    const ninjaBtn = document.getElementById('ninja-menu-btn');
     modal.style.display = 'flex';
     isNinjaOpen = true;
+    // Keep active class
+    if (ninjaBtn) ninjaBtn.classList.add('ninja-active');
     
     // Focus input
     setTimeout(() => {
@@ -431,15 +434,21 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     if (modal) {
       modal.style.display = 'none';
       isNinjaOpen = false;
+      // Keep the active class so button stays orange
+      const ninjaBtn = document.getElementById('ninja-menu-btn');
+      if (ninjaBtn) ninjaBtn.classList.add('ninja-active');
     }
   }
 
   // Toggle Ninja
   function toggleNinja() {
+    const ninjaBtn = document.getElementById('ninja-menu-btn');
     if (isNinjaOpen) {
       closeNinja();
     } else {
       openNinja();
+      // Add active class when opened (stays orange)
+      if (ninjaBtn) ninjaBtn.classList.add('ninja-active');
     }
   }
 
@@ -840,14 +849,21 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       
       /* Ninja Menu Button Styling */
       .ninja-menu-btn {
-        background: linear-gradient(135deg, #43E7F6 0%, #64d1ff 100%) !important;
-        color: #1e3a5f !important;
+        background: linear-gradient(135deg, #FF8C00 0%, #FFA500 100%) !important;
+        color: #000000 !important;
         font-weight: 700 !important;
-        box-shadow: 0 4px 12px rgba(67, 231, 246, 0.4) !important;
-        border: 1px solid rgba(100, 209, 255, 0.5) !important;
+        box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4) !important;
+        border: 1px solid rgba(255, 165, 0, 0.5) !important;
         transition: all 0.3s ease !important;
         position: relative !important;
         overflow: hidden !important;
+      }
+      
+      /* Activated state - stays orange */
+      .ninja-menu-btn.ninja-active {
+        background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%) !important;
+        color: #000000 !important;
+        box-shadow: 0 4px 12px rgba(255, 140, 0, 0.6) !important;
       }
       
       .ninja-menu-btn::before {
@@ -868,9 +884,10 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       }
       
       .ninja-menu-btn:hover {
-        background: linear-gradient(135deg, #64d1ff 0%, #43E7F6 100%) !important;
+        background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%) !important;
+        color: #000000 !important;
         transform: translateY(-2px) scale(1.02) !important;
-        box-shadow: 0 6px 20px rgba(67, 231, 246, 0.6) !important;
+        box-shadow: 0 6px 20px rgba(255, 140, 0, 0.6) !important;
       }
       
       .ninja-menu-btn:active {
@@ -943,3 +960,4 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   };
 
 })();
+
