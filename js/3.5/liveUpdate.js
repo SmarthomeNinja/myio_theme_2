@@ -243,6 +243,7 @@ const MyIOLive = (function() {
 
   /**
    * Relay kártyák UI frissítése
+   * JAVÍTÁS: querySelectorAll használata, hogy mindegyik kártya frissüljön
    */
   function updateRelays(relaysData) {
     for (const key in relaysData) {
@@ -251,26 +252,31 @@ const MyIOLive = (function() {
       const relayId = idx + 1; // relay ID = tömb index + 1
       const isOn = relay.state === 1;
       
-      // Kártya keresése data-cardid alapján
-      const card = document.querySelector(`[data-cardid="relay:${relayId}"]`);
-      if (!card) continue;
+      // JAVÍTÁS: querySelectorAll minden olyan kártyát megtalál
+      // amelyik ezzel a data-cardid értékkel rendelkezik (favorit + eredeti hely)
+      const cards = document.querySelectorAll(`[data-cardid="relay:${relayId}"]`);
       
-      // Osztály frissítése
-      card.classList.remove('myio-on', 'myio-off');
-      card.classList.add(isOn ? 'myio-on' : 'myio-off');
+      cards.forEach(card => {
+        // Osztály frissítése
+        card.classList.remove('myio-on', 'myio-off');
+        card.classList.add(isOn ? 'myio-on' : 'myio-off');
+        
+        // Toggle input frissítése
+        const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
+        if (toggle && toggle.checked !== isOn) {
+          toggle.checked = isOn;
+        }
+      });
       
-      // Toggle input frissítése
-      const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
-      if (toggle && toggle.checked !== isOn) {
-        toggle.checked = isOn;
+      if (cards.length > 0) {
+        log(`Relay ${relayId}: ${isOn ? 'ON' : 'OFF'} (${cards.length} cards updated)`);
       }
-      
-      log(`Relay ${relayId}: ${isOn ? 'ON' : 'OFF'}`);
     }
   }
 
   /**
    * PCA kimenetek UI frissítése
+   * JAVÍTÁS: querySelectorAll használata
    */
   function updatePCA(pcaData) {
     for (const key in pcaData) {
@@ -281,65 +287,70 @@ const MyIOLive = (function() {
       const isOn = val255 > 0;
       const pct = Math.round(val255 / 2.55);
       
-      // Normál PCA kártya
-      let card = document.querySelector(`[data-cardid="pca:${pcaId}"]`);
-      if (!card) {
-        // Thermo PCA kártya
-        card = document.querySelector(`[data-cardid="thermo:pca:${pcaId}"]`);
-      }
-      if (!card) continue;
+      // Normál PCA kártyák
+      let cards = document.querySelectorAll(`[data-cardid="pca:${pcaId}"]`);
       
-      // Osztály frissítése
-      card.classList.remove('myio-on', 'myio-off', 'myio-heat', 'myio-cool');
-      if (isOn) {
-        card.classList.add('myio-on');
-        // Heat/cool meghatározása a szenzor küszöbök alapján
-        if (pca.sensorON < pca.sensorOFF) {
-          card.classList.add('myio-heat');
-        } else if (pca.sensorOFF < pca.sensorON) {
-          card.classList.add('myio-cool');
+      // Ha nincs normál, keress thermo PCA kártyákat
+      if (cards.length === 0) {
+        cards = document.querySelectorAll(`[data-cardid="thermo:pca:${pcaId}"]`);
+      }
+      
+      cards.forEach(card => {
+        // Osztály frissítése
+        card.classList.remove('myio-on', 'myio-off', 'myio-heat', 'myio-cool');
+        if (isOn) {
+          card.classList.add('myio-on');
+          // Heat/cool meghatározása a szenzor küszöbök alapján
+          if (pca.sensorON < pca.sensorOFF) {
+            card.classList.add('myio-heat');
+          } else if (pca.sensorOFF < pca.sensorON) {
+            card.classList.add('myio-cool');
+          }
+        } else {
+          card.classList.add('myio-off');
         }
-      } else {
-        card.classList.add('myio-off');
-      }
-      
-      // Toggle frissítése
-      const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
-      if (toggle && toggle.checked !== isOn) {
-        toggle.checked = isOn;
-      }
-      
-      // Slider és number input frissítése
-      const rangeInput = card.querySelector('input[type="range"]');
-      const numInput = card.querySelector('input[type="number"]');
-      
-      if (rangeInput && parseInt(rangeInput.value) !== pct) {
-        rangeInput.value = pct;
-      }
-      if (numInput && parseInt(numInput.value) !== pct) {
-        numInput.value = pct;
-      }
-      
-      // Thermo chip-ek frissítése (On/Off értékek)
-      if (pca.sensor > 0) {
-        const onInput = card.querySelector('input[name^="PCA_min_temp_ON"]');
-        const offInput = card.querySelector('input[name^="PCA_max_temp_OFF"]');
-        if (onInput) {
-          const onVal = (pca.sensorON / 10).toFixed(1);
-          if (onInput.value !== onVal) onInput.value = onVal;
+        
+        // Toggle frissítése
+        const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
+        if (toggle && toggle.checked !== isOn) {
+          toggle.checked = isOn;
         }
-        if (offInput) {
-          const offVal = (pca.sensorOFF / 10).toFixed(1);
-          if (offInput.value !== offVal) offInput.value = offVal;
+        
+        // Slider és number input frissítése
+        const rangeInput = card.querySelector('input[type="range"]');
+        const numInput = card.querySelector('input[type="number"]');
+        
+        if (rangeInput && parseInt(rangeInput.value) !== pct) {
+          rangeInput.value = pct;
         }
-      }
+        if (numInput && parseInt(numInput.value) !== pct) {
+          numInput.value = pct;
+        }
+        
+        // Thermo chip-ek frissítése (On/Off értékek)
+        if (pca.sensor > 0) {
+          const onInput = card.querySelector('input[name^="PCA_min_temp_ON"]');
+          const offInput = card.querySelector('input[name^="PCA_max_temp_OFF"]');
+          if (onInput) {
+            const onVal = (pca.sensorON / 10).toFixed(1);
+            if (onInput.value !== onVal) onInput.value = onVal;
+          }
+          if (offInput) {
+            const offVal = (pca.sensorOFF / 10).toFixed(1);
+            if (offInput.value !== offVal) offInput.value = offVal;
+          }
+        }
+      });
       
-      log(`PCA ${pcaId}: ${pct}%`);
+      if (cards.length > 0) {
+        log(`PCA ${pcaId}: ${pct}% (${cards.length} cards updated)`);
+      }
     }
   }
 
   /**
    * PWM/FET kimenetek UI frissítése
+   * JAVÍTÁS: querySelectorAll használata
    */
   function updatePWM(pwmData) {
     for (const key in pwmData) {
@@ -350,36 +361,41 @@ const MyIOLive = (function() {
       const isOn = val255 > 0;
       const pct = Math.round(val255 / 2.55);
       
-      const card = document.querySelector(`[data-cardid="fet:${fetId}"]`);
-      if (!card) continue;
+      // JAVÍTÁS: querySelectorAll minden olyan kártyát megtalál
+      const cards = document.querySelectorAll(`[data-cardid="fet:${fetId}"]`);
       
-      // Osztály frissítése
-      card.classList.remove('myio-on', 'myio-off');
-      card.classList.add(isOn ? 'myio-on' : 'myio-off');
+      cards.forEach(card => {
+        // Osztály frissítése
+        card.classList.remove('myio-on', 'myio-off');
+        card.classList.add(isOn ? 'myio-on' : 'myio-off');
+        
+        // Toggle frissítése
+        const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
+        if (toggle && toggle.checked !== isOn) {
+          toggle.checked = isOn;
+        }
+        
+        // Slider és number input frissítése
+        const rangeInput = card.querySelector('input[type="range"]');
+        const numInput = card.querySelector('input[type="number"]');
+        
+        if (rangeInput && parseInt(rangeInput.value) !== pct) {
+          rangeInput.value = pct;
+        }
+        if (numInput && parseInt(numInput.value) !== pct) {
+          numInput.value = pct;
+        }
+      });
       
-      // Toggle frissítése
-      const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
-      if (toggle && toggle.checked !== isOn) {
-        toggle.checked = isOn;
+      if (cards.length > 0) {
+        log(`FET ${fetId}: ${pct}% (${cards.length} cards updated)`);
       }
-      
-      // Slider és number input frissítése
-      const rangeInput = card.querySelector('input[type="range"]');
-      const numInput = card.querySelector('input[type="number"]');
-      
-      if (rangeInput && parseInt(rangeInput.value) !== pct) {
-        rangeInput.value = pct;
-      }
-      if (numInput && parseInt(numInput.value) !== pct) {
-        numInput.value = pct;
-      }
-      
-      log(`FET ${fetId}: ${pct}%`);
     }
   }
 
   /**
    * Szenzorok UI frissítése
+   * JAVÍTÁS: querySelectorAll használata
    */
   function updateSensors(sensorsData) {
     // Humidity szenzorok (101-108)
@@ -388,28 +404,29 @@ const MyIOLive = (function() {
         const humIdx = i - 101;
         const humVal = sensorsData[String(i)].hum;
         if (humVal !== undefined) {
-          const card = document.querySelector(`[data-cardid="sensors:hum:${humIdx}"]`);
-          if (card) {
+          // JAVÍTÁS: querySelectorAll
+          const cards = document.querySelectorAll(`[data-cardid="sensors:hum:${humIdx}"]`);
+          cards.forEach(card => {
             const valueEl = card.querySelector('.myio-value');
             if (valueEl) {
               valueEl.textContent = (humVal / 10) + ' %';
             }
-          }
+          });
         }
       }
     }
     
     // Fogyasztás (200)
     if (sensorsData['200']) {
-      const card = document.querySelector('[data-cardid="sensors:consumption"]');
-      if (card) {
+      const cards = document.querySelectorAll('[data-cardid="sensors:consumption"]');
+      cards.forEach(card => {
         const valueEl = card.querySelector('.myio-value');
         if (valueEl) {
           const val = sensorsData['200'].imp || 0;
           const unit = typeof consumptionUnit !== 'undefined' ? consumptionUnit : 'kW';
           valueEl.textContent = (val / 1000) + ' ' + unit;
         }
-      }
+      });
     }
     
     // Fázis fogyasztás (201-203)
@@ -417,14 +434,14 @@ const MyIOLive = (function() {
       if (sensorsData[String(i)]) {
         const phase = i - 200;
         const power = sensorsData[String(i)].P;
-        // Ha van ilyen kártya, frissítjük
-        const card = document.querySelector(`[data-cardid="sensors:power:${phase}"]`);
-        if (card) {
+        // JAVÍTÁS: querySelectorAll
+        const cards = document.querySelectorAll(`[data-cardid="sensors:power:${phase}"]`);
+        cards.forEach(card => {
           const valueEl = card.querySelector('.myio-value');
           if (valueEl) {
             valueEl.textContent = power + ' W';
           }
-        }
+        });
       }
     }
     
@@ -433,13 +450,14 @@ const MyIOLive = (function() {
       if (sensorsData[String(i)]) {
         const phase = i - 203;
         const voltage = sensorsData[String(i)].U;
-        const card = document.querySelector(`[data-cardid="sensors:voltage:${phase}"]`);
-        if (card) {
+        // JAVÍTÁS: querySelectorAll
+        const cards = document.querySelectorAll(`[data-cardid="sensors:voltage:${phase}"]`);
+        cards.forEach(card => {
           const valueEl = card.querySelector('.myio-value');
           if (valueEl) {
             valueEl.textContent = voltage + ' V';
           }
-        }
+        });
       }
     }
   }
