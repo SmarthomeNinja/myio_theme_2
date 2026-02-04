@@ -829,16 +829,16 @@ let isDraggingCard = false;
       // Skála számítása a hiszterézis alapján
       // Kis hiszterézis -> kis skála (x20), nagy hiszterézis -> nagyobb skála (min x3)
       const calculateScale = () => {
-        const hysteresis = Math.abs(currentOffVal - currentOnVal);
+        // hysteresis = ON és OFF közötti teljes távolság
+        const fullHysteresis = Math.abs(currentOffVal - currentOnVal);
         const avgTemp = (currentOnVal + currentOffVal) / 2;
-        
-        // A teljes hiszterézis (ON-OFF távolság) = hysteresis * 2
-        const fullHysteresis = hysteresis * 2;
+        // A megjelenített hiszterézis (±érték) a fele
+        const displayHysteresis = fullHysteresis / 2;
         
         // Szorzó: kis hiszterézisnél nagyobb (max 10x), nagy hiszterézisnél kisebb (min 2x)
         // FONTOS: minimum 2x, hogy legyen hely mozgatni a dragpontokat!
-        // 0.2°C hiszterézisnél (fullHyst=0.4) -> 10x szorzó -> 4°C skála
-        // 5°C hiszterézisnél (fullHyst=10) -> 2x szorzó -> 20°C skála
+        // 0.4°C fullHyst -> 10x szorzó -> 4°C skála
+        // 10°C fullHyst -> 2x szorzó -> 20°C skála
         let multiplier;
         if (isPercent) {
           // %-nál: min 2x, max 8x
@@ -869,7 +869,7 @@ let isDraggingCard = false;
         minT = Math.max(defaultMinTemp, minT);
         maxT = Math.min(defaultMaxTemp, maxT);
         
-        return { minT, maxT, hysteresis, avgTemp };
+        return { minT, maxT, hysteresis: displayHysteresis, avgTemp };
       };
       
       let scale = calculateScale();
