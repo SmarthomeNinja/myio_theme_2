@@ -1,0 +1,1931 @@
+body {
+	font-family:Verdana, Geneva, sans-serif;
+	width: 98%;
+	background-color: #999;
+	display: block;
+	}
+	#overlay {
+		position: fixed;
+		display: none;
+		width: 100%;
+		height: 100%;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-color: rgba(0,0,0,0.5);
+		z-index: 2;
+		cursor: pointer;
+	}
+	.header{
+	width:99%;
+	position:fixed;
+	left:0.5%;
+	top:5px;	
+	z-index:110;
+	}
+	.content{
+	left: 1%;
+	width:98%;
+	position:absolute;	
+	top:100px;
+	z-index:-1;
+	}
+	h2{
+	background-color:#0397d6;
+	color:#fff;
+	padding:15px;
+	align:center;
+	margin:0px;
+	}
+	h4{
+	background-color:#43E7F6;
+	padding:5px;
+	align:middle;
+	vertical-align:auto;
+	margin:0px;
+	color:#333;
+	}
+	h4#l{
+		background-color:#43E7F6;
+		color:#333;
+	}
+	h4#d{
+		background-color:#666;
+		color:#fff;
+	}
+	
+	/* Chrome, Safari, Edge, Opera */
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+	  -webkit-appearance: none;  
+	}
+	
+	/* Firefox */
+	input[type=number] {
+	-moz-appearance: textfield;
+	margin:0px;
+	text-align: right;
+	}
+	tr.on1 td{
+	background-color:#fcb034;
+	}
+	tr.on2 td{
+	background-color:#dc9014;
+	}
+	th#top {
+	padding: 2px;
+	background: #0397d6;
+	border-bottom:dotted #ccc 1px ;
+	align:center;
+	font-size:17px;
+	color:#fff;
+	padding:5px 0 6px 0;
+	font-weight:normal;
+	}
+	th#second {
+		padding: 2px;
+		background: #64d1ff;
+		border-bottom:dotted #ccc 1px ;
+		align:center;
+		font-size:14px;
+		color:#555;
+		padding:5px 0 6px 0;
+		}
+	th {
+	padding: 2px;
+	background: #fff ;
+	align:center;
+	font-size:14px;
+	color:#777;
+	}
+	td{
+	color:#555;
+	font-size:13px;
+	}
+	td#lb {
+		background: #ddd;
+	}
+	td#rb {
+		background: #eee;
+	}
+	tr {
+	align:center;
+	}
+	table {
+	background-color:#ffffff;  /* table border*/
+	width: 100%;
+	padding:10;
+	}
+	table#t02 tr:nth-child(even) {
+	background-color: #e8e8e8;
+	}
+	table#t02 tr:nth-child(odd) {
+	background-color:#f6f6f6;
+	}
+	table#t02 tr:hover td {
+	background-color:#43E7F6;
+	}
+	
+	table#t03 tr:hover td {
+	background-color:#fcb034 !important;
+	}
+	table#t03{
+		border-collapse: collapse;
+	}
+	
+	table#t04 tr:nth-child(odd) {
+	background-color: #e8e8e8;
+	}
+	table#t04 tr:nth-child(even) {
+	background-color:#f6f6f6;
+	}
+	
+	table#t04 tr:hover td {
+	background-color:#fcb034 !important;
+	}
+	table#t04{
+		border-collapse: collapse;
+	}
+	table#t_navbar{
+		width:100%;
+		background-color:transparent;
+		box-shadow:15px 25px 15px inset;
+		align:center;
+	}
+	tr#navbartop{
+		background-color:darkorange;
+	}
+	td#navbar2nd{
+		background-color:orange;
+	}
+	td#saveImmediately{
+		background-color:orange;
+	}
+	td#messageBoxOn{
+		background: #000 ;
+		color: #ffffff ;
+		font-weight: bold;
+		font-family: monospace;
+	}
+	td#messageBoxOff{
+		opacity: 0.97;
+		background-color:transparent;
+	}
+	.respWidth{
+	width: 11.9%;
+	}
+	.rawBox {
+		float: left;
+		alignment-adjust:central;
+		vertical-align:central;
+		margin: 5px;
+		border: 1px solid black;	
+	}
+	.relay {
+		height:105px;	
+	}
+	.fet {
+		height:135px;
+	}
+	.container{	
+		padding:10px 16px;
+		alignment-adjust:middle;
+		background-color:#fafafa;
+	}
+	.container:after{content:"";display:table;clear:both}
+	.button {
+		color: #333;
+		background-color:rgba(0,0,0,0);
+		font-weight: bold;
+		font-size:14px;
+		width:100%;
+		height:40px;
+	}
+	@media screen and (max-width:1900px) {
+		.respWidth {	
+			width: 13.5%;
+		}
+	}
+	@media screen and (max-width: 1500px) {
+	.respWidth {	
+		width: 18.9%;	
+	}	
+	}
+	@media screen and (max-width: 1080px) {	
+	.respWidth {	
+		width: 31.5%;	
+	}	
+	.content{	
+	top:70px;
+	}
+	}
+	@media screen and (max-width: 640px) {
+		.respWidth {	
+			width: 47%;	
+		}
+		.content{	
+			top:90px;
+		}
+	}
+	@media screen and (max-width: 440px) {
+		.respWidth {	
+			width: 97%;	
+		}
+		.header{	
+			width:100%;
+		}
+		.content{	
+			top:100px;
+		}
+	}
+	
+	.green_button {
+	  background-color: #0397d6;
+	  border: none;
+	  color: white;
+	  padding: 3px 3px;
+	  margin: 1px 2px;
+	  text-align: center;
+	  text-decoration: none;
+	  display: inline-block;
+	  font-size: 14px;
+	  cursor: pointer;
+	}
+	
+	#graphdiv2 .dygraph-legend { 
+		background-color: transparent !important;
+		left: 60px !important;
+	}
+	
+	#status > span.highlight { 	
+		background-color: #0397d6;
+		color:white;
+	}
+	
+	
+	/* =========================
+	   THEME TOKENS  (KOMMENTELVE: felülírja a body-t, színeket, inputokat)
+	========================= */
+	
+	:root{
+		--bg0:#070a12;
+		--bg1:#0b1020;
+	  
+		--card:rgba(255,255,255,.06);
+		--card2:rgba(255,255,255,.10);
+		--border:rgba(255,255,255,.12);
+	  
+		--text:rgba(255,255,255,.92);
+		--muted:rgba(255,255,255,.65);
+	  
+		--accent:#0397d6;
+		--ok:#19c37d;
+		--warn:#f5a524;
+		--bad:#f31260;
+	  
+		--radius:16px;
+		--shadow:0 14px 40px rgba(0,0,0,.35);
+	  
+		--ctl-h:32px;
+	}
+	
+	*{ box-sizing:border-box; }
+	/*
+	html,body{ height:100%; }
+	*/
+	body{
+		margin:0;
+		font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+		color:var(--text);
+		display:block !important;
+	
+		background:
+		  radial-gradient(1200px 700px at 15% 10%, rgba(3,151,214,.22), transparent 60%),
+		  radial-gradient(900px 600px at 90% 0%, rgba(67,231,246,.18), transparent 55%),
+		  linear-gradient(180deg, #06131c 0%, #081a26 100%);
+		background-attachment:fixed;
+	}
+	
+	.myio-wrap{ max-width:1200px; margin:0 auto; padding:18px 14px 40px; }
+	
+	.myio-topbar{
+		display:flex; align-items:center; justify-content:space-between; gap:12px;
+		padding:12px 14px; margin-bottom:14px;
+		border:1px solid var(--border);
+		background:linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.04));
+		border-radius:var(--radius);
+		backdrop-filter:blur(8px);
+		box-shadow:var(--shadow);
+		position:sticky; top:10px; z-index:10;
+	}
+	
+	.myio-brand{ display:flex; flex-direction:column; gap:2px; }
+	.myio-brand .t{ font-weight:900; letter-spacing:.2px; }
+	.myio-brand .s{ color:var(--muted); font-size:12px; }
+	
+	.myio-actions{ display:flex; gap:10px; align-items:center; }
+	
+	.myio-pill{
+		border:1px solid var(--border);
+		background:rgba(0,0,0,.18);
+		color:var(--muted);
+		padding:8px 10px;
+		border-radius:999px;
+		font-size:12px;
+		display:flex; gap:8px; align-items:center;
+	}
+	
+	.myio-btn{
+		border:1px solid var(--border);
+		background:var(--card2);
+		color:var(--text);
+		padding:10px 12px;
+		border-radius:12px;
+		font-weight:800;
+		cursor:pointer;
+		transition:transform .05s ease, background .15s ease, border-color .15s ease;
+	}
+	.myio-btn:hover{ background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.18); }
+	.myio-btn:active{ transform:translateY(1px); }
+	.myio-btn.small{ padding:8px 10px; font-size:12px; border-radius:999px; }
+	
+	.myio-section{
+		margin-top:14px;
+		border:1px solid var(--border);
+		background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+		border-radius:var(--radius);
+		box-shadow:var(--shadow);
+		overflow: visible !important;   /* sticky miatt kötelező */
+	}
+	
+	.myio-sectionHead{
+		display:flex; justify-content:space-between; align-items:center; gap:10px;
+		padding:12px 14px;
+		background-color:var(--accent);
+		border-bottom:0 !important;
+		position: sticky !important;
+		top: 50px;                      /* navbar alá */
+		z-index: 5;                     /* navbar alá */
+	}
+	
+	.myio-sectionTitle{
+		margin:0;
+		color:#fff !important;
+		font-size:17px;
+		font-weight:900;
+		letter-spacing:.04em;
+		text-transform:none;
+	}
+	.myio-sectionMeta{ font-size:12px; color:rgba(255,255,255,.85) !important; }
+	
+	.myio-sectionTitle::before{
+		content:"▸ ";
+		color:rgba(255,255,255,.95) !important;
+	}
+	.myio-section:not(.is-collapsed) .myio-sectionTitle::before{ content:"▾ "; }
+	
+	.myio-sectionBody{
+		padding:12px 14px;
+		overflow:hidden;
+		max-height:100000px;
+		opacity:1;
+		transform:translateY(0);
+		transition:max-height .35s ease, opacity .25s ease, transform .25s ease;
+		will-change:max-height, opacity, transform;
+	}
+	.myio-section.is-collapsed .myio-sectionBody{
+		max-height:0;
+		opacity:0;
+		transform:translateY(-6px);
+		overflow: hidden;
+	}
+	html.myio-noanim .myio-sectionBody{ transition:none !important; }
+	
+/* --- Zoom + rugalmas kártyaszélesség --- */
+/* ============================================================
+   6. KÁRTYA MINIMUM SZÉLESSÉG - Nagyobb alapérték
+   ============================================================ */
+:root {
+	--myio-zoom: 1;         /* ezt állítja a slider */
+    --myio-card-min: clamp(
+        230px,                              /* minimum */
+        calc(400px / var(--myio-zoom)),     /* zoom-kompen145t */
+        600px                               /* maximum */
+    ) !important;	
+}
+.myio-grid{
+	display:grid;
+	gap:12px;
+	grid-template-columns: repeat(auto-fit, minmax(calc(var(--myio-card-min) * var(--myio-zoom)*0.69), 1fr));
+  }
+
+@media (max-width: 720px){
+	:root {
+		--myio-card-min: clamp(
+			145px,                              /* minimum */
+			calc(147px / var(--myio-zoom)),     /* zoom-kompen145t */
+			1000px                               /* maximum */
+		) !important;
+	}
+	.myio-grid{
+		display:grid;
+		gap:12px;
+		grid-template-columns: repeat(auto-fit, minmax(calc(var(--myio-card-min) * var(--myio-zoom)), 1fr));
+	  }
+}
+
+
+/* Breakpoint-os span szabályok helyett auto */
+.myio-card{
+  grid-column:auto !important;
+  border:1px solid var(--border);
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,.22);
+}
+
+	.myio-cardTitle{
+		user-select: none;
+		margin:2px 0 10px;
+		font-size:13px;
+		color:var(--muted);
+		font-weight:800;
+		text-align:center;
+		white-space:nowrap;
+		overflow:hidden;
+		text-overflow:ellipsis;
+	}
+	
+	.myio-value{
+		text-align:center;
+		font-size:22px;
+		font-weight:900;
+		letter-spacing:.2px;
+		margin:0 0 10px;
+	}
+	
+	.myio-sub{
+		text-align:center;
+		margin-top:8px;
+		color:rgba(255,255,255,.86);
+		font-weight:900;
+	}
+	
+	.myio-dot{
+		width:9px; height:9px; border-radius:50%;
+		display:inline-block; margin-right:6px;
+		background:rgba(255,255,255,.25);
+		vertical-align:middle;
+	}
+	
+	.myio-card.myio-off .myio-dot{ background:rgba(255,255,255,.25); }
+	.myio-card.myio-warn .myio-dot{ background:var(--warn); }
+	
+	.myio-card.myio-heat .myio-dot{ background:#c2240e; }
+	.myio-card.myio-cool .myio-dot{ background:#05bed9; }
+	
+	.myio-card.myio-on .myio-dot{ background:var(--accent); }
+	
+	.myio-btnRow{ display:flex; gap:10px; margin-top:8px; }
+	.myio-btnRow > *{ flex:1; }
+	
+	.myio-control{
+		display:flex; gap:10px; align-items:center; justify-content:center;
+		margin-top:10px; flex-wrap:wrap;
+	}
+	.myio-control input[type="number"]{
+		width:5.6em;
+		padding:8px 10px;
+		border-radius:12px;
+		border:1px solid var(--border);
+		background:rgba(0,0,0,.18);
+		color:var(--text);
+		outline:none;
+		font-weight:900;
+		text-align:center;
+	}
+	.myio-control input[type="range"]{ width:min(320px, 92%); }
+	
+	.myio-toast{
+		position:fixed;
+		left:50%;
+		bottom:16px;
+		transform:translateX(-50%);
+		background:rgba(0,0,0,.55);
+		border:1px solid rgba(255,255,255,.18);
+		color:rgba(255,255,255,.9);
+		padding:10px 12px;
+		border-radius:12px;
+		backdrop-filter:blur(8px);
+		display:none;
+		max-width:min(560px, 92vw);
+		box-shadow:var(--shadow);
+		font-size:13px;
+		z-index:50;
+	}
+	
+	.myio-card.myio-off{
+		background:var(--card);
+		border-color:var(--border);
+	}
+	.myio-card.myio-warn{
+		background:rgba(255,255,255,.10);
+		border-color:rgba(255,255,255,.16);
+	}
+	
+	.myio-headRow{
+		display:flex;
+		align-items:flex-start;;
+		justify-content:space-between;
+		gap:12px;
+		margin-bottom:10px;
+	}
+	.myio-headRow .myio-cardTitle{
+		margin:0;
+		text-align:left !important;
+		flex:1 1 auto;
+	}
+	
+	.myio-headTitleBtn{
+		background:transparent;
+		border:0;
+		padding:0;
+		margin:0;
+		font:inherit;
+		color:inherit;
+		cursor:pointer;
+		text-align:left;
+		width:100%;
+	}
+	.myio-headTitleBtn:hover{ text-decoration:underline; }
+	
+	.myio-miniToggle{
+		position:relative;
+		width: calc(var(--ctl-h) * 1.8);
+		height: var(--ctl-h);
+		flex:0 0 auto;
+	}
+	
+	.myio-miniToggle input{
+		position:absolute !important;
+		opacity:0 !important;
+		width:0 !important;
+		height:0 !important;
+		margin:0 !important;
+		pointer-events:none !important;
+	}
+	
+	.myio-miniTrack{
+		position:absolute;
+		inset:0;
+		border-radius:999px;
+		background:rgba(255,255,255,.25);
+		border:1px solid rgba(255,255,255,.35);
+		transition:background .18s ease, border-color .18s ease;
+	}
+	.myio-miniTrack::before{
+		content:"";
+		position:absolute;
+		top:50%;
+		left:2px;
+		width: calc(var(--ctl-h) - 6px);
+		height: calc(var(--ctl-h) - 6px);
+		transform:translateY(-50%);
+		background:#fff;
+		border-radius:50%;
+		box-shadow:0 2px 8px rgba(0,0,0,.35);
+		transition:left .18s ease;
+	}
+	.myio-miniToggle input:checked + .myio-miniTrack{
+		background:var(--accent);
+		border-color:rgba(3,151,214,.65);
+	}
+	.myio-miniToggle input:checked + .myio-miniTrack::before{
+		left: calc(100% - var(--ctl-h) + 2px);
+	}
+	
+	.myio-row{
+		display:flex;
+		align-items:center;
+		justify-content:space-between;
+		gap:12px;
+	}
+	.myio-row + .myio-row{ margin-top:10px; }
+	
+	.myio-titleLeft{
+		flex:1 1 auto;
+		min-width:0;
+		font-weight:900;
+		color:var(--muted);
+		white-space:nowrap;
+		overflow:hidden;
+		text-overflow:ellipsis;
+	}
+	
+	.myio-pcaRow{
+		display:flex;
+		align-items:center;
+		gap:12px;
+		margin-top:10px;
+		flex-wrap: nowrap;          /* maradhat */
+	}
+	.myio-pcaRow input[type="range"]{ flex:1 1 auto; }
+	
+	.myio-pcaValue{
+		display:flex;
+		align-items:center;
+		gap:6px;
+		flex:0 0 auto;
+	}
+	.myio-pcaValue input[type="number"]{
+		width:4em;
+		text-align:right;
+		padding:6px 8px;
+		font-weight:900;
+		border-radius:12px;
+		border:1px solid var(--border);
+		background:rgba(0,0,0,.18);
+		color:var(--text);
+		outline:none;
+	}
+	.myio-pcaUnit{ color:var(--muted); font-weight:900; }
+	
+	.myio-thermoChips{
+		display:flex;
+		gap:10px;
+		margin-top:10px;
+		flex-wrap:wrap;
+	}
+	
+	.myio-chip{
+		flex:1 1 auto;
+		min-width:140px;
+		border:1px solid rgba(255,255,255,.14);
+		background:rgba(255,255,255,.06);
+		border-radius:14px;
+		padding:10px 12px;
+		display:flex;
+		align-items:baseline;
+		justify-content:space-between;
+		gap:10px;
+	}
+	
+	.myio-chip .k{
+		color:var(--muted);
+		font-weight:900;
+		letter-spacing:.08em;
+		text-transform:uppercase;
+		font-size:12px;
+	}
+	.myio-chip .v{ font-weight:900; font-size:16px; }
+	
+	.myio-chip input[type="number"]{
+		width:5.2em;
+		text-align:right;
+		padding:6px 8px;
+		border-radius:12px;
+		border:1px solid var(--border);
+		background:rgba(0,0,0,.18);
+		color:var(--text);
+		font-weight:900;
+		outline:none;
+	}
+	
+	.myio-sensorLine{
+		margin-top:10px;
+		display:flex;
+		gap:10px;
+		justify-content:space-between;
+		color:var(--muted);
+		font-weight:900;
+	}
+	.myio-sensorLine .name{
+		overflow:hidden;
+		text-overflow:ellipsis;
+		white-space:nowrap;
+	}
+	.myio-sensorLine .val{
+		flex:0 0 auto;
+		color:rgba(255,255,255,.86);
+	}
+	
+	.myio-card.myio-on.myio-heat{
+		background:linear-gradient(180deg, rgba(194,36,14,.22), rgba(194,36,14,.10)) !important;
+		border-color:rgba(194,36,14,.35) !important;
+	}
+	.myio-card.myio-on.myio-cool{
+		background:linear-gradient(180deg, rgba(5,190,217,.22), rgba(5,190,217,.10)) !important;
+		border-color:rgba(5,190,217,.35) !important;
+	}
+	
+	.myio-card.myio-on.myio-heat .myio-chip,
+	.myio-card.myio-on.myio-cool .myio-chip{
+		background:rgba(255,255,255,.55) !important;
+		border-color:rgba(0,0,0,.10) !important;
+	}
+	
+	.myio-card.myio-on.myio-heat input[type="number"],
+	.myio-card.myio-on.myio-cool input[type="number"]{
+		background:rgba(255,255,255,.65) !important;
+		color:rgba(0,0,0,.92) !important;
+	}
+	
+	.myio-card.myio-on.myio-heat .myio-cardTitle,
+	.myio-card.myio-on.myio-cool .myio-cardTitle{
+		color:#fff !important;
+	}
+	
+	.myio-card.myio-on.myio-heat .myio-chip .k,
+	.myio-card.myio-on.myio-cool .myio-chip .k{ color:rgba(0,0,0,.75) !important; }
+	
+	.myio-card.myio-on.myio-heat .myio-chip .v,
+	.myio-card.myio-on.myio-cool .myio-chip .v{ color:rgba(0,0,0,.88) !important; }
+	
+	.myio-card.myio-on.myio-heat .myio-sensorLine,
+	.myio-card.myio-on.myio-cool .myio-sensorLine{
+		color:rgba(255,255,255,.95) !important;
+	}
+	.myio-card.myio-on.myio-heat .myio-sensorLine .val,
+	.myio-card.myio-on.myio-cool .myio-sensorLine .val{
+		color:#fff !important;
+	}
+	
+	.myio-toggle{
+		display:block;
+		width:100%;
+		margin:12px auto 0;
+		position:relative;
+		user-select:none;
+	}
+	.myio-toggle input{
+		position:absolute;
+		opacity:0;
+		pointer-events:none;
+	}
+	.myio-toggleTrack{
+		display:block;
+		width:100%;
+		height:44px;
+		border-radius:999px;
+		border:1px solid rgba(255,255,255,.22);
+		background:rgba(255,255,255,.10);
+		box-shadow:inset 0 0 0 1px rgba(0,0,0,.10);
+		transition:background .18s ease, border-color .18s ease;
+	}
+	.myio-toggleTrack::before{
+		content:"";
+		position:absolute;
+		top:50%;
+		left:10px;
+		width:36px;
+		height:36px;
+		transform:translateY(-50%);
+		background:#fff;
+		border-radius:50%;
+		box-shadow:0 10px 20px rgba(0,0,0,.22);
+		transition:left .22s ease;
+	}
+	.myio-toggle input:checked + .myio-toggleTrack{
+		background:var(--accent);
+		border-color:rgba(3,151,214,.65);
+	}
+	.myio-toggle input:checked + .myio-toggleTrack::before{
+		left:calc(100% - 46px);
+	}
+	
+	.myio-card.myio-on .myio-toggleTrack{
+		border-color:rgba(0,0,0,.16);
+		background:rgba(0,0,0,.10);
+	}
+	.myio-card.myio-on .myio-toggle input:checked + .myio-toggleTrack{
+		background:var(--accent);
+		border-color:rgba(3,151,214,.55);
+	}
+	/* ===== ÁLTALÁNOS ON kártya (relé / PCA / FET) ===== */
+	.myio-card.myio-on{
+		background: rgba(255,255,255,.92) !important;
+		border-color: rgba(255,255,255,.75) !important;
+		box-shadow: 0 14px 38px rgba(0,0,0,.28) !important;
+	}
+	
+	/* ON kártyán a cím/szöveg legyen sötét (ha kell) */
+	.myio-card.myio-on .myio-titleLeft,
+	.myio-card.myio-on .myio-value,
+	.myio-card.myio-on .myio-sub,
+	.myio-card.myio-on .myio-cardTitle{
+		color: rgba(0,0,0,.85) !important;
+	}
+	/* szenzor kártya: maradjon sötét üveg */
+	.myio-card.myio-sensor{
+		background: var(--card) !important;
+		border-color: var(--border) !important;
+		box-shadow: 0 10px 25px rgba(0,0,0,.22) !important;
+	}
+  
+	.myio-card.myio-sensor .myio-dot{
+		background: var(--accent);
+	  }
+	/* Szekció felső sarkok lekerekítése */
+	.myio-section{
+		border-radius: 18px;
+		overflow: hidden;   /* hogy a fejléc ne lógjon ki */
+	}
+	
+	/* Sticky fejléc felső sarkai */
+	.myio-sectionHead{
+		border-top-left-radius: 18px;
+		border-top-right-radius: 18px;
+	}
+    	  
+	.myio-sectionHead{
+		border-top-left-radius: 14px;
+		border-top-right-radius: 14px;
+		box-shadow: inset 0 -1px 0 rgba(255,255,255,.25);
+	}
+	  
+
+
+	  /* ===== myIO modern header (nav.js) ===== */
+:root{
+	--myio-accent:#0397d6;
+	--myio-accent2:#43E7F6;
+	--myio-nav-text:#fff;
+	--myio-nav-btn-bg:rgba(255,255,255,.18);
+	--myio-nav-btn-bg2:rgba(255,255,255,.26);
+	--myio-nav-border:rgba(255,255,255,.32);
+	--myio-nav-shadow:0 10px 26px rgba(0,0,0,.22);
+  }
+  
+  /* a meglévő .header fix marad, csak belül új UI */
+  .header .myio-nav{
+	width:100%;
+	display:flex;
+	flex-wrap:nowrap;
+	align-items:center;
+	justify-content:space-between;
+	gap:10px;
+	padding:10px 10px;
+	border-radius:14px;
+	background:linear-gradient(180deg, rgba(3,151,214,.95), rgba(3,151,214,.82));
+	box-shadow:var(--myio-nav-shadow);
+	border:1px solid rgba(255,255,255,.22);
+	backdrop-filter: blur(8px);
+  }
+  
+  .header .myio-nav .myio-left,
+  .header .myio-nav .myio-mid,
+  .header .myio-nav .myio-right{
+	display:flex;
+	align-items:center;
+	gap:8px;
+	flex-wrap:nowrap;
+  }
+  
+  .header .myio-nav .myio-mid{
+	justify-content:center;
+	flex:1 1 auto;
+  }
+  
+  .header .myio-nav .myio-right{
+	justify-content:flex-end;
+  }
+  
+  .header .myio-nav button{
+	appearance:none;
+	border:1px solid var(--myio-nav-border);
+	background:var(--myio-nav-btn-bg);
+	color:var(--myio-nav-text);
+	border-radius:12px;
+	padding:8px 10px;
+	font-weight:800;
+	cursor:pointer;
+	line-height:1;
+	transition: background .15s ease, transform .06s ease, border-color .15s ease;
+  }
+  .header .myio-nav button:hover{ background:var(--myio-nav-btn-bg2); border-color:rgba(255,255,255,.45); }
+  .header .myio-nav button:active{ transform: translateY(1px); }
+  
+  .header .myio-nav .myio-chip{
+	display:flex;
+	align-items:center;
+	gap:8px;
+	padding:6px 10px;
+	border:1px solid rgba(255,255,255,.22);
+	background:rgba(0,0,0,.14);
+	color:rgba(255,255,255,.92);
+	border-radius:999px;
+	font-weight:800;
+  }
+  
+  .header .myio-nav .myio-chip input[type="checkbox"]{
+	width:16px; height:16px;
+	accent-color: var(--myio-accent2);
+  }
+  
+ 
+  .header .myio-nav input[type="text"],
+  .header .myio-nav select{
+	border-radius:12px;
+	border:1px solid rgba(255,255,255,.22);
+	background:rgba(255,255,255,.14);
+	color:#fff;
+	padding:8px 10px;
+	font-weight:800;
+	outline:none;
+  }
+  .header .myio-nav input[type="text"]{ min-width:180px; }
+  
+  .header .myio-msg{
+	width:100%;
+	margin-top:8px;
+	padding:8px 10px;
+	border-radius:12px;
+	border:1px solid rgba(255,255,255,.20);
+	background:rgba(0,0,0,.12);
+	color:rgba(255,255,255,.90);
+	font-weight:800;
+	font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  }
+  .header .myio-msg.is-alert{
+	background:rgba(0,0,0,.55);
+	border-color:rgba(255,255,255,.26);
+  }
+  
+  /* Reszponzív: mobilon középső nav sor lejjebb */
+  @media (max-width: 720px){
+	.header .myio-nav{ gap:8px; padding:8px; }
+	.header .myio-nav .myio-mid{ width:100%; order:2; justify-content:center; }
+	.header .myio-nav .myio-right{ order:3; }
+	.header .myio-nav .myio-left{ order:1; }
+	.header .myio-nav button{ padding:8px 9px; border-radius:12px; }
+  }
+  /* ===== Dark header theme ===== */
+.header .myio-nav{
+	background: linear-gradient(
+	  180deg,
+	  #0f3b55 0%,
+	  #0c3248 60%,
+	  #0a2a3d 100%
+	);
+	border: 1px solid rgba(255,255,255,.18);
+	box-shadow: 0 12px 30px rgba(0,0,0,.45);
+  }
+  
+  /* gombok */
+  .header .myio-nav button{
+	background: rgba(255,255,255,.10);
+	border-color: rgba(255,255,255,.22);
+	color: #ffffff;
+  }
+  .header .myio-nav button:hover{
+	background: rgba(255,255,255,.18);
+  }
+  
+  /* Booster / chip */
+  .header .myio-nav .myio-chip{
+	background: rgba(255,255,255,.12);
+	border-color: rgba(255,255,255,.25);
+	color: #ffffff;
+  }
+  
+  /* checkbox */
+  .header .myio-nav input[type="checkbox"]{
+	accent-color: #1fa4d8;
+  }
+  
+ 
+  /* inputok */
+  .header .myio-nav input[type="text"],
+  .header .myio-nav select{
+	background: rgba(255,255,255,.14);
+	border-color: rgba(255,255,255,.28);
+	color: #ffffff;
+  }
+  /* ===== Layout fix: középre (X) ===== */
+body{ width:100% !important; }
+.header{ left:0 !important; width:100% !important; }
+
+/* a modern UI wrap marad középen */
+.myio-wrap{ max-width:1200px; margin:0 auto; }
+
+/* ===== Header maszk (kitakarás a header alatt/felett) ===== */
+:root{ --myio-header-h: 26px; } /* JS felülírja pontosra */
+
+.myio-headerMask{
+  position: fixed;
+  left: 0; right: 0; top: 0;
+  height: calc(var(--myio-header-h) - 16px); /* kis ráhagyás */
+  z-index: 109; /* a content fölé, de a header alá (header:110) */
+  pointer-events: none;
+
+  /* ugyanaz a háttér, mint a body-nál */
+  background:
+    radial-gradient(1200px 700px at 15% 10%, rgba(3,151,214,.22), transparent 60%),
+    radial-gradient(900px 600px at 90% 0%, rgba(67,231,246,.18), transparent 55%),
+    linear-gradient(180deg, #06131c 0%, #081a26 100%);
+}
+
+	/* opcionális: hogy szépen “összeolvadjon” */
+	.myio-headerMask{
+	box-shadow: 0 10px 18px rgba(0,0,0,.35);
+	}
+	/* Header magasság = felül “padding” a dashboardnak */
+	.myio-wrap{
+		padding-top: calc(var(--myio-header-h) + 14px) !important;
+	}
+	  /* ===== Header gombok reszponzív méretezése ===== */
+  .header button{
+	font-size:13px;
+	padding:6px 10px;
+	min-height:32px;
+  }
+  
+  @media (max-width: 640px){
+	.header button{
+	  font-size:32px;
+	  padding:10px 10px;
+	}
+	.header .myio-nav .myio-iconBtn,
+	.header .myio-nav .myio-menuBtn{
+	  font-size: 28px;
+	}
+  }
+  
+ /* NAV gombok: ne örököljék a régi .button / táblázat-stílusokat */
+.myio-nav button.myio-navBtn{
+	height: 36px;
+	padding: 0 12px;
+	border-radius: 12px;
+	border: 1px solid rgba(255,255,255,.22);
+	background: rgba(255,255,255,.10);
+	color: #fff;
+	font-weight: 800;
+	font-size: 14px;
+	cursor: pointer;
+  }
+  
+  /* Booster gomb állapotjelzés */
+  #btnBooster.is-on{
+	background: rgba(3,151,214,.95);
+	border-color: rgba(3,151,214,.95);
+  }
+  
+  /* Panel toggle sor */
+  .myio-panelToggleRow{
+	display:flex;
+	align-items:center;
+	justify-content:space-between;
+	gap:12px;
+	padding:10px 10px;
+	margin-bottom:8px;
+	border-radius:12px;
+	background: rgba(255,255,255,.08);
+	border: 1px solid rgba(255,255,255,.14);
+  }
+  
+  .myio-panelToggleLabel{
+	font-weight: 900;
+	color: rgba(255,255,255,.92);
+  }
+/* --- NAV: egységes gombméret (NE fixáljuk a nav magasságát) --- */
+.myio-nav{
+  display:flex;
+  align-items:center;
+}
+
+/* minden nav-oszlop ugyanúgy igazítson */
+.myio-left, .myio-mid, .myio-right{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* MINDEN gomb a navbarban ugyanaz */
+.header .myio-nav button{
+  box-sizing:border-box;
+  height:34px;
+  padding:0 10px;
+  font-size:13px;
+  line-height:34px;     /* ettől nem “nő meg” a gomb */
+  border-radius:10px;
+}
+
+/* a booster “chip” NE adjon extra paddingot/magasságot */
+.header .myio-chip{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0;            /* ez szokta felnagyítani */
+  border:0;             /* ha van keret */
+  background:transparent;
+}
+
+/* booster gomb ugyanaz, mint a többi */
+.header .myio-chip button{
+  height:34px;
+  padding:0 10px;
+  font-size:13px;
+  line-height:34px;
+}
+
+/* ha a checkbox mégis befolyásolja a sort */
+.header .myio-chip input[type="checkbox"]{
+  margin:0 6px 0 0;
+  height:16px;
+  width:16px;
+}
+:root{
+	--header-h: 70px; /* fallback */
+  }
+  
+  /* a régi .content top fix értékét írd felül */
+  .content{
+	top: var(--header-h);
+  }
+  
+  /* a szekció fejlécek sticky top-ja is a header alá igazodjon */
+  .myio-sectionHead{
+	top: calc(var(--header-h) - 10px) !important; /* +8px kis rés */
+  }
+  
+  /* ===== MENU (jobb felső) ===== */
+	.myio-nav{ position:relative; }
+
+	.myio-menuBtn{
+	width: var(--ctl-h);
+	height: var(--ctl-h);
+	padding: 0;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	font-size: 18px;
+	line-height: 1;
+	}
+
+	/* lenyíló panel */
+	.myio-menuPanel{
+	display:none;
+	position:absolute;
+	right: 0;
+	top: calc(100% + 8px);
+	width: min(320px, 92vw);
+	padding: 12px;
+	border-radius: 14px;
+	border: 1px solid rgba(255,255,255,.16);
+	background: rgba(10,20,28,.92);
+	backdrop-filter: blur(10px);
+	box-shadow: 0 18px 40px rgba(0,0,0,.35);
+	z-index: 999;
+	}
+
+	.myio-nav.is-menuOpen .myio-menuPanel{ display:block; }
+
+	.myio-menuTitle{
+	font-weight: 900;
+	color: rgba(255,255,255,.92);
+	margin: 0 0 10px 0;
+	}
+
+	.myio-menuRow{
+	display:flex;
+	align-items:center;
+	justify-content:space-between;
+	gap: 12px;
+	margin: 10px 0;
+	}
+
+	.myio-menuRow label{
+	color: rgba(255,255,255,.85);
+	font-weight: 800;
+	white-space: nowrap;
+	}
+
+	.myio-zoomRange{
+	width: 100%;
+	}
+
+	.myio-menuFooter{
+	margin-top: 50px;
+	display:flex;
+	justify-content:flex-end;
+	}
+
+	/* finom skálázás: a sűrűség és kártyaszélesség változzon */
+	.myio-grid{ gap: calc(12px * var(--myio-zoom)); }
+	.myio-card{ padding: calc(12px * var(--myio-zoom)*0.8); }
+	.myio-value{ font-size: calc(26px * var(--myio-zoom)); }
+
+
+	.myio-cardTitle{
+		font-size: clamp(
+		12px,                          /* 16px * 0.75 */
+		calc(16px * var(--myio-zoom)), /* skálázott */
+		24px                           /* 16px * 1.5 */
+		);
+	}
+
+	/* --- 1) Kártya cím: 2 sor, ne vágja le --- */
+	.myio-cardTitle{
+		white-space: normal !important;
+		overflow: visible !important;
+		text-overflow: clip !important;
+	
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 32;          /* max 3 sor */
+		line-clamp: 3;
+		overflow: hidden !important;     /* clamp-hez kell */
+ 	 }
+  
+  /* a kattintható címgomb se kényszerítse 1 sorra */
+  .myio-headTitleBtn,
+  .myio-titleBtn{
+	white-space: normal !important;
+	overflow-wrap: break-word;
+    word-break: break-word;    /* fallback */
+  }
+  
+  /* --- 2) Slider sor: ne lógjon ki, törhessen --- */
+  .myio-pcaRow{
+	display:flex;
+	align-items:center;
+	gap:12px;
+	flex-wrap: wrap;                /* ✅ ha kevés a hely, menjen új sorba */
+  }
+  
+  .myio-pcaRow input[type="range"]{
+	flex: 1 1 160px;                /* legyen rugalmas, de minimum */
+	min-width: 160px;
+  }
+  
+  .myio-pcaValue{
+	flex: 0 0 auto;
+	max-width: 45%;
+  }
+  
+  /* az input ne legyen túl széles kis kártyán */
+  .myio-pcaValue input[type="number"]{
+	width: 4.2em;
+	max-width: 100%;
+	box-sizing: border-box;
+  }
+  
+  /* ha nagyon keskeny, akkor a value menjen teljes sorba */
+  @media (max-width: 420px){
+	.myio-pcaValue{
+	  max-width: 100%;
+	  justify-content: flex-end;
+	}
+  }
+  /* Slider sor: alapból 1 sor (90% zoom-nál is), csak nagyon szűken törjön */
+.myio-pcaRow{
+	display:flex;
+	align-items:center;
+	gap:12px;
+	flex-wrap: nowrap !important;   /* ✅ ne csússzon új sorba */
+  }
+  
+  /* a range lehessen tényleg rugalmas (különben kényszeríti a wrap-ot) */
+  .myio-pcaRow input[type="range"]{
+	flex: 1 1 auto;
+	min-width: 0;                   /* ✅ nagyon fontos */
+  }
+  
+  /* value doboz fixebb, ne tolja le */
+  .myio-pcaValue{
+	flex: 0 0 auto;
+	white-space: nowrap;
+  }
+  
+  /* value input kicsit kompaktabb, hogy elférjen */
+  .myio-pcaValue input[type="number"]{
+	width: 3.8em;                   /* ha kell: 3.4em-ig lemehetsz */
+	box-sizing: border-box;
+  }
+  
+  /* csak tényleg keskeny kártyán törjön */
+  @media (max-width: 360px){
+	.myio-pcaRow{ flex-wrap: wrap; }
+	.myio-pcaValue{ text-align: right; }
+  }
+  .header .myio-nav .myio-iconBtn{
+	width:34px;
+	height:34px;
+	padding:0;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	font-size:24px;
+	line-height:1;
+  }
+  .myio-menuBoosterBtn.is-on{
+	background: rgba(3,151,214,.95) !important;
+	border-color: rgba(3,151,214,.95) !important;
+  }
+  /* booster row: bal gomb, jobb toggle */
+.myio-menuRowBooster{
+	justify-content: space-between;
+  }
+  .myio-menuRowBooster .myio-menuBoosterBtn{
+	flex: 1 1 auto;
+  }
+  .myio-menuRowBooster .myio-miniToggleMenu{
+	flex: 0 0 auto;
+  }
+  
+  /* menübeli lenyíló sub blokkok */
+  .myio-menuSub{
+	display:none;
+	margin: 8px 0 0 0;
+	padding: 10px;
+	border-radius: 12px;
+	border: 1px solid rgba(255,255,255,.14);
+	background: rgba(255,255,255,.06);
+  }
+  
+  /* booster host lenyit */
+  .myio-menuPanel.is-boosterOpen .myio-boosterSub{
+	display:block;
+  }
+  
+  /* host input menüben */
+  .myio-boosterSub input[type="text"]{
+	width:100%;
+	box-sizing:border-box;
+	border-radius:12px;
+	border:1px solid rgba(255,255,255,.22);
+	background:rgba(255,255,255,.12);
+	color:#fff;
+	padding:8px 10px;
+	font-weight:800;
+	outline:none;
+  }
+  
+  /* language blokk mindig látszik a menüben */
+  .myio-langSub{
+	display:block;
+  }
+  .myio-langSub select{
+	width:100%;
+	box-sizing:border-box;
+	padding-right: 2.6em;
+  }
+  .myio-iconBtn{
+	width: 34px;
+	height: 34px;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 18px;
+	line-height: 1;
+	border-radius: 10px;
+  }
+/* a range alapból ne legyen tappolható (track se) */
+.myio-pcaRow input[type="range"]{ pointer-events:none; }
+
+.myio-rangeWrap{ position:relative; flex:1 1 auto;  }
+.myio-rangeWrap input[type="range"]{ width:100%; min-width:0; display:block; }
+
+.myio-rangeThumbHit{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:44px;
+  height:36px;
+  border-radius:18px;
+  background:transparent;
+  touch-action:none;
+}
+
+.myio-menuPanel{
+	display:block;                 /* mindig ott van */
+	opacity:0;
+	visibility:hidden;
+	transform:
+	  translateY(-6px)
+	  scale(0.98);
+	transform-origin: top right;
+  
+	transition:
+	  opacity .18s ease,
+	  transform .22s cubic-bezier(.2,.8,.2,1),
+	  visibility 0s linear .22s;
+  }
+  
+  /* nyitott állapot */
+  .myio-nav.is-menuOpen .myio-menuPanel{
+	opacity:1;
+	visibility:visible;
+	transform:
+	  translateY(0)
+	  scale(1);
+  
+	transition:
+	  opacity .18s ease,
+	  transform .22s cubic-bezier(.2,.8,.2,1);
+  }
+  .myio-menuBtn{
+	position: relative;
+	font-size: 0;           /* a ☰ eltűnik */
+  }
+  
+  .myio-menuBtn::before{
+	content: "☰";
+	font-size: 22px;
+	line-height: 1;
+	display: block;
+	transition: transform .22s ease, opacity .18s ease;
+  }
+  
+  /* NYITOTT ÁLLAPOT → X */
+  .myio-nav.is-menuOpen .myio-menuBtn::before{
+	content: "✕";
+	transform: rotate(90deg);
+  }
+  .myio-sectionHead{
+	display:flex;
+	align-items:center;
+	justify-content:space-between;
+	gap:10px;
+  }
+  
+  .myio-sectionHead .myio-sectionMeta{ margin-left:auto; }
+  
+  .myio-dragHandle{
+	all: unset;                 /* minden gomb alapstílus törlése */
+	cursor: grab;
+	font-size: 18px;            /* ikon méret */
+	line-height: 1;
+	color: rgba(255,255,255,.55);
+	user-select: none;
+  }
+  
+  .myio-dragHandle:active{ cursor:grabbing; }
+  
+  .myio-section.is-dragging{
+	outline: 2px dashed #ff9800;
+	outline-offset: 4px;
+	box-shadow: 0 0 0 3px rgba(255,152,0,.15);
+  }
+  
+  /* ne villanjon kattintásra */
+.myio-sectionHead:focus { outline: none; }
+
+/* keyboard fókusz maradjon */
+.myio-sectionHead:focus-visible{
+  outline: 2px dashed #ff8c00;
+  outline-offset: 6px;
+}
+
+  
+/* ============================================================
+   ZOOM功能 - Szekciók és kártyák zoom-függő skálázása
+   ============================================================
+   
+   Ez a CSS kód a styleBlue.css VÉGÉRE kerül.
+   
+   Funkciók:
+   - Szekció címek betűmérete skálázódik a zoom-mal
+   - Szekció magasság (padding) skálázódik
+   - Toggle gombok mérete skálázódik (maximum 110% méret)
+   - Kártya minimum szélesség nagyobb (286px helyett 260px)
+   - Mobil nézetben kisebb kártya minimum
+   - Favicon csillag NINCS négyzet háttér
+   
+   Dátum: 2026-01-31
+   ============================================================ */
+
+/* ============================================================
+   1. SZEKCIÓ CÍM - Zoom-függő betűméret
+   ============================================================ */
+   .myio-sectionTitle {
+    font-size: clamp(
+        14px,                          /* minimum (50% zoom-nál, ugyanaz mint kártya cím) */
+        calc(17px * var(--myio-zoom)), /* skálázott (17px az eredeti) */
+        26px                           /* maximum (150% zoom-nál) */
+    ) !important;
+}
+
+/* ============================================================
+   2. SZEKCIÓ META SZÖVEG - Zoom-függő betűméret
+   ============================================================ */
+.myio-sectionMeta {
+    font-size: clamp(
+        10px,                          /* minimum */
+        calc(12px * var(--myio-zoom)), /* skálázott */
+        18px                           /* maximum */
+    ) !important;
+}
+
+/* ============================================================
+   3. SZEKCIÓ FEJLÉC - Zoom-függő magasság (padding)
+   ============================================================ */
+.myio-sectionHead {
+    padding: calc(12px * var(--myio-zoom)) calc(14px * var(--myio-zoom)) !important;
+    gap: calc(10px * var(--myio-zoom)) !important;
+}
+
+/* ============================================================
+   4. TOGGLE GOMB MÉRET - Zoom-függő, DE maximum 35.2px (110%)
+   ============================================================
+   
+   Az eredeti --ctl-h értéket felülírjuk zoom-függő értékkel,
+   DE maximum 35.2px-nél (110% zoom méret) megáll.
+   
+   Így 150% zoom-nál sem lesznek túl nagyok a toggle gombok.
+   ============================================================ */
+:root {
+    --ctl-h: clamp(
+        20px,                           /* minimum (50% zoom-nál) */
+        calc(31px * var(--myio-zoom)), /* skálázott (32px az eredeti) */
+        33px                          /* maximum (110% zoom = 32 × 1.1) */
+    ) !important;
+}
+
+/* ============================================================
+   5. TOGGLE TRACK BEFORE - A fehér gomb is skálázódjon
+   ============================================================ */
+.myio-miniTrack::before {
+    width: calc(var(--ctl-h) - 6px) !important;
+    height: calc(var(--ctl-h) - 6px) !important;
+}
+
+
+
+/* ============================================================
+   7. FAVICON CSILLAG - NINCS négyzet háttér
+   ============================================================
+   
+   A kedvenc gomb (csillag) körül volt egy átlátszó négyzet
+   háttér/keret. Most csak a tiszta csillag ikon látszik.
+   ============================================================ */
+.myio-favBtn {
+    background: transparent !important;
+    border: none !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 0 !important;
+}
+
+.myio-card.myio-on {
+    background: rgba(247, 251, 231, 0.92) !important;
+    border-color: rgba(180, 180, 180, 0.75) !important;
+}
+
+.myio-favIcon{
+	border:0;
+	background:transparent;
+	padding:0 8px 0 0;
+	font-size:16px;
+	line-height:1;
+	cursor:pointer;
+	color:#fff;
+  }
+  .myio-favIcon.is-fav{ color:#fff; } /* ha külön színt akarsz, itt */
+  .myio-cardTitle, .myio-titleBtn, .myio-headTitleBtn{
+	display:flex;
+	align-items:center;
+	gap:6px;
+  }
+  /*
+.myio-ghost { transition: top .08s ease, left .08s ease !important; will-change: top,left; cursor: grabbing !important; }
+.myio-section.is-dragging { opacity: .25; }
+*/
+.myio-favInTitle{
+	margin-right:8px;
+	border:0;
+	background:transparent;
+	cursor:pointer;
+	font-size:16px;
+	line-height:1;
+	padding:0;
+}
+.myio-headTitleBtn .myio-favInTitle{ margin-right:6px; }
+
+.myio-favInTitle.is-fav{
+	color:#ffd36a;              /* arany */
+	text-shadow: 0 2px 2px rgba(0,0,0,.45);
+  }
+/* alap: nincs négyzet, nincs keret, csak ikon */
+/* hover: finom erősítés, de még mindig nincs doboz */
+.myio-favInTitle:hover{
+	transform: scale(1.1);
+	text-shadow: 0 2px 2px rgba(50,50,50,.45);
+  }
+
+
+/* ON kártyán a NEM kedvenc (kikapcsolt) csillag legyen "fekete kontúros" */
+.myio-card.myio-on .myio-favInTitle:not(.is-fav){
+  color: transparent;                 /* a belseje “üres” */
+  -webkit-text-stroke: 1px rgba(50,50,50,.85); /* fekete kontúr */
+  text-stroke: 1px rgba(50,50,50,.85);
+  text-shadow: none;
+}
+
+/* ON kártyán a kedvenc csillag maradhat arany (ha akarod sötétebb kontúrral) */
+
+.myio-card.myio-on .myio-favInTitle.is-fav{
+  color:#d7a63a;
+  -webkit-text-stroke: 1px rgba(0,0,0,.35);
+  text-stroke: 1px rgba(0,0,0,.35);
+}
+/* ============================================================
+   LONG PRESS BEÁLLÍTÁSOK MENÜ - Teljes megoldás
+   ============================================================
+   
+   Funkciók:
+   1. ✅ Aláhúzás kikapcsolása kattintáskor
+   2. ✅ Rövid kattintás → INV parancs (marad)
+   3. ✅ Long press (500ms+) → Beállítások menü
+   4. ✅ Favicon jobb alsó sarokban
+   5. ✅ Pötty eltüntetése a név elől
+   
+   Dátum: 2026-01-31
+   ============================================================ */
+
+
+/* ============================================================
+   1. CSS KÓD - styleBlue.css VÉGÉRE
+   ============================================================ */
+
+/* Aláhúzás kikapcsolása */
+.myio-headTitleBtn {
+    text-decoration: none !important;
+}
+
+.myio-headTitleBtn:hover {
+    text-decoration: none !important;
+}
+
+.myio-headTitleBtn:active {
+    text-decoration: none !important;
+}
+
+/* Long press feedback */
+.myio-card.is-longpress-active {
+    opacity: 0.85;
+    transform: scale(0.98);
+    transition: all 0.1s;
+}
+
+/* ============================================================
+   BEÁLLÍTÁSOK MODAL
+   ============================================================ */
+
+/* Modal háttér */
+.myio-settings-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.myio-settings-overlay.is-open {
+    opacity: 1;
+}
+
+/* Modal ablak */
+.myio-settings-modal {
+    background: linear-gradient(135deg, #1e2936 0%, #0f1419 100%);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6);
+    max-width: 500px;
+    width: 100%;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(30px) scale(0.95);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.myio-settings-overlay.is-open .myio-settings-modal {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* Modal fejléc */
+.myio-settings-header {
+    padding: 24px 28px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.myio-settings-title-wrap {
+    flex: 1;
+}
+
+.myio-settings-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+}
+
+.myio-settings-subtitle {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 0;
+    font-family: 'Courier New', monospace;
+}
+
+.myio-settings-close {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 24px;
+    line-height: 1;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.myio-settings-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+/* Modal tartalom (scrollozható) */
+.myio-settings-content {
+    padding: 28px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* Beállítás sorok */
+.myio-setting-row {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.myio-setting-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.myio-setting-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.myio-setting-description {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.myio-setting-input,
+.myio-setting-select,
+.myio-setting-textarea {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.myio-setting-input:focus,
+.myio-setting-select:focus,
+.myio-setting-textarea:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(3, 151, 214, 0.15);
+}
+
+.myio-setting-input::placeholder,
+.myio-setting-textarea::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.myio-setting-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='%23fff'%3E%3Cpath d='M6 8L0 0h12L6 8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 44px;
+}
+
+.myio-setting-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Modal footer */
+.myio-settings-footer {
+    padding: 20px 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.myio-settings-btn {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.myio-settings-btn-primary {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(3, 151, 214, 0.25);
+}
+
+.myio-settings-btn-primary:hover {
+    background: #0286b8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(3, 151, 214, 0.35);
+}
+
+.myio-settings-btn-primary:active {
+    transform: translateY(0);
+}
+
+.myio-settings-btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.myio-settings-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+/* Mobil optimalizálás */
+@media (max-width: 600px) {
+    .myio-settings-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+    
+    .myio-settings-modal {
+        max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        max-height: 92vh;
+    }
+    
+    .myio-settings-header {
+        padding: 20px 24px;
+    }
+    
+    .myio-settings-content {
+        padding: 24px;
+    }
+    
+    .myio-settings-footer {
+        padding: 16px 24px;
+        flex-direction: column-reverse;
+    }
+    
+    .myio-settings-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
