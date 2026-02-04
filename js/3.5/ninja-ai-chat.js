@@ -10,7 +10,37 @@
     modelName: 'claude-haiku-4-5-20251001',
     maxTokens: 4096,
     systemPrompt: `Te a Ninja vagy, egy okos otthon asszisztens a MyIO smart home rendszerben. 
-Segítesz a felhasználónak az okos otthon eszközök kezelésében, magyarázol dolgokat és válaszolsz kérdésekre.
+
+FONTOS: Képes vagy kezelni az okos otthon eszközöket parancsok futtatásával!
+
+ELÉRHETŐ PARANCSOK:
+1. Relék kapcsolgatása:
+   - "relay_toggle(relay_id)" - egy relé be/ki kapcsolgatása
+   - "relay_on(relay_id)" - relé bekapcsolása
+   - "relay_off(relay_id)" - relé kikapcsolása
+   Relay ID-k: 0-31
+
+2. PWM értékek beállítása (0-255):
+   - "pwm_set(pwm_id, value)" - PWM érték beállítása
+   Például: "pwm_set(2, 150)" - 2-es PWM eszköz 150-es értékre
+   PWM ID-k: 0-15
+
+PARANCSOK FORMÁTUMA:
+Ha a felhasználó eszközöket szeretne beállítani, adj ki parancsokat a válaszodban [COMMAND] tagek között:
+[COMMAND]relay_on(1)[/COMMAND]
+[COMMAND]pwm_set(0, 200)[/COMMAND]
+
+MÁSNYELVI TÁMOGATÁS:
+- "kapcsolgass be egy lámpát" = relay_on()
+- "dimm a szobai LED-et" = pwm_set()
+- Értelmezd a felhasználó szándékát és hajtsd végre a megfelelő parancsokat!
+
+PROTOKOLL:
+1. Válaszd meg a felhasználót baráti, segítőkész hangnemben
+2. Ha parancs szükséges, add ki azt [COMMAND] tagek között
+3. Mutasd meg, hogy mi történik (pl. "LED-et 200-ra dimmelek")
+4. Kerüld a többszörös parancsokat - egyszerre max 3 parancs
+
 Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   };
 
@@ -311,6 +341,108 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     return context;
   }
 
+  // Execute relay command
+  function executeRelayCommand(command, relayId) {
+    try {
+      const id = parseInt(relayId);
+      if (isNaN(id) || id < 0 || id > 31) {
+        showToast(`❌ Érvénytelen relé ID: ${id}`);
+        return false;
+      }
+
+      if (typeof relayToggle === 'function') {
+        if (command === 'toggle') {
+          relayToggle(id);
+          return true;
+        } else if (command === 'on') {
+          relayToggle(id, 11); // 11 = on
+          return true;
+        } else if (command === 'off') {
+          relayToggle(id, 12); // 12 = off
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error('Relay command error:', error);
+      showToast(`❌ Relé parancs hiba: ${error.message}`);
+      return false;
+    }
+    return false;
+  }
+
+  // Execute PWM command
+  function executePWMCommand(pwmId, value) {
+    try {
+      const id = parseInt(pwmId);
+      const val = parseInt(value);
+
+      if (isNaN(id) || id < 0 || id > 15) {
+        showToast(`❌ Érvénytelen PWM ID: ${id}`);
+        return false;
+      }
+      if (isNaN(val) || val < 0 || val > 255) {
+        showToast(`❌ Érvénytelen PWM érték: ${val} (0-255 között kell lennie)`);
+        return false;
+      }
+
+      if (typeof setDimmValue === 'function') {
+        setDimmValue(id, val);
+        return true;
+      } else if (typeof PCA !== 'undefined') {
+        // Fallback: direkten beállítás az API-n keresztül
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `/data?pwm${id}=${val}`, true);
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            PCA[id] = val;
+            showToast(`✅ PWM ${id} → ${val}`);
+          }
+        };
+        xhr.send();
+        return true;
+      }
+    } catch (error) {
+      console.error('PWM command error:', error);
+      showToast(`❌ PWM parancs hiba: ${error.message}`);
+      return false;
+    }
+    return false;
+  }
+
+  // Parse and execute commands from AI response
+  function executeCommandsFromResponse(text) {
+    const commandRegex = /\[COMMAND\]([^\[]*?)\[\/COMMAND\]/g;
+    let match;
+    let executed = 0;
+
+    while ((match = commandRegex.exec(text)) !== null) {
+      const command = match[1].trim();
+
+      // relay_toggle(id)
+      if (command.startsWith('relay_toggle(')) {
+        const id = command.match(/relay_toggle\((\d+)\)/);
+        if (id && executeRelayCommand('toggle', id[1])) executed++;
+      }
+      // relay_on(id)
+      else if (command.startsWith('relay_on(')) {
+        const id = command.match(/relay_on\((\d+)\)/);
+        if (id && executeRelayCommand('on', id[1])) executed++;
+      }
+      // relay_off(id)
+      else if (command.startsWith('relay_off(')) {
+        const id = command.match(/relay_off\((\d+)\)/);
+        if (id && executeRelayCommand('off', id[1])) executed++;
+      }
+      // pwm_set(id, value)
+      else if (command.startsWith('pwm_set(')) {
+        const match2 = command.match(/pwm_set\((\d+),\s*(\d+)\)/);
+        if (match2 && executePWMCommand(match2[1], match2[2])) executed++;
+      }
+    }
+
+    return executed;
+  }
+
   // Send message to Claude API
   async function sendMessage() {
     const input = document.getElementById('ninja-input');
@@ -390,12 +522,23 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       const data = await response.json();
       const assistantMessage = data.content[0].text;
       
-      // Add assistant response
-      addMessage(assistantMessage, false);
+      // Clean message for display (remove command tags)
+      const displayMessage = assistantMessage.replace(/\[COMMAND\][^\[]*?\[\/COMMAND\]/g, '').trim();
+      
+      // Execute commands from response
+      const commandCount = executeCommandsFromResponse(assistantMessage);
+      
+      // Add assistant response (without command tags)
+      addMessage(displayMessage, false);
       conversationHistory.push({
         role: 'assistant',
         content: assistantMessage
       });
+      
+      // Show command execution feedback
+      if (commandCount > 0) {
+        showToast(`✅ ${commandCount} parancs végrehajtva`);
+      }
       
       // Limit history to last 10 messages
       if (conversationHistory.length > 20) {
