@@ -405,10 +405,19 @@ function buildHeader() {
 		  updateIntervalDisplay(val);
 		});
 		
+		// Slider row: slider + input box
+		const sliderRow = document.createElement("div");
+		sliderRow.style.display = "flex";
+		sliderRow.style.alignItems = "center";
+		sliderRow.style.gap = "8px";
+		sliderRow.style.marginBottom = "0px";
+
+		sliderRow.append(intervalSlider, intervalInputBox);
+  
 		// Kezdeti érték megjelenítése
 		updateIntervalDisplay(Math.max(5, Math.min(600, savedVal)));
   
-		autoRefreshPanel.append(intervalRow, intervalSlider, intervalInputBox);
+		autoRefreshPanel.append(intervalRow, sliderRow);
   
 		// ---- AUTO REFRESH FUNKCIÓK ----
 		function startAutoRefresh(sec) {
