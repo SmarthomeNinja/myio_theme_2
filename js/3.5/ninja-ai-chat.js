@@ -6,7 +6,8 @@
 
   // Konfiguráció
   const NINJA_CONFIG = {
-    modelName: 'claude-sonnet-4-5-20250929',
+    // modelName: 'claude-sonnet-4-5-20250929',
+    modelName: 'claude-haiku-4-5-20251001',
     maxTokens: 4096,
     systemPrompt: `Te a Ninja vagy, egy okos otthon asszisztens a MyIO smart home rendszerben. 
 Segítesz a felhasználónak az okos otthon eszközök kezelésében, magyarázol dolgokat és válaszolsz kérdésekre.
