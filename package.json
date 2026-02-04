@@ -1,0 +1,24 @@
+{
+  "name": "extbeta2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dygraph.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SmarthomeNinja/myio_theme_2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SmarthomeNinja/myio_theme_2/issues"
+  },
+  "homepage": "https://github.com/SmarthomeNinja/myio_theme_2#readme",
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "dotenv": "^17.2.3"
+  }
+}
