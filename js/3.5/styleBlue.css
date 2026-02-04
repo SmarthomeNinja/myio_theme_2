@@ -1279,7 +1279,6 @@ body {
 	-ms-user-select: none;
   }
   
-  // KIVÉTEL: Input és Textarea elemek SELECTABLE-k
   input,
   textarea,
   input::placeholder,
