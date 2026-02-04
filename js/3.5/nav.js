@@ -277,41 +277,56 @@ function buildHeader() {
 		const autoRefreshPanel = document.createElement("div");
 		autoRefreshPanel.className = "myio-menuSub myio-autoRefreshSub";
   
+		const intervalRow = document.createElement("div");
+		intervalRow.style.display = "flex";
+		intervalRow.style.alignItems = "center";
+		intervalRow.style.gap = "12px";
+		intervalRow.style.marginBottom = "8px";
+
 		const intervalLabel = document.createElement("label");
 		intervalLabel.textContent = (typeof str_Auto_Refresh !== "undefined" ? str_Auto_Refresh : "Auto") + " (sec):";
 		intervalLabel.style.color = "rgba(255,255,255,.85)";
 		intervalLabel.style.fontWeight = "800";
-		intervalLabel.style.marginBottom = "6px";
-		intervalLabel.style.display = "block";
+		intervalLabel.style.whiteSpace = "nowrap";
+		intervalLabel.style.fontSize = "0.95em";
+  
+		const intervalValue = document.createElement("div");
+		intervalValue.style.color = "rgba(255,255,255,.9)";
+		intervalValue.style.fontWeight = "700";
+		intervalValue.style.minWidth = "3.5em";
+		intervalValue.style.textAlign = "right";
+		intervalValue.style.fontSize = "1em";
+
+		intervalRow.append(intervalLabel, intervalValue);
   
 		const intervalInput = document.createElement("input");
-		intervalInput.type = "number";
+		intervalInput.type = "range";
 		intervalInput.min = "5";
-		intervalInput.max = "3600";
-		intervalInput.step = "1";
-		intervalInput.value = localStorage.getItem(ARKEY_INTERVAL) || "30";
+		intervalInput.max = "600";
+		intervalInput.step = "5";
+		const savedVal = parseInt(localStorage.getItem(ARKEY_INTERVAL) || "30", 10);
+		intervalInput.value = String(Math.max(5, Math.min(600, savedVal)));
+		intervalInput.className = "myio-intervalSlider";
 		intervalInput.style.width = "100%";
 		intervalInput.style.boxSizing = "border-box";
-		intervalInput.style.borderRadius = "12px";
-		intervalInput.style.border = "1px solid rgba(255,255,255,.22)";
-		intervalInput.style.background = "rgba(255,255,255,.12)";
-		intervalInput.style.color = "#fff";
-		intervalInput.style.padding = "8px 10px";
-		intervalInput.style.fontWeight = "800";
-		intervalInput.style.outline = "none";
+		intervalInput.style.cursor = "pointer";
   
-		intervalInput.onchange = () => {
-		  let val = parseInt(intervalInput.value, 10) || 30;
-		  if (val < 5) val = 5;
-		  intervalInput.value = String(val);
+		const updateIntervalDisplay = () => {
+		  const val = parseInt(intervalInput.value, 10);
+		  intervalValue.textContent = val + "s";
 		  localStorage.setItem(ARKEY_INTERVAL, String(val));
 		  // Ha be van kapcsolva, újraindítjuk az időzítőt az új intervallummal
 		  if (arInput.checked) {
 			startAutoRefresh(val);
 		  }
 		};
+
+		intervalInput.addEventListener("input", updateIntervalDisplay);
+		intervalInput.addEventListener("change", updateIntervalDisplay);
+		
+		updateIntervalDisplay();
   
-		autoRefreshPanel.append(intervalLabel, intervalInput);
+		autoRefreshPanel.append(intervalRow, intervalInput);
   
 		// ---- AUTO REFRESH FUNKCIÓK ----
 		function startAutoRefresh(sec) {
