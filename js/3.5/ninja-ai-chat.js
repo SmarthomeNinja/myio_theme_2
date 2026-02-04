@@ -18,12 +18,35 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   let isNinjaOpen = false;
 
   // API kulcs beolvasása (environment változó vagy localStorage)
-  function getAPIKey() {
-    // Próbáljuk meg a localStorage-ból
+  async function getAPIKey() {
+    // 1. Először localStorage
     const stored = localStorage.getItem('ANTHROPIC_API_KEY');
     if (stored) return stored;
     
-    // Ha nincs, kérjük be a felhasználótól
+    // 2. Globális változó (ha a szerver betöltötte)
+    if (typeof ANTHROPIC_API_KEY !== 'undefined' && ANTHROPIC_API_KEY) {
+      return ANTHROPIC_API_KEY;
+    }
+    
+    // 3. Próbáljuk betölteni a /.env fájlból
+    try {
+      const response = await fetch('/.env');
+      if (response.ok) {
+        const text = await response.text();
+        const match = text.match(/ANTHROPIC_API_KEY\s*=\s*(.+)/);
+        if (match && match[1]) {
+          const key = match[1].trim().replace(/['"]/g, '');
+          if (key && key.startsWith('sk-ant-')) {
+            // Cache it in localStorage
+            localStorage.setItem('ANTHROPIC_API_KEY', key);
+            return key;
+          }
+        }
+      }
+    } catch (err) {
+      console.log('Could not load .env file:', err);
+    }
+    
     return null;
   }
 
@@ -137,8 +160,8 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   }
 
   // Check if API key exists
-  function checkAPIKey() {
-    const key = getAPIKey();
+  async function checkAPIKey() {
+    const key = await getAPIKey();
     const setupDiv = document.getElementById('ninja-api-setup');
     const inputArea = document.querySelector('.ninja-input-area');
     
@@ -295,7 +318,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     if (!message) return;
     
     // Check API key
-    const apiKey = getAPIKey();
+    const apiKey = await getAPIKey();
     if (!apiKey) {
       showToast('⚠️ Kérlek add meg az API kulcsot!');
       return;
@@ -810,6 +833,45 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
           flex-wrap: nowrap;
         }
       }
+      
+      /* Ninja Menu Button Styling */
+      .ninja-menu-btn {
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffc837 100%) !important;
+        color: #fff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4) !important;
+        border: 1px solid rgba(255, 200, 55, 0.3) !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+        overflow: hidden !important;
+      }
+      
+      .ninja-menu-btn::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transform: rotate(45deg);
+        animation: ninjaShine 3s infinite;
+      }
+      
+      @keyframes ninjaShine {
+        0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+      }
+      
+      .ninja-menu-btn:hover {
+        background: linear-gradient(135deg, #ff8555 0%, #ffa73e 50%, #ffd857 100%) !important;
+        transform: translateY(-2px) scale(1.02) !important;
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6) !important;
+      }
+      
+      .ninja-menu-btn:active {
+        transform: translateY(0) scale(0.98) !important;
+      }
     `;
     
     document.head.appendChild(style);
@@ -823,20 +885,21 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       if (menuFooter && !document.getElementById('ninja-menu-btn')) {
         clearInterval(checkMenu);
         
+        // Make footer flex with space-between
+        menuFooter.style.display = 'flex';
+        menuFooter.style.justifyContent = 'space-between';
+        menuFooter.style.alignItems = 'center';
+        menuFooter.style.gap = '10px';
+        
         const ninjaBtn = document.createElement('button');
         ninjaBtn.type = 'button';
         ninjaBtn.id = 'ninja-menu-btn';
-        ninjaBtn.className = 'myio-btn small';
-        ninjaBtn.textContent = 'AI Ninja 🥷';
+        ninjaBtn.className = 'myio-btn small ninja-menu-btn';
+        ninjaBtn.innerHTML = 'AI Ninja <span style="font-size: 1.3em;">🥷</span>';
         ninjaBtn.onclick = toggleNinja;
         
-        // Insert before logout button
-        const logoutBtn = menuFooter.querySelector('button');
-        if (logoutBtn) {
-          menuFooter.insertBefore(ninjaBtn, logoutBtn);
-        } else {
-          menuFooter.appendChild(ninjaBtn);
-        }
+        // Append to end (right side)
+        menuFooter.appendChild(ninjaBtn);
         
         console.log('🥷 Ninja AI Chat initialized');
       }
