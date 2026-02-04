@@ -434,13 +434,13 @@ body {
 	  .myio-grid{
 		display:grid;
 		gap:calc(12px * var(--myio-zoom));
-		grid-template-columns:repeat(auto-fit, minmax(calc(var(--myio-card-min) * var(--myio-zoom)*1), 1fr));
+		grid-template-columns:repeat(auto-fill, minmax(calc(var(--myio-card-min) * var(--myio-zoom)*1), calc(var(--myio-card-min) * var(--myio-zoom)*1)));
 	  }
 	  
 	  @media (max-width:720px){
 		:root{ --myio-card-min:clamp(145px, calc(147px / var(--myio-zoom)), 1000px); }
 		.myio-grid{
-		  grid-template-columns:repeat(auto-fit, minmax(calc(var(--myio-card-min) * var(--myio-zoom)), 1fr));
+		  grid-template-columns:repeat(auto-fill, minmax(calc(var(--myio-card-min) * var(--myio-zoom)), calc(var(--myio-card-min) * var(--myio-zoom))));
 		}
 	  }
 	  
@@ -1256,4 +1256,3 @@ body {
 
 .myio-menuSub.myio-autoSub{ display:none; }
 .myio-nav.is-menuOpen .myio-menuPanel.is-autoOpen .myio-autoSub{ display:block; }
-
