@@ -965,31 +965,6 @@ let isDraggingCard = false;
         }
       };
       
-      // Kezdeti zoom ha a handlerek túl közeliek
-      const applyInitialZoom = () => {
-        const distance = Math.abs(currentOnVal - currentOffVal);
-        const minVisualAngle = 30; // fok - min vizuális távolság
-        const currentAngleSpan = (distance / (scaleMaxTemp - scaleMinTemp)) * arcSpan;
-        
-        if (currentAngleSpan < minVisualAngle) {
-          const neededRange = Math.max(distance * arcSpan / minVisualAngle, minHandleDistance * 4);
-          const center = (currentOnVal + currentOffVal) / 2;
-          
-          scaleMinTemp = Math.max(defaultMinTemp, center - neededRange / 2);
-          scaleMaxTemp = Math.min(defaultMaxTemp, center + neededRange / 2);
-          
-          const actualRange = scaleMaxTemp - scaleMinTemp;
-          if (actualRange < neededRange) {
-            if (scaleMinTemp === defaultMinTemp) {
-              scaleMaxTemp = Math.min(defaultMaxTemp, scaleMinTemp + neededRange);
-            } else if (scaleMaxTemp === defaultMaxTemp) {
-              scaleMinTemp = Math.max(defaultMinTemp, scaleMaxTemp - neededRange);
-            }
-          }
-        }
-      };
-      
-      applyInitialZoom();
       updateArcs();
       
       // Handle-ök
