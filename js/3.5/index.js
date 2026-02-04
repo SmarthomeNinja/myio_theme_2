@@ -832,32 +832,42 @@ let isDraggingCard = false;
         const hysteresis = Math.abs(currentOffVal - currentOnVal);
         const avgTemp = (currentOnVal + currentOffVal) / 2;
         
-        // Szorzó: 0.1 hiszterézisnél 20x, 3 foknál 3x (lineáris interpoláció)
-        // multiplier = 20 - (hysteresis - 0.1) * (20 - 3) / (3 - 0.1)
-        // Egyszerűsítve: multiplier = max(3, min(20, 20 - hysteresis * 5.86))
+        // A teljes hiszterézis (ON-OFF távolság) = hysteresis * 2
+        const fullHysteresis = hysteresis * 2;
+        
+        // Szorzó: kis hiszterézisnél nagyobb (max 10x), nagy hiszterézisnél kisebb (min 2x)
+        // FONTOS: minimum 2x, hogy legyen hely mozgatni a dragpontokat!
+        // 0.2°C hiszterézisnél (fullHyst=0.4) -> 10x szorzó -> 4°C skála
+        // 5°C hiszterézisnél (fullHyst=10) -> 2x szorzó -> 20°C skála
         let multiplier;
         if (isPercent) {
-          // %-nál más skála
-          multiplier = Math.max(3, Math.min(15, 15 - hysteresis * 0.4));
+          // %-nál: min 2x, max 8x
+          multiplier = Math.max(2, Math.min(8, 8 - fullHysteresis * 0.12));
         } else {
-          multiplier = Math.max(3, Math.min(20, 20 - hysteresis * 5.86));
+          // °C-nál: min 2x, max 10x
+          // Lineáris: 10 - (fullHyst * 0.8), de min 2
+          multiplier = Math.max(2, Math.min(10, 10 - fullHysteresis * 0.8));
         }
         
-        const range = hysteresis * multiplier;
+        // A skála = teljes hiszterézis * szorzó
+        const range = fullHysteresis * multiplier;
+        
+        // Skála közepe = átlaghőmérséklet
         let minT = avgTemp - range / 2;
         let maxT = avgTemp + range / 2;
         
-        // Korlátozás az abszolút határokra
+        // Korlátozás az abszolút határokra (de a közép maradjon az átlagnál amennyire lehet)
         if (minT < defaultMinTemp) {
-          const shift = defaultMinTemp - minT;
           minT = defaultMinTemp;
-          maxT += shift;
+          maxT = minT + range;
         }
         if (maxT > defaultMaxTemp) {
-          const shift = maxT - defaultMaxTemp;
           maxT = defaultMaxTemp;
-          minT = Math.max(defaultMinTemp, minT - shift);
+          minT = maxT - range;
         }
+        // Végső korlátozás
+        minT = Math.max(defaultMinTemp, minT);
+        maxT = Math.min(defaultMaxTemp, maxT);
         
         return { minT, maxT, hysteresis, avgTemp };
       };
