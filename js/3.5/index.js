@@ -109,11 +109,30 @@ let isDraggingCard = false;
     else f.push(id);
     saveFavs(f);
   }
-
   const cardFactories = new Map();
   function registerCardFactory(id, factoryFn) {
     if (!id || typeof factoryFn !== "function") return;
     cardFactories.set(id, factoryFn);
+  }
+  function cleanupFavoritesSectionState() {
+    try {
+      // 1) Favorites section collapse/open state
+      localStorage.removeItem(FAV_SECTION_KEY);
+  
+      // 2) Favorites cards order (card reorder per section)
+      const scope = (typeof MYIOname === "string" && MYIOname.trim()) ? MYIOname.trim() : "default";
+      const cardsOrderKey = `myio.cards.order.${scope}.${FAV_SECTION_KEY}`;
+      localStorage.removeItem(cardsOrderKey);
+  
+      // 3) Remove Favorites from saved section order
+      const sectionsOrderKey = `myio.sections.order.${scope}`;
+      let saved = [];
+      try { saved = JSON.parse(localStorage.getItem(sectionsOrderKey) || "[]"); } catch {}
+      saved = Array.isArray(saved) ? saved.filter(k => k !== FAV_SECTION_KEY) : [];
+      localStorage.setItem(sectionsOrderKey, JSON.stringify(saved));
+    } catch (e) {
+      console.error("Favorites cleanup error:", e);
+    }
   }
   
   // Ikon wrapper - csillag (kedvenc) + választott ikon alatta
@@ -135,15 +154,46 @@ let isDraggingCard = false;
     starBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-
+    
+      // első kedvenc lesz-e? (toggle előtt)
+      const wasFav = isFav(cardId);
+      const before = loadFavs();
+      const firstFavWillBeCreated = (!wasFav && before.length === 0);
+    
+      // kedvenc toggle
       toggleFav(cardId);
-
+    // ha MOST lett 0 kedvenc -> töröljük a Favorites-hoz tartozó mentéseket
+      if (loadFavs().length === 0) {
+        cleanupFavoritesSectionState();
+      }
+      // ha most jött létre az első kedvenc: Favorites szekció menjen a sorrend elejére
+      if (firstFavWillBeCreated) {
+        try {
+          const scope = (typeof MYIOname === "string" && MYIOname.trim()) ? MYIOname.trim() : "default";
+          const ORDER_KEY = `myio.sections.order.${scope}`;
+    
+          let saved = [];
+          try { saved = JSON.parse(localStorage.getItem(ORDER_KEY) || "[]"); } catch {}
+    
+          // vedd ki, ha már benne van, majd tedd az elejére
+          saved = saved.filter(k => k !== FAV_SECTION_KEY);
+          saved.unshift(FAV_SECTION_KEY);
+    
+          localStorage.setItem(ORDER_KEY, JSON.stringify(saved));
+        } catch (err) {
+          console.error("Favorites order update error:", err);
+        }
+      }
+    
+      // UI frissítés
       const now = isFav(cardId);
       starBtn.textContent = now ? "★" : "☆";
       starBtn.classList.toggle("is-fav", now);
-
+    
       renderAll();
     });
+    
+    
     
     wrapper.appendChild(starBtn);
     
@@ -952,7 +1002,7 @@ let isDraggingCard = false;
     if (!existing.length) return;
 
     const title = (typeof str_Favorites !== "undefined" && str_Favorites) ? str_Favorites : "Favorites";
-    const { section, grid } = makeSection(title, "", FAV_SECTION_KEY, true);
+    const { section, grid } = makeSection(title, "", FAV_SECTION_KEY, false);
 
     for (const id of existing) {
       try {
@@ -970,36 +1020,6 @@ let isDraggingCard = false;
     ensureHeaderMask();
     document.documentElement.classList.add("myio-noanim");
     ensureShell();
-    
-    // Kikapcsoljuk a szöveg kijelölést UI elemeken
-    if (!document.querySelector('#myio-no-select-style')) {
-      const style = document.createElement('style');
-      style.id = 'myio-no-select-style';
-      style.textContent = `
-        * {
-          -webkit-user-select: none;
-          -moz-user-select: none;
-          -ms-user-select: none;
-          user-select: none;
-        }
-        input[type="text"],
-        input[type="number"],
-        input[type="range"],
-        input[type="email"],
-        input[type="search"],
-        input[type="password"],
-        input[type="date"],
-        input[type="time"],
-        textarea,
-        select {
-          -webkit-user-select: text;
-          -moz-user-select: text;
-          -ms-user-select: text;
-          user-select: text;
-        }
-      `;
-      document.head.appendChild(style);
-    }
 
     cardFactories.clear();
 
@@ -1023,7 +1043,6 @@ let isDraggingCard = false;
     if (typeof window.myioApplySavedCardOrder === "function") {
       window.myioApplySavedCardOrder();
     }
-
     if (typeof window.myioApplySavedSectionOrder === "function") {
       window.myioApplySavedSectionOrder();
     }
@@ -1076,6 +1095,8 @@ let isDraggingCard = false;
       const sections = getSections();
       const map = new Map(sections.map(s => [s.dataset.key, s]));
 
+      const favKey = FAV_SECTION_KEY;
+      
       const cleaned = saved.filter(k => map.has(k));
       const used = new Set(cleaned);
 
@@ -1340,387 +1361,400 @@ let isDraggingCard = false;
     
     // iOS miatt: csak drag közben, nem-passzív touchmove prevent
     function preventTouchMove(e) { e.preventDefault(); }
-  if (window.__myioCardReorderInited) return;
-  window.__myioCardReorderInited = true;
+    if (window.__myioCardReorderInited) return;
+    window.__myioCardReorderInited = true;
 
-  const scope = (typeof MYIOname === "string" && MYIOname.trim()) ? MYIOname.trim() : "default";
+    const scope = (typeof MYIOname === "string" && MYIOname.trim()) ? MYIOname.trim() : "default";
 
-  const root = document.querySelector("#myio-root");
-  if (!root) return;
+    const root = document.querySelector("#myio-root");
+    if (!root) return;
 
-  const getSectionGrids = () => Array.from(root.querySelectorAll(".myio-section")).map(sec => {
-    const grid = sec.querySelector(".myio-grid");
-    return { sec, grid };
-  }).filter(x => x.sec && x.grid && x.sec.dataset.key);
+    const getSectionGrids = () => Array.from(root.querySelectorAll(".myio-section")).map(sec => {
+      const grid = sec.querySelector(".myio-grid");
+      return { sec, grid };
+    }).filter(x => x.sec && x.grid && x.sec.dataset.key);
 
-  const orderKeyForSection = (sectionKey) => `myio.cards.order.${scope}.${sectionKey}`;
+    const orderKeyForSection = (sectionKey) => `myio.cards.order.${scope}.${sectionKey}`;
 
-  const getCards = (grid) =>
-    Array.from(grid.querySelectorAll(":scope > .myio-card"))
-      .filter(c => !!c.dataset.cardid); // csak azonosítható kártyákat mentünk/rendezünk
+    const getCards = (grid) =>
+      Array.from(grid.querySelectorAll(":scope > .myio-card"))
+        .filter(c => !!c.dataset.cardid); // csak azonosítható kártyákat mentünk/rendezünk
 
-  const saveGridOrder = (sectionKey, grid) => {
-    const ids = getCards(grid).map(c => c.dataset.cardid);
-    try { localStorage.setItem(orderKeyForSection(sectionKey), JSON.stringify(ids)); } catch { }
-  };
+    const saveGridOrder = (sectionKey, grid) => {
+      const ids = getCards(grid).map(c => c.dataset.cardid);
+      try { localStorage.setItem(orderKeyForSection(sectionKey), JSON.stringify(ids)); } catch { }
+    };
 
-  const applySavedOrderForGrid = (sectionKey, grid) => {
-    let saved = [];
-    try { saved = JSON.parse(localStorage.getItem(orderKeyForSection(sectionKey)) || "[]"); } catch { }
+    const applySavedOrderForGrid = (sectionKey, grid) => {
+      let saved = [];
+      try { saved = JSON.parse(localStorage.getItem(orderKeyForSection(sectionKey)) || "[]"); } catch { }
 
-    const cards = getCards(grid);
-    const map = new Map(cards.map(c => [c.dataset.cardid, c]));
+      const cards = getCards(grid);
+      const map = new Map(cards.map(c => [c.dataset.cardid, c]));
 
-    const cleaned = saved.filter(id => map.has(id));
-    const used = new Set(cleaned);
+      const cleaned = saved.filter(id => map.has(id));
+      const used = new Set(cleaned);
 
-    for (const id of cleaned) grid.appendChild(map.get(id));
-    for (const c of cards) if (!used.has(c.dataset.cardid)) grid.appendChild(c);
-  };
+      for (const id of cleaned) grid.appendChild(map.get(id));
+      for (const c of cards) if (!used.has(c.dataset.cardid)) grid.appendChild(c);
+    };
 
-  const applyAll = () => {
-    for (const { sec, grid } of getSectionGrids()) {
-      applySavedOrderForGrid(sec.dataset.key, grid);
-    }
-  };
-  applyAll();
-  window.myioApplySavedCardOrder = applyAll;
-
-  // ---- drag state (one active at a time) ----
-  const LP_MS = 500;
-  const MOVE_PX = 10;
-
-  let lpTimer = null;
-  let lpStartX = 0, lpStartY = 0;
-  let lpMoved = false;
-
-  let draggingCard = null;
-  let draggingGrid = null;
-  let draggingSectionKey = null;
-
-  let ghost = null;
-  let dragOffsetX = 0, dragOffsetY = 0;
-  let originalLeft = 0;
-  let isAnimating = false;
-  let lastSwapTime = 0;
-
-  function isInteractiveTarget(t) {
-    if (!t) return false;
-    return !!t.closest(
-      ".myio-cardTitle, .myio-headRow, .myio-headTitleBtn, .myio-titleBtn," +
-      "button, a, input, textarea, select, label, .myio-btnRow, .myio-miniToggle, .myio-pcaRow"
-    );
-  }
-
-  function pickCardEmptyAreaTarget(e) {
-    const card = e.target.closest(".myio-card");
-    if (!card) return null;
-    // csak ha üres rész: ne title, ne gombok/slider stb.
-    if (isInteractiveTarget(e.target)) return null;
-    // ha van szöveg kijelölés stb. -> ne
-    return card.dataset.cardid ? card : null;
-  }
-
-  function createGhost(card, clientX, clientY) {
-    const rect = card.getBoundingClientRect();
-    const gridRect = draggingGrid.getBoundingClientRect();
-
-    ghost = card.cloneNode(true);
-    ghost.classList.add("myio-ghost");
-    ghost.style.position = "fixed";
-    ghost.style.left = rect.left + "px";
-    ghost.style.top = rect.top + "px";
-    ghost.style.width = rect.width + "px";
-    ghost.style.height = rect.height + "px";
-    ghost.style.opacity = "0.72";
-    ghost.style.pointerEvents = "none";
-    ghost.style.zIndex = "10000";
-    ghost.style.boxShadow = "0 10px 26px rgba(0,0,0,0.35)";
-    ghost.style.transform = "scale(1.02)";
-
-    ghost.style.visibility = "visible";
-
-    originalLeft = rect.left - gridRect.left;
-    dragOffsetX = clientX - rect.left;
-    dragOffsetY = clientY - rect.top;
-
-    // a ghost-on ne látszódjanak a drag handlek (ha valahol lennének)
-    ghost.querySelectorAll(".myio-dragHandle").forEach(h => (h.style.display = "none"));
-
-    document.body.appendChild(ghost);
-  }
-
-  function removeGhost() {
-    if (ghost) ghost.remove();
-    ghost = null;
-    originalLeft = 0;
-    dragOffsetX = 0;
-    dragOffsetY = 0;
-  }
-
-  function updateGhostPosition(clientX, clientY) {
-    if (!ghost || !draggingCard || !draggingGrid) return;
-
-    const gridRect = draggingGrid.getBoundingClientRect();
-    const fixedLeft = gridRect.left + originalLeft;
-
-    const minX = gridRect.left - 10;
-    const maxX = gridRect.right - ghost.offsetWidth + 10;
-    
-    const x = Math.min(maxX, Math.max(minX, clientX - dragOffsetX));
-    ghost.style.left = x + "px";
-
-    ghost.style.top = (clientY - dragOffsetY) + "px";
-
-    checkSwap();
-  }
-
-  function checkSwap() {
-    if (!draggingCard || !ghost || isAnimating || Date.now() - lastSwapTime < 120) return;
-
-    const cards = Array.from(draggingGrid.querySelectorAll(":scope > .myio-card:not(.is-dragging)"))
-      .filter(c => !!c.dataset.cardid);
-
-    if (!cards.length) return;
-
-    const g = ghost.getBoundingClientRect();
-    const gx = g.left + g.width / 2;
-    const gy = g.top + g.height / 2;
-
-    // aktuális sorrend (row-major) a DOM alapján
-    const current = Array.from(draggingGrid.querySelectorAll(":scope > .myio-card"))
-      .filter(c => !!c.dataset.cardid);
-
-    const oldIndex = current.indexOf(draggingCard);
-
-    // cél index meghatározása: ghost közepe hol lenne a többiekhez képest
-    const indexed = cards.map(c => {
-      const r = c.getBoundingClientRect();
-      return { c, cx: r.left + r.width / 2, cy: r.top + r.height / 2, top: r.top, left: r.left };
-    });
-
-    // row-major rendezés (vizuális sorrend)
-    // kis tolerancia, hogy ugyanabban a sorban maradjon
-    const rowTol = Math.max(12, g.height * 0.35);
-    indexed.sort((a, b) => (Math.abs(a.top - b.top) <= rowTol) ? (a.left - b.left) : (a.top - b.top));
-
-    // beszúrási pont: első olyan elem, ami "után" vagyunk (gy, gx alapján)
-    let insertBeforeEl = null;
-    for (const it of indexed) {
-      const sameRow = Math.abs(it.cy - gy) <= rowTol;
-      if (gy < it.cy - rowTol || (sameRow && gx < it.cx)) {
-        insertBeforeEl = it.c;
-        break;
+    const applyAll = () => {
+      for (const { sec, grid } of getSectionGrids()) {
+        applySavedOrderForGrid(sec.dataset.key, grid);
       }
+    };
+    applyAll();
+    window.myioApplySavedCardOrder = applyAll;
+
+    // kívülről hívható: Favorites szekciót első helyre teszi a mentett orderben
+    window.myioMoveSectionToTop = (sectionKey) => {
+      if (!sectionKey) return;
+      let saved = [];
+      try { saved = JSON.parse(localStorage.getItem(ORDER_KEY) || "[]"); } catch {}
+      // vedd ki, ha benne van
+      saved = saved.filter(k => k !== sectionKey);
+      // tedd az elejére
+      saved.unshift(sectionKey);
+      try { localStorage.setItem(ORDER_KEY, JSON.stringify(saved)); } catch {}
+    };
+
+
+    // ---- drag state (one active at a time) ----
+    const LP_MS = 500;
+    const MOVE_PX = 10;
+
+    let lpTimer = null;
+    let lpStartX = 0, lpStartY = 0;
+    let lpMoved = false;
+
+    let draggingCard = null;
+    let draggingGrid = null;
+    let draggingSectionKey = null;
+
+    let ghost = null;
+    let dragOffsetX = 0, dragOffsetY = 0;
+    let originalLeft = 0;
+    let isAnimating = false;
+    let lastSwapTime = 0;
+
+    function isInteractiveTarget(t) {
+      if (!t) return false;
+      return !!t.closest(
+        ".myio-cardTitle, .myio-headRow, .myio-headTitleBtn, .myio-titleBtn," +
+        "button, a, input, textarea, select, label, .myio-btnRow, .myio-miniToggle, .myio-pcaRow"
+      );
     }
 
-    // newIndex kiszámolása a *teljes* current listában
-    let newIndex;
-    if (!insertBeforeEl) {
-      newIndex = current.length - 1; // legvégére
-    } else {
-      newIndex = current.indexOf(insertBeforeEl);
+    function pickCardEmptyAreaTarget(e) {
+      const card = e.target.closest(".myio-card");
+      if (!card) return null;
+      // csak ha üres rész: ne title, ne gombok/slider stb.
+      if (isInteractiveTarget(e.target)) return null;
+      // ha van szöveg kijelölés stb. -> ne
+      return card.dataset.cardid ? card : null;
     }
 
-    // ha a drag elem kivétele miatt "átcsúszik" az index
-    if (oldIndex !== -1 && newIndex > oldIndex) newIndex--;
+    function createGhost(card, clientX, clientY) {
+      const rect = card.getBoundingClientRect();
+      const gridRect = draggingGrid.getBoundingClientRect();
 
-    if (newIndex === oldIndex || newIndex < 0) return;
+      ghost = card.cloneNode(true);
+      ghost.classList.add("myio-ghost");
+      ghost.style.position = "fixed";
+      ghost.style.left = rect.left + "px";
+      ghost.style.top = rect.top + "px";
+      ghost.style.width = rect.width + "px";
+      ghost.style.height = rect.height + "px";
+      ghost.style.opacity = "0.72";
+      ghost.style.pointerEvents = "none";
+      ghost.style.zIndex = "10000";
+      ghost.style.boxShadow = "0 10px 26px rgba(0,0,0,0.35)";
+      ghost.style.transform = "scale(1.02)";
 
-    performReorderToIndex(newIndex);
-    lastSwapTime = Date.now();
-  }
+      ghost.style.visibility = "visible";
 
+      originalLeft = rect.left - gridRect.left;
+      dragOffsetX = clientX - rect.left;
+      dragOffsetY = clientY - rect.top;
 
-  function performReorderToIndex(newIndex) {
-    if (isAnimating) return;
-    isAnimating = true;
-  
-    const all = Array.from(draggingGrid.querySelectorAll(":scope > .myio-card"))
-      .filter(c => !!c.dataset.cardid);
-  
-    const oldIndex = all.indexOf(draggingCard);
-    if (oldIndex < 0) { isAnimating = false; return; }
-  
-    const startPos = new Map();
-    all.forEach(c => {
-      const r = c.getBoundingClientRect();
-      startPos.set(c, { x: r.left, y: r.top });
-    });
-  
-    // új sorrend
-    const reordered = all.slice();
-    reordered.splice(oldIndex, 1);
-    reordered.splice(newIndex, 0, draggingCard);
-  
-    // DOM frissítés
-    reordered.forEach(c => draggingGrid.appendChild(c));
-  
-    // FLIP anim
-    reordered.forEach(c => {
-      const s = startPos.get(c);
-      if (!s) return;
-      const e = c.getBoundingClientRect();
-      const dx = s.x - e.left;
-      const dy = s.y - e.top;
-  
-      if (dx || dy) {
-        c.style.transform = `translate(${dx}px, ${dy}px)`;
-        c.style.transition = "transform 0s";
-        c.style.zIndex = (c === draggingCard) ? "1000" : "1";
-        c.offsetHeight;
-  
-        requestAnimationFrame(() => {
-          c.style.transition = "transform 150ms ease-out";
-          c.style.transform = "translate(0,0)";
-        });
-      }
-    });
-  
-    setTimeout(() => {
-      reordered.forEach(c => {
-        c.style.transition = "";
-        c.style.transform = "";
-        c.style.zIndex = "";
+      // a ghost-on ne látszódjanak a drag handlek (ha valahol lennének)
+      ghost.querySelectorAll(".myio-dragHandle").forEach(h => (h.style.display = "none"));
+
+      document.body.appendChild(ghost);
+    }
+
+    function removeGhost() {
+      if (ghost) ghost.remove();
+      ghost = null;
+      originalLeft = 0;
+      dragOffsetX = 0;
+      dragOffsetY = 0;
+    }
+
+    function updateGhostPosition(clientX, clientY) {
+      if (!ghost || !draggingCard || !draggingGrid) return;
+
+      const gridRect = draggingGrid.getBoundingClientRect();
+      const fixedLeft = gridRect.left + originalLeft;
+
+      const minX = gridRect.left - 10;
+      const maxX = gridRect.right - ghost.offsetWidth + 10;
+      
+      const x = Math.min(maxX, Math.max(minX, clientX - dragOffsetX));
+      ghost.style.left = x + "px";
+
+      ghost.style.top = (clientY - dragOffsetY) + "px";
+
+      checkSwap();
+    }
+
+    function checkSwap() {
+      if (!draggingCard || !ghost || isAnimating || Date.now() - lastSwapTime < 120) return;
+
+      const cards = Array.from(draggingGrid.querySelectorAll(":scope > .myio-card:not(.is-dragging)"))
+        .filter(c => !!c.dataset.cardid);
+
+      if (!cards.length) return;
+
+      const g = ghost.getBoundingClientRect();
+      const gx = g.left + g.width / 2;
+      const gy = g.top + g.height / 2;
+
+      // aktuális sorrend (row-major) a DOM alapján
+      const current = Array.from(draggingGrid.querySelectorAll(":scope > .myio-card"))
+        .filter(c => !!c.dataset.cardid);
+
+      const oldIndex = current.indexOf(draggingCard);
+
+      // cél index meghatározása: ghost közepe hol lenne a többiekhez képest
+      const indexed = cards.map(c => {
+        const r = c.getBoundingClientRect();
+        return { c, cx: r.left + r.width / 2, cy: r.top + r.height / 2, top: r.top, left: r.left };
       });
-      isAnimating = false;
-    }, 170);
-  }
-  
 
-  function startDrag(card, clientX, clientY) {
-    isDraggingCard = true;
-    draggingCard = card;
-    draggingGrid = card.closest(".myio-grid");
-    const sec = card.closest(".myio-section");
-    draggingSectionKey = sec ? sec.dataset.key : null;
+      // row-major rendezés (vizuális sorrend)
+      // kis tolerancia, hogy ugyanabban a sorban maradjon
+      const rowTol = Math.max(12, g.height * 0.35);
+      indexed.sort((a, b) => (Math.abs(a.top - b.top) <= rowTol) ? (a.left - b.left) : (a.top - b.top));
 
-    if (!draggingGrid || !draggingSectionKey) {
-      draggingCard = null; draggingGrid = null; draggingSectionKey = null;
-      return;
+      // beszúrási pont: első olyan elem, ami "után" vagyunk (gy, gx alapján)
+      let insertBeforeEl = null;
+      for (const it of indexed) {
+        const sameRow = Math.abs(it.cy - gy) <= rowTol;
+        if (gy < it.cy - rowTol || (sameRow && gx < it.cx)) {
+          insertBeforeEl = it.c;
+          break;
+        }
+      }
+
+      // newIndex kiszámolása a *teljes* current listában
+      let newIndex;
+      if (!insertBeforeEl) {
+        newIndex = current.length - 1; // legvégére
+      } else {
+        newIndex = current.indexOf(insertBeforeEl);
+      }
+
+      // ha a drag elem kivétele miatt "átcsúszik" az index
+      if (oldIndex !== -1 && newIndex > oldIndex) newIndex--;
+
+      if (newIndex === oldIndex || newIndex < 0) return;
+
+      performReorderToIndex(newIndex);
+      lastSwapTime = Date.now();
     }
 
-    card.classList.add("is-dragging");
-    card.style.visibility = "hidden"; // helyét tartja, de ne duplázódjon
-    createGhost(card, clientX, clientY);
-    // scroll tiltás drag közben
-    lockScroll();
-    document.addEventListener("touchmove", preventTouchMove, { passive: false });
 
-    // csak a gridre tedd a touch-action none-t (nem html/body)
-    try { draggingGrid.style.touchAction = "none"; } catch {}
-    try { draggingCard.style.touchAction = "none"; } catch {}
-
-    // pointer capture (a pointerId-t lent tároljuk)
-    try { draggingCard.setPointerCapture(draggingCard.__myioPointerId); } catch {}
-
-    // pointer capture (mobilon kulcs)
-    try { card.setPointerCapture(card.__myioPointerId); } catch {}
-
-    // kis haptika
-    try { if (navigator.vibrate) navigator.vibrate(20); } catch { }
-  }
-
-  function endDrag() {
-    isDraggingCard = false;
-    document.removeEventListener("touchmove", preventTouchMove, { passive: false });
-    unlockScroll();
-
-    if (draggingGrid) draggingGrid.style.touchAction = "";
-    if (draggingCard) {
-      try { draggingCard.releasePointerCapture(draggingCard.__myioPointerId); } catch {}
-      draggingCard.style.touchAction = "";
-      draggingCard.__myioPointerId = null;
+    function performReorderToIndex(newIndex) {
+      if (isAnimating) return;
+      isAnimating = true;
+    
+      const all = Array.from(draggingGrid.querySelectorAll(":scope > .myio-card"))
+        .filter(c => !!c.dataset.cardid);
+    
+      const oldIndex = all.indexOf(draggingCard);
+      if (oldIndex < 0) { isAnimating = false; return; }
+    
+      const startPos = new Map();
+      all.forEach(c => {
+        const r = c.getBoundingClientRect();
+        startPos.set(c, { x: r.left, y: r.top });
+      });
+    
+      // új sorrend
+      const reordered = all.slice();
+      reordered.splice(oldIndex, 1);
+      reordered.splice(newIndex, 0, draggingCard);
+    
+      // DOM frissítés
+      reordered.forEach(c => draggingGrid.appendChild(c));
+    
+      // FLIP anim
+      reordered.forEach(c => {
+        const s = startPos.get(c);
+        if (!s) return;
+        const e = c.getBoundingClientRect();
+        const dx = s.x - e.left;
+        const dy = s.y - e.top;
+    
+        if (dx || dy) {
+          c.style.transform = `translate(${dx}px, ${dy}px)`;
+          c.style.transition = "transform 0s";
+          c.style.zIndex = (c === draggingCard) ? "1000" : "1";
+          c.offsetHeight;
+    
+          requestAnimationFrame(() => {
+            c.style.transition = "transform 150ms ease-out";
+            c.style.transform = "translate(0,0)";
+          });
+        }
+      });
+    
+      setTimeout(() => {
+        reordered.forEach(c => {
+          c.style.transition = "";
+          c.style.transform = "";
+          c.style.zIndex = "";
+        });
+        isAnimating = false;
+      }, 170);
     }
-    if (draggingCard) {
-      draggingCard.classList.remove("is-dragging");
-      draggingCard.style.visibility = "";
-    }
-    removeGhost();
+    
 
-    if (draggingSectionKey && draggingGrid) {
-      saveGridOrder(draggingSectionKey, draggingGrid);
-    }
-    // scroll vissza
-    document.documentElement.classList.remove("myio-noscroll");
-    try { document.body.style.overscrollBehavior = ""; } catch {}
+    function startDrag(card, clientX, clientY) {
+      isDraggingCard = true;
+      draggingCard = card;
+      draggingGrid = card.closest(".myio-grid");
+      const sec = card.closest(".myio-section");
+      draggingSectionKey = sec ? sec.dataset.key : null;
 
-    if (draggingCard) {
-      try { draggingCard.releasePointerCapture(draggingCard.__myioPointerId); } catch {}
-      draggingCard.style.touchAction = ""; // vissza
-      draggingCard.__myioPointerId = null;
-    }
+      if (!draggingGrid || !draggingSectionKey) {
+        draggingCard = null; draggingGrid = null; draggingSectionKey = null;
+        return;
+      }
 
-    draggingCard = null;
-    draggingGrid = null;
-    draggingSectionKey = null;
-  }
+      card.classList.add("is-dragging");
+      card.style.visibility = "hidden"; // helyét tartja, de ne duplázódjon
+      createGhost(card, clientX, clientY);
+      // scroll tiltás drag közben
+      lockScroll();
+      document.addEventListener("touchmove", preventTouchMove, { passive: false });
 
-  // ---- global pointer handlers (capture) ----
-  function clearLP() {
-    if (lpTimer) clearTimeout(lpTimer);
-    lpTimer = null;
-    lpMoved = false;
-  }
+      // csak a gridre tedd a touch-action none-t (nem html/body)
+      try { draggingGrid.style.touchAction = "none"; } catch {}
+      try { draggingCard.style.touchAction = "none"; } catch {}
 
-  document.addEventListener("pointerdown", (e) => {
-    // csak bal gomb / touch
-    if (e.pointerType === "mouse" && e.button !== 0) return;
+      // pointer capture (a pointerId-t lent tároljuk)
+      try { draggingCard.setPointerCapture(draggingCard.__myioPointerId); } catch {}
 
-    const card = pickCardEmptyAreaTarget(e);
-    if (!card) return;
-    card.__myioPointerId = e.pointerId;
-    card.style.touchAction = "none";          // drag alatt ne scrollozzon
+      // pointer capture (mobilon kulcs)
+      try { card.setPointerCapture(card.__myioPointerId); } catch {}
 
-    card.__myioPointerId = e.pointerId;
-
-    // long-press indítás
-    clearLP();
-    lpStartX = e.clientX;
-    lpStartY = e.clientY;
-    lpMoved = false;
-
-    lpTimer = setTimeout(() => {
-      // ha közben scroll / mozgás volt, ne induljon
-      if (lpMoved) return;
-      startDrag(card, e.clientX, e.clientY);
-    }, LP_MS);
-  }, { passive: true });
-
-  document.addEventListener("pointermove", (e) => {
-    // ha épp drag megy: mozgatjuk a ghostot
-    if (draggingCard) {
-      e.preventDefault();
-      updateGhostPosition(e.clientX, e.clientY);
-      return;
+      // kis haptika
+      try { if (navigator.vibrate) navigator.vibrate(20); } catch { }
     }
 
-    // long-press előtti cancel mozgásra (scroll-safe)
-    if (!lpTimer || isDraggingCard) return;
-    const dx = Math.abs(e.clientX - lpStartX);
-    const dy = Math.abs(e.clientY - lpStartY);
-    if (dx > MOVE_PX || dy > MOVE_PX) {
-      lpMoved = true;
+    function endDrag() {
+      isDraggingCard = false;
+      document.removeEventListener("touchmove", preventTouchMove, { passive: false });
+      unlockScroll();
+
+      if (draggingGrid) draggingGrid.style.touchAction = "";
+      if (draggingCard) {
+        try { draggingCard.releasePointerCapture(draggingCard.__myioPointerId); } catch {}
+        draggingCard.style.touchAction = "";
+        draggingCard.__myioPointerId = null;
+      }
+      if (draggingCard) {
+        draggingCard.classList.remove("is-dragging");
+        draggingCard.style.visibility = "";
+      }
+      removeGhost();
+
+      if (draggingSectionKey && draggingGrid) {
+        saveGridOrder(draggingSectionKey, draggingGrid);
+      }
+      // scroll vissza
+      document.documentElement.classList.remove("myio-noscroll");
+      try { document.body.style.overscrollBehavior = ""; } catch {}
+
+      if (draggingCard) {
+        try { draggingCard.releasePointerCapture(draggingCard.__myioPointerId); } catch {}
+        draggingCard.style.touchAction = ""; // vissza
+        draggingCard.__myioPointerId = null;
+      }
+
+      draggingCard = null;
+      draggingGrid = null;
+      draggingSectionKey = null;
+    }
+
+    // ---- global pointer handlers (capture) ----
+    function clearLP() {
+      if (lpTimer) clearTimeout(lpTimer);
+      lpTimer = null;
+      lpMoved = false;
+    }
+
+    document.addEventListener("pointerdown", (e) => {
+      // csak bal gomb / touch
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+
+      const card = pickCardEmptyAreaTarget(e);
+      if (!card) return;
+      card.__myioPointerId = e.pointerId;
+      card.style.touchAction = "none";          // drag alatt ne scrollozzon
+
+      card.__myioPointerId = e.pointerId;
+
+      // long-press indítás
       clearLP();
-    }
-  }, { passive: false });
+      lpStartX = e.clientX;
+      lpStartY = e.clientY;
+      lpMoved = false;
 
-  document.addEventListener("pointerup", () => {
-    clearLP();
-    if (draggingCard) endDrag();
-  }, { passive: true });
+      lpTimer = setTimeout(() => {
+        // ha közben scroll / mozgás volt, ne induljon
+        if (lpMoved) return;
+        startDrag(card, e.clientX, e.clientY);
+      }, LP_MS);
+    }, { passive: true });
 
-  document.addEventListener("pointercancel", () => {
-    clearLP();
-    if (draggingCard) endDrag();
-  }, { passive: true });
+    document.addEventListener("pointermove", (e) => {
+      // ha épp drag megy: mozgatjuk a ghostot
+      if (draggingCard) {
+        e.preventDefault();
+        updateGhostPosition(e.clientX, e.clientY);
+        return;
+      }
 
-  // biztonság: ha valami miatt elmaradna
-  window.addEventListener("blur", () => {
-    clearLP();
-    if (draggingCard) endDrag();
-  });
-}
+      // long-press előtti cancel mozgásra (scroll-safe)
+      if (!lpTimer || isDraggingCard) return;
+      const dx = Math.abs(e.clientX - lpStartX);
+      const dy = Math.abs(e.clientY - lpStartY);
+      if (dx > MOVE_PX || dy > MOVE_PX) {
+        lpMoved = true;
+        clearLP();
+      }
+    }, { passive: false });
+
+    document.addEventListener("pointerup", () => {
+      clearLP();
+      if (draggingCard) endDrag();
+    }, { passive: true });
+
+    document.addEventListener("pointercancel", () => {
+      clearLP();
+      if (draggingCard) endDrag();
+    }, { passive: true });
+
+    // biztonság: ha valami miatt elmaradna
+    window.addEventListener("blur", () => {
+      clearLP();
+      if (draggingCard) endDrag();
+    });
+  }
 
   // ---------- Header mask ----------
 

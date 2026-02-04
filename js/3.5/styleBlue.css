@@ -619,8 +619,8 @@ body {
 	  /* toggles */
 	  .myio-miniToggle{
 		position:relative;
-		width:calc(var(--ctl-h) * 1.8);
-		height:var(--ctl-h);
+		width:calc(var(--ctl-h) * 1.2);
+		height:calc(var(--ctl-h) * 0.6);
 		flex:0 0 auto;
 	  }
 	  .myio-miniToggle input{
@@ -631,7 +631,8 @@ body {
 		pointer-events:none !important;
 	  }
 	  .myio-miniTrack{
-		position:absolute; inset:0;
+		position:absolute; 
+		inset: 1px;
 		border-radius:999px;
 		background:rgba(255,255,255,.25);
 		border:1px solid rgba(255,255,255,.35);
@@ -641,7 +642,6 @@ body {
 		content:"";
 		position:absolute;
 		top:50%;
-		left:2px;
 		width:calc(var(--ctl-h) - 6px) !important;
 		height:calc(var(--ctl-h) - 6px) !important;
 		transform:translateY(-50%);
@@ -655,7 +655,7 @@ body {
 		border-color:rgba(3,151,214,.65);
 	  }
 	  .myio-miniToggle input:checked + .myio-miniTrack::before{
-		left:calc(100% - var(--ctl-h) + 2px);
+		left:calc(100% - var(--ctl-h) + 10px);
 	  }
 	  
 	  .myio-toggle{
@@ -938,6 +938,14 @@ body {
 		border-color:rgba(3,151,214,.95) !important;
 	  }
 	  
+	  .myio-menuRowAutoRefresh{ justify-content:space-between; }
+	  .myio-menuRowAutoRefresh .myio-menuAutoRefreshBtn{ flex:1 1 auto; }
+	  .myio-menuRowAutoRefresh .myio-miniToggleMenu{ flex:0 0 auto; }
+	  .myio-menuAutoRefreshBtn.is-on{
+		background:rgba(3,151,214,.95) !important;
+		border-color:rgba(3,151,214,.95) !important;
+	  }
+	  
 	  .myio-menuSub{
 		display:none;
 		margin:8px 0 0;
@@ -947,9 +955,11 @@ body {
 		background:rgba(255,255,255,.06);
 	  }
 	  .myio-menuPanel.is-boosterOpen .myio-boosterSub{ display:block; }
+	  .myio-menuPanel.is-autoRefreshOpen .myio-autoRefreshSub{ display:block; }
 	  .myio-langSub{ display:block; }
 	  .myio-boosterSub input[type="text"],
-	  .myio-langSub select{
+	  .myio-langSub select,
+	  .myio-autoRefreshSub input[type="number"]{
 		width:100%;
 		box-sizing:border-box;
 		border-radius:12px;
@@ -980,7 +990,7 @@ body {
 		border:0;
 		background:transparent;
 		cursor:pointer;
-		font-size:16px;
+		font-size:calc(20px * var(--myio-zoom));
 		line-height:1;
 		padding:0;
 	  }
@@ -1241,8 +1251,8 @@ body {
 
   .myio-mid{ display:flex; align-items:center; justify-content:center; min-width:0; }
 .myio-title{
-  color:#fff;
-  font-weight:800;
+  color:orange;
+  font-weight:500;
   letter-spacing:.02em;
   font-size:14px;
   white-space:nowrap;
@@ -1257,3 +1267,9 @@ body {
 .myio-menuSub.myio-autoSub{ display:none; }
 .myio-nav.is-menuOpen .myio-menuPanel.is-autoOpen .myio-autoSub{ display:block; }
 
+.myio-logo{
+	height: 22px;        /* header magassághoz igazítsd */
+	width: auto;
+	display: block;
+  }
+  
