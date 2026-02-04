@@ -412,7 +412,6 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   function openNinja() {
     if (!document.getElementById('ninja-modal')) {
       createNinjaModal();
-      createNinjaStyles();
     }
     const modal = document.getElementById('ninja-modal');
     const ninjaBtn = document.getElementById('ninja-menu-btn');
