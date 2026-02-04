@@ -928,6 +928,7 @@ body {
 	  .myio-menuRow{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin:10px 0; }
 	  .myio-menuRow label{ color:rgba(255,255,255,.85); font-weight:800; white-space:nowrap; }
 	  .myio-zoomRange{ width:100%; }
+  .myio-intervalSlider{ width:100%; }
 	  .myio-menuFooter{ margin-top:50px; display:flex; justify-content:flex-end; }
 	  
 	  .myio-menuRowBooster{ justify-content:space-between; }
