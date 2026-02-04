@@ -1,765 +1,862 @@
-/**
- * Ninja AI Chatbot Module
- * Integrates Anthropic Claude AI into MyIO Dashboard
- * 
- * Features:
- * - Modal chat interface
- * - Message history
- * - Loading states
- * - Theme-aware styling
- */
+// ===== NINJA AI CHAT MODULE =====
+// Anthropic Claude chatbot integráció MyIO smart home rendszerhez
 
-(function initNinjaAIChat() {
-    // CSS beinjektálása
-    const chatStyles = `
-        .myio-ninja-chat-wrapper {
-            --ninja-primary: #00d4ff;
-            --ninja-bg: rgba(15, 23, 42, 0.98);
-            --ninja-border: rgba(0, 212, 255, 0.2);
-            --ninja-text: #e2e8f0;
-            --ninja-text-secondary: rgba(226, 232, 240, 0.6);
-        }
+(function() {
+  'use strict';
 
-        .myio-ninja-chat-btn {
-            position: relative;
-            padding: 8px 12px;
-            margin-left: auto;
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.05));
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 8px;
-            color: var(--ninja-primary);
-            font-weight: 600;
-            font-size: 0.9em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
+  // Konfiguráció
+  const NINJA_CONFIG = {
+    modelName: 'claude-sonnet-4-5-20250929',
+    maxTokens: 4096,
+    systemPrompt: `Te a Ninja vagy, egy okos otthon asszisztens a MyIO smart home rendszerben. 
+Segítesz a felhasználónak az okos otthon eszközök kezelésében, magyarázol dolgokat és válaszolsz kérdésekre.
+Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
+  };
 
-        .myio-ninja-chat-btn:hover {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 212, 255, 0.1));
-            border-color: rgba(0, 212, 255, 0.5);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.15);
-        }
+  // Conversation history
+  let conversationHistory = [];
+  let isNinjaOpen = false;
 
-        .myio-ninja-chat-btn:active {
-            transform: translateY(0);
-        }
+  // API kulcs beolvasása (environment változó vagy localStorage)
+  function getAPIKey() {
+    // Próbáljuk meg a localStorage-ból
+    const stored = localStorage.getItem('ANTHROPIC_API_KEY');
+    if (stored) return stored;
+    
+    // Ha nincs, kérjük be a felhasználótól
+    return null;
+  }
 
-        .myio-ninja-icon {
-            font-size: 1.1em;
-            display: inline-block;
-            animation: ninjaBounce 0.6s ease-in-out infinite;
-        }
+  // Ninja SVG icon
+  const NINJA_ICON_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-1.85.63-3.55 1.69-4.9l1.56 1.56C6.49 9.66 6 10.78 6 12c0 3.31 2.69 6 6 6 1.22 0 2.34-.49 3.34-1.25l1.56 1.56C15.55 19.37 13.85 20 12 20zm6.31-5.9l-1.56-1.56C17.51 11.34 18 10.22 18 9c0-3.31-2.69-6-6-6-1.22 0-2.34.49-3.34 1.25L7.1 2.69C8.45 2.63 10.15 2 12 2c4.41 0 8 3.59 8 8 0 1.85-.63 3.55-1.69 4.9zM9 12c0-.83.67-1.5 1.5-1.5S12 11.17 12 12s-.67 1.5-1.5 1.5S9 12.83 9 12zm4.5 0c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5z"/>
+  </svg>`;
 
-        @keyframes ninjaBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-2px); }
-        }
-
-        .myio-ninja-chat-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9998;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .myio-ninja-chat-overlay.is-open {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .myio-ninja-chat-modal {
-            position: relative;
-            width: 90%;
-            max-width: 500px;
-            height: 70vh;
-            max-height: 600px;
-            background: var(--ninja-bg);
-            border: 1px solid var(--ninja-border);
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(0, 212, 255, 0.1);
-            animation: slideUp 0.3s ease;
-            overflow: hidden;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .myio-ninja-chat-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--ninja-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .myio-ninja-chat-header-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            font-size: 1.1em;
-            color: var(--ninja-text);
-        }
-
-        .myio-ninja-chat-header-icon {
-            font-size: 1.3em;
-        }
-
-        .myio-ninja-chat-close {
-            background: none;
-            border: none;
-            color: var(--ninja-text-secondary);
-            font-size: 1.5em;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .myio-ninja-chat-close:hover {
-            background: rgba(0, 212, 255, 0.1);
-            color: var(--ninja-primary);
-        }
-
-        .myio-ninja-chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .myio-ninja-chat-messages::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .myio-ninja-chat-messages::-webkit-scrollbar-track {
-            background: rgba(0, 212, 255, 0.05);
-            border-radius: 3px;
-        }
-
-        .myio-ninja-chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(0, 212, 255, 0.2);
-            border-radius: 3px;
-        }
-
-        .myio-ninja-chat-messages::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 212, 255, 0.4);
-        }
-
-        .myio-ninja-message {
-            display: flex;
-            gap: 8px;
-            animation: messageSlideIn 0.3s ease;
-        }
-
-        @keyframes messageSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .myio-ninja-message.is-user {
-            justify-content: flex-end;
-        }
-
-        .myio-ninja-message-content {
-            max-width: 85%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            font-size: 0.95em;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-
-        .myio-ninja-message-user .myio-ninja-message-content {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.25), rgba(0, 212, 255, 0.15));
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            color: var(--ninja-text);
-        }
-
-        .myio-ninja-message-ninja .myio-ninja-message-content {
-            background: rgba(0, 212, 255, 0.08);
-            border: 1px solid rgba(0, 212, 255, 0.15);
-            color: var(--ninja-text);
-        }
-
-        .myio-ninja-message-ninja .myio-ninja-message-content a {
-            color: var(--ninja-primary);
-            text-decoration: none;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
-            transition: border-color 0.2s;
-        }
-
-        .myio-ninja-message-ninja .myio-ninja-message-content a:hover {
-            border-bottom-color: var(--ninja-primary);
-        }
-
-        .myio-ninja-message-typing {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-
-        .myio-ninja-message-typing span {
-            width: 6px;
-            height: 6px;
-            background: var(--ninja-primary);
-            border-radius: 50%;
-            animation: typing 1.4s infinite;
-        }
-
-        .myio-ninja-message-typing span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .myio-ninja-message-typing span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes typing {
-            0%, 60%, 100% {
-                opacity: 0.3;
-                transform: translateY(0);
-            }
-            30% {
-                opacity: 1;
-                transform: translateY(-8px);
-            }
-        }
-
-        .myio-ninja-chat-input-area {
-            padding: 12px 16px;
-            border-top: 1px solid var(--ninja-border);
-            display: flex;
-            gap: 8px;
-            align-items: flex-end;
-        }
-
-        .myio-ninja-chat-input {
-            flex: 1;
-            background: rgba(0, 212, 255, 0.05);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            border-radius: 8px;
-            color: var(--ninja-text);
-            padding: 10px 12px;
-            font-size: 0.95em;
-            font-family: inherit;
-            resize: none;
-            max-height: 100px;
-            transition: border-color 0.2s;
-        }
-
-        .myio-ninja-chat-input::placeholder {
-            color: var(--ninja-text-secondary);
-        }
-
-        .myio-ninja-chat-input:focus {
-            outline: none;
-            border-color: rgba(0, 212, 255, 0.4);
-            background: rgba(0, 212, 255, 0.08);
-        }
-
-        .myio-ninja-chat-send-btn {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.15));
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            color: var(--ninja-primary);
-            font-weight: 600;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9em;
-            white-space: nowrap;
-        }
-
-        .myio-ninja-chat-send-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, rgba(0, 212, 255, 0.4), rgba(0, 212, 255, 0.25));
-            border-color: rgba(0, 212, 255, 0.5);
-            transform: translateY(-1px);
-        }
-
-        .myio-ninja-chat-send-btn:active:not(:disabled) {
-            transform: translateY(0);
-        }
-
-        .myio-ninja-chat-send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .myio-ninja-chat-welcome {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            padding: 20px;
-            text-align: center;
-            color: var(--ninja-text-secondary);
-        }
-
-        .myio-ninja-chat-welcome-icon {
-            font-size: 3em;
-            opacity: 0.6;
-        }
-
-        .myio-ninja-chat-suggestions {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-            margin-top: 12px;
-            width: 100%;
-        }
-
-        .myio-ninja-suggestion-btn {
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            color: var(--ninja-text-secondary);
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85em;
-            transition: all 0.2s ease;
-        }
-
-        .myio-ninja-suggestion-btn:hover {
-            background: rgba(0, 212, 255, 0.15);
-            border-color: rgba(0, 212, 255, 0.3);
-            color: var(--ninja-text);
-        }
-
-        .myio-ninja-error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #fca5a5;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 0.9em;
-        }
-
-        @media (max-width: 600px) {
-            .myio-ninja-chat-modal {
-                width: 95%;
-                max-height: 80vh;
-                border-radius: 12px;
-            }
-
-            .myio-ninja-message-content {
-                max-width: 90%;
-            }
-
-            .myio-ninja-chat-btn {
-                padding: 6px 10px;
-                font-size: 0.8em;
-            }
-
-            .myio-ninja-chat-header {
-                padding: 12px 16px;
-            }
-
-            .myio-ninja-chat-messages {
-                padding: 12px;
-            }
-
-            .myio-ninja-chat-input-area {
-                padding: 10px 12px;
-            }
-        }
+  // Ninja modal HTML létrehozása
+  function createNinjaModal() {
+    const modal = document.createElement('div');
+    modal.id = 'ninja-modal';
+    modal.className = 'ninja-modal';
+    modal.innerHTML = `
+      <div class="ninja-modal-content">
+        <div class="ninja-header">
+          <div class="ninja-title">
+            ${NINJA_ICON_SVG}
+            <span>Ninja AI Asszisztens</span>
+          </div>
+          <button class="ninja-close" aria-label="Bezárás">&times;</button>
+        </div>
+        
+        <div class="ninja-messages" id="ninja-messages">
+          <!-- Welcome message -->
+          <div class="ninja-message ninja-assistant">
+            <div class="ninja-avatar">${NINJA_ICON_SVG}</div>
+            <div class="ninja-bubble">
+              <p>👋 Szia! Ninja vagyok, az okos otthon asszisztensed!</p>
+              <p>Miben segíthetek?</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="ninja-suggested-prompts" id="ninja-suggestions">
+          <button class="ninja-suggestion">🏠 Milyen eszközeim vannak?</button>
+          <button class="ninja-suggestion">💡 Hogyan állíthatom be a világítást?</button>
+          <button class="ninja-suggestion">📊 Mutasd az energiafogyasztást</button>
+          <button class="ninja-suggestion">🌡️ Mi a jelenlegi hőmérséklet?</button>
+        </div>
+        
+        <div class="ninja-input-area">
+          <textarea 
+            id="ninja-input" 
+            class="ninja-input" 
+            placeholder="Írj egy üzenetet Ninjának..."
+            rows="1"
+          ></textarea>
+          <button id="ninja-send" class="ninja-send" aria-label="Küldés">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="ninja-api-setup" id="ninja-api-setup" style="display: none;">
+          <div class="ninja-api-notice">
+            <p>⚠️ Anthropic API kulcs szükséges a használathoz</p>
+            <input 
+              type="password" 
+              id="ninja-api-key-input" 
+              placeholder="sk-ant-api..."
+              class="ninja-api-input"
+            />
+            <button id="ninja-save-key" class="ninja-btn-primary">Mentés</button>
+          </div>
+        </div>
+      </div>
     `;
-
-    // CSS injektálása
-    const styleEl = document.createElement('style');
-    styleEl.textContent = chatStyles;
-    document.head.appendChild(styleEl);
-
-    // AI Chatbot kezelő
-    const NinjaChatBot = {
-        apiKey: null,
-        conversationHistory: [],
-        isOpen: false,
-        isLoading: false,
-        systemPrompt: `You are Ninja, a helpful AI assistant integrated into a smart home dashboard (MyIO). 
-You have expertise in:
-- Smart home automation and control
-- Energy monitoring and optimization
-- Device management
-- Home automation best practices
-
-Keep responses concise and friendly. You can provide guidance, troubleshooting help, and suggestions for optimizing the smart home setup.
-Always be respectful and try to understand the user's smart home context.
-When uncertain, ask clarifying questions.`,
-
-        // Inicializáció
-        init() {
-            this.loadApiKey();
-            this.setupUI();
-            this.attachEventListeners();
-        },
-
-        // API key betöltése
-        loadApiKey() {
-            // Az API kulcsot a backend adja meg - a frontend nem tároljunk szenzitív adatot
-            // Az API hívást proxy-zni kell a backendon keresztül!
-            // Ez egy demo, valós használatban a backend kezelje az API-t
-            const apiKeyElement = document.getElementById('anthropic-api-key');
-            if (apiKeyElement) {
-                this.apiKey = apiKeyElement.getAttribute('data-key');
-            }
-        },
-
-        // UI felépítése
-        setupUI() {
-            // Gomb hozzáadása a menübe
-            const menuRow = document.querySelector('.myio-menuRow.myio-menuRowNav');
-            if (!menuRow) return;
-
-            const chatBtnWrapper = document.createElement('div');
-            chatBtnWrapper.className = 'myio-ninja-chat-wrapper';
-
-            const chatBtn = document.createElement('button');
-            chatBtn.className = 'myio-ninja-chat-btn';
-            chatBtn.innerHTML = '<span class="myio-ninja-icon">🥷</span> Ninja';
-            chatBtn.title = 'Open Ninja AI Chat';
-            chatBtn.id = 'ninja-chat-open-btn';
-
-            chatBtnWrapper.appendChild(chatBtn);
-            menuRow.appendChild(chatBtnWrapper);
-
-            // Modal overlay
-            const overlay = document.createElement('div');
-            overlay.className = 'myio-ninja-chat-overlay';
-            overlay.id = 'ninja-chat-overlay';
-
-            // Modal
-            const modal = document.createElement('div');
-            modal.className = 'myio-ninja-chat-modal';
-            modal.id = 'ninja-chat-modal';
-
-            // Header
-            const header = document.createElement('div');
-            header.className = 'myio-ninja-chat-header';
-            header.innerHTML = `
-                <div class="myio-ninja-chat-header-title">
-                    <span class="myio-ninja-chat-header-icon">🥷</span>
-                    Ninja Assistant
-                </div>
-                <button class="myio-ninja-chat-close" id="ninja-chat-close-btn">✕</button>
-            `;
-
-            // Messages area
-            const messagesArea = document.createElement('div');
-            messagesArea.className = 'myio-ninja-chat-messages';
-            messagesArea.id = 'ninja-chat-messages';
-
-            // Welcome message
-            const welcome = document.createElement('div');
-            welcome.className = 'myio-ninja-chat-welcome';
-            welcome.id = 'ninja-chat-welcome';
-            welcome.innerHTML = `
-                <div class="myio-ninja-chat-welcome-icon">🥷</div>
-                <div>
-                    <strong>Hi! I'm Ninja</strong><br>
-                    Your smart home AI assistant
-                </div>
-                <div class="myio-ninja-chat-suggestions">
-                    <button class="myio-ninja-suggestion-btn" data-msg="What can you help me with?">What can you help me with?</button>
-                    <button class="myio-ninja-suggestion-btn" data-msg="How do I optimize energy use?">How do I optimize energy use?</button>
-                    <button class="myio-ninja-suggestion-btn" data-msg="Tell me about smart home automation">Tell me about automation</button>
-                </div>
-            `;
-            messagesArea.appendChild(welcome);
-
-            // Input area
-            const inputArea = document.createElement('div');
-            inputArea.className = 'myio-ninja-chat-input-area';
-
-            const input = document.createElement('textarea');
-            input.className = 'myio-ninja-chat-input';
-            input.id = 'ninja-chat-input';
-            input.placeholder = 'Ask Ninja anything...';
-            input.rows = 1;
-
-            const sendBtn = document.createElement('button');
-            sendBtn.className = 'myio-ninja-chat-send-btn';
-            sendBtn.id = 'ninja-chat-send-btn';
-            sendBtn.textContent = 'Send';
-
-            inputArea.appendChild(input);
-            inputArea.appendChild(sendBtn);
-
-            // Assembly
-            modal.appendChild(header);
-            modal.appendChild(messagesArea);
-            modal.appendChild(inputArea);
-            overlay.appendChild(modal);
-            document.body.appendChild(overlay);
-        },
-
-        // Event listenerek
-        attachEventListeners() {
-            const openBtn = document.getElementById('ninja-chat-open-btn');
-            const closeBtn = document.getElementById('ninja-chat-close-btn');
-            const overlay = document.getElementById('ninja-chat-overlay');
-            const sendBtn = document.getElementById('ninja-chat-send-btn');
-            const input = document.getElementById('ninja-chat-input');
-
-            if (openBtn) openBtn.addEventListener('click', () => this.open());
-            if (closeBtn) closeBtn.addEventListener('click', () => this.close());
-            if (overlay) overlay.addEventListener('click', (e) => {
-                if (e.target === overlay) this.close();
-            });
-            if (sendBtn) sendBtn.addEventListener('click', () => this.sendMessage());
-
-            // Enter to send (Shift+Enter for newline)
-            if (input) {
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        this.sendMessage();
-                    }
-                });
-
-                // Auto-resize textarea
-                input.addEventListener('input', () => {
-                    input.style.height = 'auto';
-                    input.style.height = Math.min(input.scrollHeight, 100) + 'px';
-                });
-            }
-
-            // Suggestion buttons
-            const suggestions = document.querySelectorAll('.myio-ninja-suggestion-btn');
-            suggestions.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const msg = btn.getAttribute('data-msg');
-                    const inputField = document.getElementById('ninja-chat-input');
-                    if (inputField) {
-                        inputField.value = msg;
-                        inputField.focus();
-                    }
-                });
-            });
-        },
-
-        // Chat megnyitása
-        open() {
-            const overlay = document.getElementById('ninja-chat-overlay');
-            if (overlay) {
-                overlay.classList.add('is-open');
-                this.isOpen = true;
-                const input = document.getElementById('ninja-chat-input');
-                if (input) setTimeout(() => input.focus(), 100);
-            }
-        },
-
-        // Chat bezárása
-        close() {
-            const overlay = document.getElementById('ninja-chat-overlay');
-            if (overlay) {
-                overlay.classList.remove('is-open');
-                this.isOpen = false;
-            }
-        },
-
-        // Üzenet küldése
-        async sendMessage() {
-            const input = document.getElementById('ninja-chat-input');
-            const message = input.value.trim();
-
-            if (!message || this.isLoading) return;
-
-            // User üzenet megjelenítése
-            this.addMessage(message, 'user');
-            input.value = '';
-            input.style.height = 'auto';
-            this.isLoading = true;
-
-            // Typing indicator
-            this.addTypingIndicator();
-
-            try {
-                const response = await this.callAPI(message);
-                this.removeTypingIndicator();
-                this.addMessage(response, 'ninja');
-                this.conversationHistory.push({ role: 'assistant', content: response });
-            } catch (error) {
-                this.removeTypingIndicator();
-                console.error('API Error:', error);
-                this.addMessage(
-                    'Sajnálom, hiba történt. Kérlek próbáld meg később. ❌',
-                    'ninja'
-                );
-            }
-
-            this.isLoading = false;
-        },
-
-        // API hívás (Anthropic)
-        async callAPI(message) {
-            this.conversationHistory.push({ role: 'user', content: message });
-
-            // FONTOS: Ez a kód a frontend-en fut, de az API kulcs biztonsága érdekében
-            // a VALÓS implementáció során ezt a backend-en keresztül kell végezni!
-            // Ez csak demó - szervezz meg egy proxy endpoint-ot!
-
-            try {
-                // Backend proxy hívása (javasolt)
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        history: this.conversationHistory
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                return data.response;
-            } catch (err) {
-                console.warn('Backend proxy nem elérhető, alternatív módszert próbálok...');
-                // Fallback: ha a backend nem támogatja, ismerje fel az API kulcsot az index.html-ből
-                return await this.callClaudeAPI(message);
-            }
-        },
-
-        // Közvetlen Claude API hívás (DEMO CSAK!)
-        async callClaudeAPI(message) {
-            // Ez szenzitív! Valós alkalmazásban a backend-en kell csinálni
-            if (!this.apiKey) {
-                throw new Error('API key not configured');
-            }
-
-            const response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: {
-                    'x-api-key': this.apiKey,
-                    'anthropic-version': '2023-06-01',
-                    'content-type': 'application/json',
-                },
-                body: JSON.stringify({
-                    model: 'claude-3-5-sonnet-20241022',
-                    max_tokens: 1024,
-                    system: this.systemPrompt,
-                    messages: this.conversationHistory
-                })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error?.message || 'API request failed');
-            }
-
-            const data = await response.json();
-            return data.content[0].text;
-        },
-
-        // Üzenet hozzáadása az UI-hez
-        addMessage(content, sender) {
-            const messagesArea = document.getElementById('ninja-chat-messages');
-            const welcome = document.getElementById('ninja-chat-welcome');
-
-            // Üdvözlés eltávolítása első üzenetkor
-            if (welcome && (this.conversationHistory.length > 0 || sender === 'user')) {
-                welcome.remove();
-            }
-
-            const msgEl = document.createElement('div');
-            msgEl.className = `myio-ninja-message myio-ninja-message-${sender}`;
-
-            const contentEl = document.createElement('div');
-            contentEl.className = 'myio-ninja-message-content';
-
-            // Markdown-szerű formázás
-            const formattedContent = content
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/\n/g, '<br>');
-
-            contentEl.innerHTML = formattedContent;
-            msgEl.appendChild(contentEl);
-            messagesArea.appendChild(msgEl);
-
-            // Auto-scroll
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-        },
-
-        // Typing indikátor
-        addTypingIndicator() {
-            const messagesArea = document.getElementById('ninja-chat-messages');
-            const typingEl = document.createElement('div');
-            typingEl.className = 'myio-ninja-message myio-ninja-message-ninja';
-            typingEl.id = 'ninja-typing-indicator';
-            typingEl.innerHTML = `
-                <div class="myio-ninja-message-content">
-                    <div class="myio-ninja-message-typing">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-            `;
-            messagesArea.appendChild(typingEl);
-            messagesArea.scrollTop = messagesArea.scrollHeight;
-        },
-
-        // Typing indikátor eltávolítása
-        removeTypingIndicator() {
-            const typing = document.getElementById('ninja-typing-indicator');
-            if (typing) typing.remove();
-        }
+    
+    document.body.appendChild(modal);
+    
+    // Event listeners
+    modal.querySelector('.ninja-close').onclick = closeNinja;
+    modal.onclick = (e) => {
+      if (e.target === modal) closeNinja();
     };
-
-    // Inicializáció
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => NinjaChatBot.init());
-    } else {
-        NinjaChatBot.init();
+    
+    // Send button
+    document.getElementById('ninja-send').onclick = sendMessage;
+    
+    // Input textarea - Enter to send, Shift+Enter for new line
+    const input = document.getElementById('ninja-input');
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+    
+    // Auto-resize textarea
+    input.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
+    
+    // Suggested prompts
+    document.querySelectorAll('.ninja-suggestion').forEach(btn => {
+      btn.onclick = function() {
+        input.value = this.textContent.trim();
+        sendMessage();
+      };
+    });
+    
+    // API key setup
+    const saveKeyBtn = document.getElementById('ninja-save-key');
+    if (saveKeyBtn) {
+      saveKeyBtn.onclick = saveAPIKey;
     }
+    
+    // Check for API key
+    checkAPIKey();
+  }
 
-    // Global export (opcionális)
-    window.NinjaChatBot = NinjaChatBot;
+  // Check if API key exists
+  function checkAPIKey() {
+    const key = getAPIKey();
+    const setupDiv = document.getElementById('ninja-api-setup');
+    const inputArea = document.querySelector('.ninja-input-area');
+    
+    if (!key) {
+      setupDiv.style.display = 'block';
+      inputArea.style.opacity = '0.5';
+      inputArea.style.pointerEvents = 'none';
+    } else {
+      setupDiv.style.display = 'none';
+      inputArea.style.opacity = '1';
+      inputArea.style.pointerEvents = 'auto';
+    }
+  }
+
+  // Save API key
+  function saveAPIKey() {
+    const input = document.getElementById('ninja-api-key-input');
+    const key = input.value.trim();
+    
+    if (key && key.startsWith('sk-ant-')) {
+      localStorage.setItem('ANTHROPIC_API_KEY', key);
+      input.value = '';
+      checkAPIKey();
+      showToast('✅ API kulcs mentve!');
+    } else {
+      showToast('❌ Érvénytelen API kulcs formátum');
+    }
+  }
+
+  // Toast notification
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'ninja-toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => toast.classList.add('show'), 10);
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }
+
+  // Add message to chat
+  function addMessage(text, isUser = false) {
+    const messagesDiv = document.getElementById('ninja-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `ninja-message ${isUser ? 'ninja-user' : 'ninja-assistant'}`;
+    
+    if (isUser) {
+      messageDiv.innerHTML = `
+        <div class="ninja-bubble">${escapeHtml(text)}</div>
+        <div class="ninja-avatar">👤</div>
+      `;
+    } else {
+      messageDiv.innerHTML = `
+        <div class="ninja-avatar">${NINJA_ICON_SVG}</div>
+        <div class="ninja-bubble">${escapeHtml(text)}</div>
+      `;
+    }
+    
+    messagesDiv.appendChild(messageDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    
+    return messageDiv;
+  }
+
+  // Add loading indicator
+  function addLoadingIndicator() {
+    const messagesDiv = document.getElementById('ninja-messages');
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'ninja-message ninja-assistant ninja-loading';
+    loadingDiv.id = 'ninja-loading';
+    loadingDiv.innerHTML = `
+      <div class="ninja-avatar">${NINJA_ICON_SVG}</div>
+      <div class="ninja-bubble">
+        <div class="ninja-typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    `;
+    messagesDiv.appendChild(loadingDiv);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  }
+
+  // Remove loading indicator
+  function removeLoadingIndicator() {
+    const loading = document.getElementById('ninja-loading');
+    if (loading) loading.remove();
+  }
+
+  // Escape HTML
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML.replace(/\n/g, '<br>');
+  }
+
+  // Get device context for AI
+  function getDeviceContext() {
+    const context = {
+      relays: [],
+      sensors: [],
+      pwm: []
+    };
+    
+    // Relays
+    if (typeof relay_description !== 'undefined' && typeof relays !== 'undefined') {
+      for (let i = 0; i < relay_description.length; i++) {
+        if (relay_description[i]) {
+          context.relays.push({
+            id: i,
+            name: relay_description[i],
+            state: relays[i] === 11 ? 'be' : 'ki'
+          });
+        }
+      }
+    }
+    
+    // PWM devices
+    if (typeof PCA_description !== 'undefined' && typeof PCA !== 'undefined') {
+      for (let i = 0; i < PCA_description.length; i++) {
+        if (PCA_description[i]) {
+          context.pwm.push({
+            id: i,
+            name: PCA_description[i],
+            value: PCA[i]
+          });
+        }
+      }
+    }
+    
+    // Sensors
+    if (typeof hum_description !== 'undefined' && typeof humidity !== 'undefined') {
+      for (let i = 0; i < hum_description.length; i++) {
+        if (hum_description[i]) {
+          context.sensors.push({
+            id: i,
+            name: hum_description[i],
+            value: humidity[i]
+          });
+        }
+      }
+    }
+    
+    return context;
+  }
+
+  // Send message to Claude API
+  async function sendMessage() {
+    const input = document.getElementById('ninja-input');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // Check API key
+    const apiKey = getAPIKey();
+    if (!apiKey) {
+      showToast('⚠️ Kérlek add meg az API kulcsot!');
+      return;
+    }
+    
+    // Clear input and hide suggestions
+    input.value = '';
+    input.style.height = 'auto';
+    document.getElementById('ninja-suggestions').style.display = 'none';
+    
+    // Add user message
+    addMessage(message, true);
+    conversationHistory.push({
+      role: 'user',
+      content: message
+    });
+    
+    // Show loading
+    addLoadingIndicator();
+    
+    try {
+      // Get device context
+      const deviceContext = getDeviceContext();
+      
+      // Build enhanced system prompt with context
+      let enhancedSystemPrompt = NINJA_CONFIG.systemPrompt;
+      if (deviceContext.relays.length > 0 || deviceContext.pwm.length > 0 || deviceContext.sensors.length > 0) {
+        enhancedSystemPrompt += `\n\nJelenlegi eszközök:\n`;
+        if (deviceContext.relays.length > 0) {
+          enhancedSystemPrompt += `\nRelék: ${JSON.stringify(deviceContext.relays, null, 2)}`;
+        }
+        if (deviceContext.pwm.length > 0) {
+          enhancedSystemPrompt += `\nPWM eszközök: ${JSON.stringify(deviceContext.pwm, null, 2)}`;
+        }
+        if (deviceContext.sensors.length > 0) {
+          enhancedSystemPrompt += `\nSzenzorok: ${JSON.stringify(deviceContext.sensors, null, 2)}`;
+        }
+      }
+      
+      // Call Anthropic API
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: NINJA_CONFIG.modelName,
+          max_tokens: NINJA_CONFIG.maxTokens,
+          system: enhancedSystemPrompt,
+          messages: conversationHistory
+        })
+      });
+      
+      removeLoadingIndicator();
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `API hiba: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const assistantMessage = data.content[0].text;
+      
+      // Add assistant response
+      addMessage(assistantMessage, false);
+      conversationHistory.push({
+        role: 'assistant',
+        content: assistantMessage
+      });
+      
+      // Limit history to last 10 messages
+      if (conversationHistory.length > 20) {
+        conversationHistory = conversationHistory.slice(-20);
+      }
+      
+    } catch (error) {
+      removeLoadingIndicator();
+      console.error('Ninja API error:', error);
+      addMessage(`❌ Hiba történt: ${error.message}`, false);
+      showToast('❌ Hiba történt a válasz feldolgozása során');
+    }
+  }
+
+  // Open Ninja modal
+  function openNinja() {
+    if (!document.getElementById('ninja-modal')) {
+      createNinjaModal();
+      createNinjaStyles();
+    }
+    const modal = document.getElementById('ninja-modal');
+    modal.style.display = 'flex';
+    isNinjaOpen = true;
+    
+    // Focus input
+    setTimeout(() => {
+      const input = document.getElementById('ninja-input');
+      if (input) input.focus();
+    }, 100);
+  }
+
+  // Close Ninja modal
+  function closeNinja() {
+    const modal = document.getElementById('ninja-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      isNinjaOpen = false;
+    }
+  }
+
+  // Toggle Ninja
+  function toggleNinja() {
+    if (isNinjaOpen) {
+      closeNinja();
+    } else {
+      openNinja();
+    }
+  }
+
+  // Create Ninja styles
+  function createNinjaStyles() {
+    if (document.getElementById('ninja-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'ninja-styles';
+    style.textContent = `
+      /* Ninja AI Chat Styles */
+      .ninja-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: ninjaFadeIn 0.2s ease-out;
+      }
+      
+      @keyframes ninjaFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      .ninja-modal-content {
+        background: linear-gradient(135deg, #1e3a5f 0%, #0f1f38 100%);
+        border-radius: 16px;
+        max-width: 800px;
+        width: 100%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        animation: ninjaSlideUp 0.3s ease-out;
+        border: 1px solid rgba(3, 151, 214, 0.3);
+      }
+      
+      @keyframes ninjaSlideUp {
+        from { transform: translateY(30px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      
+      .ninja-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid rgba(3, 151, 214, 0.3);
+        background: rgba(3, 151, 214, 0.1);
+      }
+      
+      .ninja-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #43E7F6;
+      }
+      
+      .ninja-title svg {
+        filter: drop-shadow(0 2px 4px rgba(67, 231, 246, 0.3));
+      }
+      
+      .ninja-close {
+        background: transparent;
+        border: none;
+        color: #43E7F6;
+        font-size: 32px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
+      }
+      
+      .ninja-close:hover {
+        background: rgba(67, 231, 246, 0.1);
+        transform: scale(1.1);
+      }
+      
+      .ninja-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        min-height: 300px;
+        max-height: 500px;
+      }
+      
+      .ninja-messages::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      .ninja-messages::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+      }
+      
+      .ninja-messages::-webkit-scrollbar-thumb {
+        background: rgba(3, 151, 214, 0.5);
+        border-radius: 4px;
+      }
+      
+      .ninja-messages::-webkit-scrollbar-thumb:hover {
+        background: rgba(3, 151, 214, 0.7);
+      }
+      
+      .ninja-message {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        animation: ninjaMessageIn 0.3s ease-out;
+      }
+      
+      @keyframes ninjaMessageIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .ninja-message.ninja-user {
+        flex-direction: row-reverse;
+      }
+      
+      .ninja-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #0397d6, #43E7F6);
+        box-shadow: 0 4px 12px rgba(3, 151, 214, 0.3);
+        font-size: 20px;
+      }
+      
+      .ninja-message.ninja-user .ninja-avatar {
+        background: linear-gradient(135deg, #555, #777);
+      }
+      
+      .ninja-bubble {
+        background: rgba(3, 151, 214, 0.15);
+        padding: 12px 16px;
+        border-radius: 12px;
+        max-width: 75%;
+        color: #e0e0e0;
+        line-height: 1.5;
+        border: 1px solid rgba(3, 151, 214, 0.2);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      
+      .ninja-message.ninja-user .ninja-bubble {
+        background: rgba(67, 231, 246, 0.2);
+        border-color: rgba(67, 231, 246, 0.3);
+      }
+      
+      .ninja-bubble p {
+        margin: 0 0 8px 0;
+      }
+      
+      .ninja-bubble p:last-child {
+        margin-bottom: 0;
+      }
+      
+      .ninja-typing {
+        display: flex;
+        gap: 4px;
+        padding: 4px 0;
+      }
+      
+      .ninja-typing span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #43E7F6;
+        animation: ninjaTyping 1.4s infinite;
+      }
+      
+      .ninja-typing span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      
+      .ninja-typing span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      
+      @keyframes ninjaTyping {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.7; }
+        30% { transform: translateY(-10px); opacity: 1; }
+      }
+      
+      .ninja-suggested-prompts {
+        padding: 12px 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        border-top: 1px solid rgba(3, 151, 214, 0.2);
+        background: rgba(0, 0, 0, 0.2);
+      }
+      
+      .ninja-suggestion {
+        padding: 8px 14px;
+        background: rgba(3, 151, 214, 0.2);
+        border: 1px solid rgba(3, 151, 214, 0.3);
+        border-radius: 20px;
+        color: #43E7F6;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      
+      .ninja-suggestion:hover {
+        background: rgba(3, 151, 214, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+      
+      .ninja-input-area {
+        padding: 20px;
+        border-top: 1px solid rgba(3, 151, 214, 0.3);
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        background: rgba(0, 0, 0, 0.2);
+      }
+      
+      .ninja-input {
+        flex: 1;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(3, 151, 214, 0.3);
+        border-radius: 12px;
+        color: #fff;
+        font-size: 14px;
+        font-family: inherit;
+        resize: none;
+        min-height: 44px;
+        max-height: 150px;
+        transition: all 0.2s;
+      }
+      
+      .ninja-input:focus {
+        outline: none;
+        border-color: #43E7F6;
+        background: rgba(255, 255, 255, 0.15);
+        box-shadow: 0 0 0 3px rgba(67, 231, 246, 0.1);
+      }
+      
+      .ninja-input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+      
+      .ninja-send {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0397d6, #43E7F6);
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(3, 151, 214, 0.3);
+      }
+      
+      .ninja-send:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(3, 151, 214, 0.4);
+      }
+      
+      .ninja-send:active {
+        transform: translateY(0);
+      }
+      
+      .ninja-send svg {
+        width: 20px;
+        height: 20px;
+      }
+      
+      .ninja-api-setup {
+        padding: 20px;
+        border-top: 1px solid rgba(3, 151, 214, 0.3);
+        background: rgba(252, 176, 52, 0.1);
+      }
+      
+      .ninja-api-notice {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .ninja-api-notice p {
+        margin: 0;
+        color: #fcb034;
+        font-weight: 500;
+      }
+      
+      .ninja-api-input {
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(3, 151, 214, 0.3);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 14px;
+        font-family: 'Courier New', monospace;
+      }
+      
+      .ninja-api-input:focus {
+        outline: none;
+        border-color: #43E7F6;
+        box-shadow: 0 0 0 3px rgba(67, 231, 246, 0.1);
+      }
+      
+      .ninja-btn-primary {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #0397d6, #43E7F6);
+        border: none;
+        border-radius: 8px;
+        color: #fff;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 12px rgba(3, 151, 214, 0.3);
+      }
+      
+      .ninja-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(3, 151, 214, 0.4);
+      }
+      
+      .ninja-toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(30, 58, 95, 0.95);
+        color: #fff;
+        padding: 14px 24px;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        z-index: 10001;
+        opacity: 0;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(3, 151, 214, 0.3);
+        backdrop-filter: blur(10px);
+      }
+      
+      .ninja-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      
+      /* Mobile responsive */
+      @media (max-width: 768px) {
+        .ninja-modal {
+          padding: 0;
+        }
+        
+        .ninja-modal-content {
+          max-width: 100%;
+          max-height: 100vh;
+          border-radius: 0;
+        }
+        
+        .ninja-messages {
+          max-height: calc(100vh - 300px);
+        }
+        
+        .ninja-bubble {
+          max-width: 85%;
+        }
+        
+        .ninja-suggested-prompts {
+          overflow-x: auto;
+          flex-wrap: nowrap;
+        }
+      }
+    `;
+    
+    document.head.appendChild(style);
+  }
+
+  // Add Ninja button to nav
+  function addNinjaButton() {
+    // Wait for nav to be ready
+    const checkNav = setInterval(() => {
+      const rightNav = document.querySelector('.myio-right');
+      if (rightNav && !document.getElementById('ninja-btn')) {
+        clearInterval(checkNav);
+        
+        const ninjaBtn = document.createElement('button');
+        ninjaBtn.type = 'button';
+        ninjaBtn.id = 'ninja-btn';
+        ninjaBtn.className = 'myio-iconBtn';
+        ninjaBtn.title = 'Ninja AI Asszisztens';
+        ninjaBtn.setAttribute('aria-label', 'Ninja AI');
+        ninjaBtn.innerHTML = NINJA_ICON_SVG;
+        ninjaBtn.onclick = toggleNinja;
+        
+        // Add after other buttons
+        rightNav.appendChild(ninjaBtn);
+        
+        console.log('🥷 Ninja AI Chat initialized');
+      }
+    }, 100);
+    
+    // Timeout after 5 seconds
+    setTimeout(() => clearInterval(checkNav), 5000);
+  }
+
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', addNinjaButton);
+  } else {
+    addNinjaButton();
+  }
+
+  // Export for testing
+  window.NinjaAI = {
+    open: openNinja,
+    close: closeNinja,
+    toggle: toggleNinja
+  };
+
 })();
