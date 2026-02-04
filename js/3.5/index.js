@@ -816,10 +816,11 @@ let isDraggingCard = false;
       const strokeWidth = 8;
       const handleRadius = 12;
       
-      // Hőmérséklet tartomány
-      const defaultMinTemp = 5;
-      const defaultMaxTemp = 40;
-      const minHandleDistance = 2.0;
+      // Tartomány automatikus meghatározása az egység alapján
+      const isPercent = unitText === "%" || unitText === " %";
+      const defaultMinTemp = isPercent ? 0 : 5;
+      const defaultMaxTemp = isPercent ? 100 : 40;
+      const minHandleDistance = isPercent ? 5 : 2.0;
       
       let scaleMinTemp = defaultMinTemp;
       let scaleMaxTemp = defaultMaxTemp;
