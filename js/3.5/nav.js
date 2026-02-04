@@ -277,14 +277,51 @@ function buildHeader() {
 		const autoRefreshPanel = document.createElement("div");
 		autoRefreshPanel.className = "myio-menuSub myio-autoRefreshSub";
   
+		// ---- LOGARITMIKUS SKÁLA UTILITY ----
+		const ARUtils = {
+		  // Linear (0-100) → Actual seconds
+		  // 0-50: 5-60 sec (másodpercenként)
+		  // 50-100: 60-600 sec (log skála, percenként)
+		  linearToSeconds: (linear) => {
+			const lin = Math.max(0, Math.min(100, linear));
+			if (lin <= 50) {
+			  // Lineáris: 5-60 másodperc
+			  return Math.round(5 + (lin / 50) * 55);
+			}
+			// Log: 60-600 másodperc
+			const logRange = (lin - 50) / 50; // 0-1
+			const logFactor = Math.pow(10, logRange * Math.log10(10)); // 10x range
+			return Math.round(60 * logFactor);
+		  },
+		  
+		  // Actual seconds → Linear (0-100)
+		  secondsToLinear: (sec) => {
+			sec = Math.max(5, Math.min(600, sec));
+			if (sec <= 60) {
+			  return (sec - 5) / 55 * 50;
+			}
+			const logFactor = sec / 60;
+			const logRange = Math.log10(logFactor) / Math.log10(10);
+			return 50 + logRange * 50;
+		  },
+		  
+		  // Formázás
+		  formatSeconds: (sec) => {
+			sec = Math.round(sec);
+			if (sec < 60) return sec + "s";
+			return Math.round(sec / 60) + "m";
+		  }
+		};
+
+		// ---- UI ELEMEK ----
 		const intervalRow = document.createElement("div");
 		intervalRow.style.display = "flex";
 		intervalRow.style.alignItems = "center";
-		intervalRow.style.gap = "12px";
+		intervalRow.style.gap = "10px";
 		intervalRow.style.marginBottom = "8px";
 
 		const intervalLabel = document.createElement("label");
-		intervalLabel.textContent = (typeof str_Auto_Refresh !== "undefined" ? str_Auto_Refresh : "Auto") + " (sec):";
+		intervalLabel.textContent = (typeof str_Auto_Refresh !== "undefined" ? str_Auto_Refresh : "Auto") + ":";
 		intervalLabel.style.color = "rgba(255,255,255,.85)";
 		intervalLabel.style.fontWeight = "800";
 		intervalLabel.style.whiteSpace = "nowrap";
@@ -293,40 +330,85 @@ function buildHeader() {
 		const intervalValue = document.createElement("div");
 		intervalValue.style.color = "rgba(255,255,255,.9)";
 		intervalValue.style.fontWeight = "700";
-		intervalValue.style.minWidth = "3.5em";
-		intervalValue.style.textAlign = "right";
-		intervalValue.style.fontSize = "1em";
+		intervalValue.style.minWidth = "3.2em";
+		intervalValue.style.textAlign = "center";
+		intervalValue.style.fontSize = "1.05em";
 
 		intervalRow.append(intervalLabel, intervalValue);
   
-		const intervalInput = document.createElement("input");
-		intervalInput.type = "range";
-		intervalInput.min = "5";
-		intervalInput.max = "600";
-		intervalInput.step = "5";
+		// Slider: 0-100 lineáris (logaritmikus konverzió)
+		const intervalSlider = document.createElement("input");
+		intervalSlider.type = "range";
+		intervalSlider.min = "0";
+		intervalSlider.max = "100";
+		intervalSlider.step = "1";
 		const savedVal = parseInt(localStorage.getItem(ARKEY_INTERVAL) || "30", 10);
-		intervalInput.value = String(Math.max(5, Math.min(600, savedVal)));
-		intervalInput.className = "myio-intervalSlider";
-		intervalInput.style.width = "100%";
-		intervalInput.style.boxSizing = "border-box";
-		intervalInput.style.cursor = "pointer";
+		intervalSlider.value = String(ARUtils.secondsToLinear(Math.max(5, Math.min(600, savedVal))));
+		intervalSlider.className = "myio-intervalSlider";
+		intervalSlider.style.width = "100%";
+		intervalSlider.style.boxSizing = "border-box";
+		intervalSlider.style.cursor = "pointer";
+		intervalSlider.style.flex = "1";
+
+		// Input box: közvetlen másodperc bevitel
+		const intervalInputBox = document.createElement("input");
+		intervalInputBox.type = "number";
+		intervalInputBox.min = "5";
+		intervalInputBox.max = "600";
+		intervalInputBox.step = "1";
+		intervalInputBox.value = String(Math.max(5, Math.min(600, savedVal)));
+		intervalInputBox.style.width = "60px";
+		intervalInputBox.style.boxSizing = "border-box";
+		intervalInputBox.style.borderRadius = "8px";
+		intervalInputBox.style.border = "1px solid rgba(255,255,255,.2)";
+		intervalInputBox.style.background = "rgba(255,255,255,.1)";
+		intervalInputBox.style.color = "#fff";
+		intervalInputBox.style.padding = "6px 8px";
+		intervalInputBox.style.fontWeight = "700";
+		intervalInputBox.style.fontSize = "0.9em";
+		intervalInputBox.style.textAlign = "center";
+		intervalInputBox.style.outline = "none";
   
-		const updateIntervalDisplay = () => {
-		  const val = parseInt(intervalInput.value, 10);
-		  intervalValue.textContent = val + "s";
-		  localStorage.setItem(ARKEY_INTERVAL, String(val));
-		  // Ha be van kapcsolva, újraindítjuk az időzítőt az új intervallummal
+		// Szinkronizációs függvény
+		const updateIntervalDisplay = (seconds) => {
+		  seconds = Math.max(5, Math.min(600, Math.round(seconds)));
+		  
+		  // UI frissítés
+		  intervalValue.textContent = ARUtils.formatSeconds(seconds);
+		  intervalSlider.value = String(ARUtils.secondsToLinear(seconds));
+		  intervalInputBox.value = String(seconds);
+		  
+		  // Tárolis
+		  localStorage.setItem(ARKEY_INTERVAL, String(seconds));
+		  
+		  // Ha be van kapcsolva, újraindítjuk az időzítőt
 		  if (arInput.checked) {
-			startAutoRefresh(val);
+			startAutoRefresh(seconds);
 		  }
 		};
 
-		intervalInput.addEventListener("input", updateIntervalDisplay);
-		intervalInput.addEventListener("change", updateIntervalDisplay);
+		// Slider: logaritmikus érték
+		intervalSlider.addEventListener("input", () => {
+		  const seconds = ARUtils.linearToSeconds(parseInt(intervalSlider.value, 10));
+		  updateIntervalDisplay(seconds);
+		});
+
+		// Input box: közvetlen másodperc érték
+		intervalInputBox.addEventListener("input", () => {
+		  let val = parseInt(intervalInputBox.value, 10) || 30;
+		  updateIntervalDisplay(val);
+		});
 		
-		updateIntervalDisplay();
+		// Enter-re is reagáljon az input
+		intervalInputBox.addEventListener("change", () => {
+		  let val = parseInt(intervalInputBox.value, 10) || 30;
+		  updateIntervalDisplay(val);
+		});
+		
+		// Kezdeti érték megjelenítése
+		updateIntervalDisplay(Math.max(5, Math.min(600, savedVal)));
   
-		autoRefreshPanel.append(intervalRow, intervalInput);
+		autoRefreshPanel.append(intervalRow, intervalSlider, intervalInputBox);
   
 		// ---- AUTO REFRESH FUNKCIÓK ----
 		function startAutoRefresh(sec) {
