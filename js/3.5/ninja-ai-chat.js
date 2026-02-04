@@ -27,10 +27,8 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     return null;
   }
 
-  // Ninja SVG icon
-  const NINJA_ICON_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" style="width: 20px; height: 20px;">
-    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8 0-1.85.63-3.55 1.69-4.9l1.56 1.56C6.49 9.66 6 10.78 6 12c0 3.31 2.69 6 6 6 1.22 0 2.34-.49 3.34-1.25l1.56 1.56C15.55 19.37 13.85 20 12 20zm6.31-5.9l-1.56-1.56C17.51 11.34 18 10.22 18 9c0-3.31-2.69-6-6-6-1.22 0-2.34.49-3.34 1.25L7.1 2.69C8.45 2.63 10.15 2 12 2c4.41 0 8 3.59 8 8 0 1.85-.63 3.55-1.69 4.9zM9 12c0-.83.67-1.5 1.5-1.5S12 11.17 12 12s-.67 1.5-1.5 1.5S9 12.83 9 12zm4.5 0c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5z"/>
-  </svg>`;
+  // Ninja emoji icon
+  const NINJA_ICON = '🥷';
 
   // Ninja modal HTML létrehozása
   function createNinjaModal() {
@@ -41,7 +39,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       <div class="ninja-modal-content">
         <div class="ninja-header">
           <div class="ninja-title">
-            ${NINJA_ICON_SVG}
+            <span style="font-size: 24px;">${NINJA_ICON}</span>
             <span>Ninja AI Asszisztens</span>
           </div>
           <button class="ninja-close" aria-label="Bezárás">&times;</button>
@@ -50,7 +48,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         <div class="ninja-messages" id="ninja-messages">
           <!-- Welcome message -->
           <div class="ninja-message ninja-assistant">
-            <div class="ninja-avatar">${NINJA_ICON_SVG}</div>
+            <div class="ninja-avatar">${NINJA_ICON}</div>
             <div class="ninja-bubble">
               <p>👋 Szia! Ninja vagyok, az okos otthon asszisztensed!</p>
               <p>Miben segíthetek?</p>
@@ -197,7 +195,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       `;
     } else {
       messageDiv.innerHTML = `
-        <div class="ninja-avatar">${NINJA_ICON_SVG}</div>
+        <div class="ninja-avatar">${NINJA_ICON}</div>
         <div class="ninja-bubble">${escapeHtml(text)}</div>
       `;
     }
@@ -215,7 +213,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     loadingDiv.className = 'ninja-message ninja-assistant ninja-loading';
     loadingDiv.id = 'ninja-loading';
     loadingDiv.innerHTML = `
-      <div class="ninja-avatar">${NINJA_ICON_SVG}</div>
+      <div class="ninja-avatar">${NINJA_ICON}</div>
       <div class="ninja-bubble">
         <div class="ninja-typing">
           <span></span><span></span><span></span>
@@ -817,32 +815,35 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     document.head.appendChild(style);
   }
 
-  // Add Ninja button to nav
+  // Add Ninja button to menu
   function addNinjaButton() {
-    // Wait for nav to be ready
-    const checkNav = setInterval(() => {
-      const rightNav = document.querySelector('.myio-right');
-      if (rightNav && !document.getElementById('ninja-btn')) {
-        clearInterval(checkNav);
+    // Wait for menu footer to be ready
+    const checkMenu = setInterval(() => {
+      const menuFooter = document.querySelector('.myio-menuFooter');
+      if (menuFooter && !document.getElementById('ninja-menu-btn')) {
+        clearInterval(checkMenu);
         
         const ninjaBtn = document.createElement('button');
         ninjaBtn.type = 'button';
-        ninjaBtn.id = 'ninja-btn';
-        ninjaBtn.className = 'myio-iconBtn';
-        ninjaBtn.title = 'Ninja AI Asszisztens';
-        ninjaBtn.setAttribute('aria-label', 'Ninja AI');
-        ninjaBtn.innerHTML = NINJA_ICON_SVG;
+        ninjaBtn.id = 'ninja-menu-btn';
+        ninjaBtn.className = 'myio-btn small';
+        ninjaBtn.textContent = 'AI Ninja 🥷';
         ninjaBtn.onclick = toggleNinja;
         
-        // Add after other buttons
-        rightNav.appendChild(ninjaBtn);
+        // Insert before logout button
+        const logoutBtn = menuFooter.querySelector('button');
+        if (logoutBtn) {
+          menuFooter.insertBefore(ninjaBtn, logoutBtn);
+        } else {
+          menuFooter.appendChild(ninjaBtn);
+        }
         
         console.log('🥷 Ninja AI Chat initialized');
       }
     }, 100);
     
     // Timeout after 5 seconds
-    setTimeout(() => clearInterval(checkNav), 5000);
+    setTimeout(() => clearInterval(checkMenu), 5000);
   }
 
   // Initialize when DOM is ready
