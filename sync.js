@@ -4,8 +4,6 @@ require('dotenv').config();
 console.log('🚀 MyIO Auto-Sync elindult...');
 console.log(`📁 Repo path: ${process.cwd()}`);
 
-const username = process.env.GIT_USERNAME || '';
-const token = process.env.GIT_TOKEN || '';
 
 let lastCommitHash = '';
 
