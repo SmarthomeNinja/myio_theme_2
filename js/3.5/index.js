@@ -970,6 +970,36 @@ let isDraggingCard = false;
     ensureHeaderMask();
     document.documentElement.classList.add("myio-noanim");
     ensureShell();
+    
+    // Kikapcsoljuk a szöveg kijelölést UI elemeken
+    if (!document.querySelector('#myio-no-select-style')) {
+      const style = document.createElement('style');
+      style.id = 'myio-no-select-style';
+      style.textContent = `
+        * {
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="range"],
+        input[type="email"],
+        input[type="search"],
+        input[type="password"],
+        input[type="date"],
+        input[type="time"],
+        textarea,
+        select {
+          -webkit-user-select: text;
+          -moz-user-select: text;
+          -ms-user-select: text;
+          user-select: text;
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
     cardFactories.clear();
 
