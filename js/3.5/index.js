@@ -853,7 +853,7 @@ let isDraggingCard = false;
       const modeColor = isHeating ? "#FF6B35" : "#35B8FF";
       const modeColorLight = isHeating ? "rgba(255, 107, 53, 0.2)" : "rgba(53, 184, 255, 0.2)";
       const modeIcon = isHeating ? "🔥" : "❄️";
-      const modeText = isHeating ? (str_Heating || "Heating") : (str_Cooling || "Cooling");
+      const modeText = isHeating ? (typeof str_Heating !== "undefined" ? str_Heating : "Heating") : (typeof str_Cooling !== "undefined" ? str_Cooling : "Cooling");
       
       // Container
       const thermoContainer = el("div", { class: "myio-thermo-circular" });
