@@ -753,3 +753,8 @@ function buildHeader() {
 	const myioRO = window.ResizeObserver ? new ResizeObserver(()=>enableThumbOnlyRanges(document)) : null;
 	window.addEventListener('resize', ()=>enableThumbOnlyRanges(document));
 	
+
+	// Ninja AI Chatbot betöltése
+	if (typeof host !== 'undefined') {
+		document.write('<script src="'+host+'ninja-ai-chat.js"/><\/script>');
+	}
