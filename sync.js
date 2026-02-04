@@ -47,9 +47,9 @@ function syncWithGithub() {
 }
 
 // Sync minden 15 másodpercben
-setInterval(syncWithGithub, 15000);
+setInterval(syncWithGithub, 5000);
 
-console.log('✅ Szinkronizálás minden 15 másodpercben...\n');
+console.log('✅ Szinkronizálás minden 5 másodpercben...\n');
 
 // Első szinkro azonnal
 syncWithGithub();
