@@ -914,7 +914,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         ninjaBtn.type = 'button';
         ninjaBtn.id = 'ninja-menu-btn';
         ninjaBtn.className = 'myio-btn small ninja-menu-btn';
-        ninjaBtn.innerHTML = 'AI Ninja <span style="font-size: 1.3em;">🥷</span>';
+        ninjaBtn.innerHTML = 'AI Ninja <span style="font-size: 2em;">🥷</span>';
         ninjaBtn.onclick = toggleNinja;
         
         // Append to end (right side)
