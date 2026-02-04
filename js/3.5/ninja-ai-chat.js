@@ -30,7 +30,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     
     // 3. Próbáljuk betölteni a /.env fájlból
     try {
-      const response = await fetch(host+'.env');
+      const response = await fetch('/.env');
       if (response.ok) {
         const text = await response.text();
         const match = text.match(/ANTHROPIC_API_KEY\s*=\s*(.+)/);
@@ -343,19 +343,23 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       // Get device context
       const deviceContext = getDeviceContext();
       
-      // Build enhanced system prompt with context
-      let enhancedSystemPrompt = NINJA_CONFIG.systemPrompt;
-      if (deviceContext.relays.length > 0 || deviceContext.pwm.length > 0 || deviceContext.sensors.length > 0) {
-        enhancedSystemPrompt += `\n\nJelenlegi eszközök:\n`;
+      // Build context message for first user message
+      let contextMessage = message;
+      if (conversationHistory.length === 1 && (deviceContext.relays.length > 0 || deviceContext.pwm.length > 0 || deviceContext.sensors.length > 0)) {
+        contextMessage = `Rendszer kontextus:\n`;
         if (deviceContext.relays.length > 0) {
-          enhancedSystemPrompt += `\nRelék: ${JSON.stringify(deviceContext.relays, null, 2)}`;
+          contextMessage += `Relék: ${JSON.stringify(deviceContext.relays)}\n`;
         }
         if (deviceContext.pwm.length > 0) {
-          enhancedSystemPrompt += `\nPWM eszközök: ${JSON.stringify(deviceContext.pwm, null, 2)}`;
+          contextMessage += `PWM eszközök: ${JSON.stringify(deviceContext.pwm)}\n`;
         }
         if (deviceContext.sensors.length > 0) {
-          enhancedSystemPrompt += `\nSzenzorok: ${JSON.stringify(deviceContext.sensors, null, 2)}`;
+          contextMessage += `Szenzorok: ${JSON.stringify(deviceContext.sensors)}\n`;
         }
+        contextMessage += `\nFelhasználó kérdése: ${message}`;
+        
+        // Update last message with context
+        conversationHistory[conversationHistory.length - 1].content = contextMessage;
       }
       
       // Call Anthropic API
@@ -369,7 +373,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         body: JSON.stringify({
           model: NINJA_CONFIG.modelName,
           max_tokens: NINJA_CONFIG.maxTokens,
-          system: enhancedSystemPrompt,
+          system: NINJA_CONFIG.systemPrompt,
           messages: conversationHistory
         })
       });
@@ -836,11 +840,11 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       
       /* Ninja Menu Button Styling */
       .ninja-menu-btn {
-        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffc837 100%) !important;
-        color: #fff !important;
+        background: linear-gradient(135deg, #43E7F6 0%, #64d1ff 100%) !important;
+        color: #1e3a5f !important;
         font-weight: 700 !important;
-        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4) !important;
-        border: 1px solid rgba(255, 200, 55, 0.3) !important;
+        box-shadow: 0 4px 12px rgba(67, 231, 246, 0.4) !important;
+        border: 1px solid rgba(100, 209, 255, 0.5) !important;
         transition: all 0.3s ease !important;
         position: relative !important;
         overflow: hidden !important;
@@ -853,7 +857,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         left: -50%;
         width: 200%;
         height: 200%;
-        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.4), transparent);
         transform: rotate(45deg);
         animation: ninjaShine 3s infinite;
       }
@@ -864,13 +868,28 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       }
       
       .ninja-menu-btn:hover {
-        background: linear-gradient(135deg, #ff8555 0%, #ffa73e 50%, #ffd857 100%) !important;
+        background: linear-gradient(135deg, #64d1ff 0%, #43E7F6 100%) !important;
         transform: translateY(-2px) scale(1.02) !important;
-        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6) !important;
+        box-shadow: 0 6px 20px rgba(67, 231, 246, 0.6) !important;
       }
       
       .ninja-menu-btn:active {
         transform: translateY(0) scale(0.98) !important;
+      }
+      
+      /* Text selection enabled */
+      .ninja-bubble {
+        user-select: text !important;
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+      }
+      
+      .ninja-bubble * {
+        user-select: text !important;
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
       }
     `;
     
