@@ -420,11 +420,25 @@ function buildHeader() {
 		autoRefreshPanel.append(intervalRow, sliderRow);
   
 		// ---- AUTO REFRESH FUNKCIÓK ----
+		// AJAX alapú frissítés - nem tölti újra az oldalt!
 		function startAutoRefresh(sec) {
 		  stopAutoRefresh();
 		  const ms = Math.max(5, sec) * 1000;
-		  autoRefreshTimer = setInterval(() => {
-			try { sendForm(); } catch(e){ console.warn("Auto refresh failed:", e); }
+		  autoRefreshTimer = setInterval(async () => {
+			try {
+			  // Ha MyIOLive elérhető, AJAX frissítés
+			  if (typeof MyIOLive !== 'undefined') {
+				const data = await MyIOLive.fetchSensOut();
+				if (data) {
+				  MyIOLive.updateUI(data);
+				}
+			  } else {
+				// Fallback: régi működés
+				sendForm();
+			  }
+			} catch(e) {
+			  console.warn("Auto refresh failed:", e);
+			}
 		  }, ms);
 		}
   
@@ -757,4 +771,9 @@ function buildHeader() {
 	// Ninja AI Chatbot betöltése
 	if (typeof host !== 'undefined') {
 		document.write('<script src="'+host+'ninja-ai-chat.js"/><\/script>');
+	}
+
+	// LiveUpdate modul betöltése AJAX alapú frissítéshez
+	if (typeof host !== 'undefined') {
+		document.write('<script src="'+host+'liveUpdate.js"/><\/script>');
 	}
