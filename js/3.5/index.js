@@ -816,59 +816,80 @@ let isDraggingCard = false;
       const strokeWidth = 8;
       const handleRadius = 12;
       
-      // Dinamikus skála állapot
-      // Alapértelmezett hőmérséklet tartomány
+      // Hőmérséklet tartomány
       const defaultMinTemp = 5;
       const defaultMaxTemp = 40;
-      const minHandleDistance = 2.0; // Minimum °C távolság a handlek között
-      const zoomPadding = 5; // Extra °C padding zoom módban
+      const minHandleDistance = 2.0;
       
-      // Aktuális skála (dinamikusan változhat)
       let scaleMinTemp = defaultMinTemp;
       let scaleMaxTemp = defaultMaxTemp;
       
-      // Szög számítás - ELFORGATVA 90 fokkal jobbra (nyílás alul)
-      // Eredeti: arcStart = 150 (nyílás felül-balra)
-      // Új: arcStart = 240 (nyílás alul középen)
-      const arcStart = 240;
-      const arcSpan = 240;
+      // Szög számítás - NYÍLÁS ALUL
+      // Az ív bal oldalt fent kezdődik (135°) és jobb oldalt fent végződik (45°)
+      // SVG-ben 0° = jobbra, 90° = le, 180° = balra, 270° = fel
+      // De mi -90°-kal eltoljuk a polarToCartesian-ben, így:
+      // 0° = fel, 90° = jobbra, 180° = le, 270° = balra
+      // 
+      // Nyílás alul: ív megy 225°-tól (bal-lent) -> 315°-ig (jobb-lent) - ez a HIÁNYZÓ rész
+      // Tehát az ív: -45° (=315°) -tól 225°-ig, azaz 270° ív
+      // Egyszerűbben: startAngle = -45, arcSpan = 270
       
-      // Segédfüggvények a skálához
-      const tempToAngle = (temp, minT = scaleMinTemp, maxT = scaleMaxTemp) => {
-        const ratio = (temp - minT) / (maxT - minT);
-        return arcStart + ratio * arcSpan;
+      const arcStartDeg = -45;  // Jobb oldalon lent (kb 4-5 óra pozíció)
+      const arcEndDeg = 225;    // Bal oldalon lent (kb 7-8 óra pozíció)  
+      const arcSpan = 270;      // Teljes ív hossza fokban
+      
+      const tempToAngle = (temp) => {
+        const ratio = Math.max(0, Math.min(1, (temp - scaleMinTemp) / (scaleMaxTemp - scaleMinTemp)));
+        return arcStartDeg + ratio * arcSpan;
       };
       
-      const angleToTemp = (angle, minT = scaleMinTemp, maxT = scaleMaxTemp) => {
-        let normalizedAngle = angle - arcStart;
-        if (normalizedAngle < 0) normalizedAngle += 360;
-        if (normalizedAngle > arcSpan) normalizedAngle = arcSpan;
-        const ratio = normalizedAngle / arcSpan;
-        return minT + ratio * (maxT - minT);
+      const angleToTemp = (angle) => {
+        // Normalizáljuk a szöget az ív tartományára
+        let normAngle = angle;
+        // Ha a szög kisebb mint arcStartDeg, adjunk hozzá 360-at
+        while (normAngle < arcStartDeg) normAngle += 360;
+        while (normAngle > arcStartDeg + 360) normAngle -= 360;
+        
+        // Korlátozzuk az ív tartományára
+        if (normAngle > arcEndDeg && normAngle < arcStartDeg + 360) {
+          // A "tiltott" zónában vagyunk (alul középen)
+          // Döntjük el melyik végéhez van közelebb
+          const distToStart = Math.abs(normAngle - (arcStartDeg + 360));
+          const distToEnd = Math.abs(normAngle - arcEndDeg);
+          normAngle = distToStart < distToEnd ? arcStartDeg : arcEndDeg;
+        }
+        
+        const ratio = (normAngle - arcStartDeg) / arcSpan;
+        return scaleMinTemp + Math.max(0, Math.min(1, ratio)) * (scaleMaxTemp - scaleMinTemp);
       };
       
-      const polarToCartesian = (cx, cy, r, angleDeg) => {
+      const polarToCartesian = (angleDeg) => {
         const rad = (angleDeg - 90) * Math.PI / 180;
-        return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+        return { 
+          x: cx + radius * Math.cos(rad), 
+          y: cy + radius * Math.sin(rad) 
+        };
       };
       
-      const describeArc = (cx, cy, r, startAngle, endAngle) => {
-        const start = polarToCartesian(cx, cy, r, endAngle);
-        const end = polarToCartesian(cx, cy, r, startAngle);
-        const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
-        return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+      const describeArc = (startAngle, endAngle) => {
+        if (Math.abs(endAngle - startAngle) < 0.1) return "";
+        const start = polarToCartesian(startAngle);
+        const end = polarToCartesian(endAngle);
+        const largeArc = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
+        const sweep = 1; // Mindig óramutató irányba
+        return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} ${sweep} ${end.x} ${end.y}`;
       };
       
-      // Színek meghatározása
+      // Színek
       const modeColor = isHeating ? "#FF6B35" : "#35B8FF";
-      const modeColorLight = isHeating ? "rgba(255, 107, 53, 0.2)" : "rgba(53, 184, 255, 0.2)";
+      const modeColorLight = isHeating ? "rgba(255, 107, 53, 0.3)" : "rgba(53, 184, 255, 0.3)";
       const modeIcon = isHeating ? "🔥" : "❄️";
       const modeText = isHeating ? (typeof str_Heating !== "undefined" ? str_Heating : "Heating") : (typeof str_Cooling !== "undefined" ? str_Cooling : "Cooling");
       
       // Container
       const thermoContainer = el("div", { class: "myio-thermo-circular" });
       
-      // SVG elem
+      // SVG
       const svgNS = "http://www.w3.org/2000/svg";
       const svg = document.createElementNS(svgNS, "svg");
       svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
@@ -876,246 +897,183 @@ let isDraggingCard = false;
       svg.style.width = "100%";
       svg.style.maxWidth = "200px";
       svg.style.height = "auto";
+      svg.style.touchAction = "none";
       
-      // Háttér ív (szürke)
+      // Háttér ív
       const bgArc = document.createElementNS(svgNS, "path");
-      bgArc.setAttribute("d", describeArc(cx, cy, radius, arcStart, arcStart + arcSpan));
+      bgArc.setAttribute("d", describeArc(arcStartDeg, arcEndDeg));
       bgArc.setAttribute("fill", "none");
       bgArc.setAttribute("stroke", "rgba(255,255,255,0.15)");
       bgArc.setAttribute("stroke-width", strokeWidth);
       bgArc.setAttribute("stroke-linecap", "round");
       svg.appendChild(bgArc);
       
-      // Aktív ív (ON és OFF közötti tartomány)
-      const onAngle = tempToAngle(onVal);
-      const offAngle = tempToAngle(offVal);
-      const startAngle = Math.min(onAngle, offAngle);
-      const endAngle = Math.max(onAngle, offAngle);
-      
+      // Aktív zóna ív (ON és OFF között)
       const activeArc = document.createElementNS(svgNS, "path");
-      activeArc.setAttribute("d", describeArc(cx, cy, radius, startAngle, endAngle));
       activeArc.setAttribute("fill", "none");
       activeArc.setAttribute("stroke", modeColorLight);
-      activeArc.setAttribute("stroke-width", strokeWidth + 4);
+      activeArc.setAttribute("stroke-width", strokeWidth + 2);
       activeArc.setAttribute("stroke-linecap", "round");
       svg.appendChild(activeArc);
       
-      // Aktuális érték ív (ha be van kapcsolva)
-      let currentArc = null;
-      if (isActive && sensorValue >= scaleMinTemp && sensorValue <= scaleMaxTemp) {
-        const sensorAngle = tempToAngle(sensorValue);
+      // Aktuális hőmérséklet ív (ha aktív)
+      const currentArc = document.createElementNS(svgNS, "path");
+      currentArc.setAttribute("fill", "none");
+      currentArc.setAttribute("stroke", modeColor);
+      currentArc.setAttribute("stroke-width", strokeWidth);
+      currentArc.setAttribute("stroke-linecap", "round");
+      svg.appendChild(currentArc);
+      
+      // Frissítő függvények
+      let currentOnVal = onVal;
+      let currentOffVal = offVal;
+      
+      const updateArcs = () => {
+        const onAng = tempToAngle(currentOnVal);
+        const offAng = tempToAngle(currentOffVal);
+        const minAng = Math.min(onAng, offAng);
+        const maxAng = Math.max(onAng, offAng);
         
-        currentArc = document.createElementNS(svgNS, "path");
-        currentArc.setAttribute("d", describeArc(cx, cy, radius, Math.min(onAngle, sensorAngle), Math.max(onAngle, sensorAngle)));
-        currentArc.setAttribute("fill", "none");
-        currentArc.setAttribute("stroke", modeColor);
-        currentArc.setAttribute("stroke-width", strokeWidth);
-        currentArc.setAttribute("stroke-linecap", "round");
-        svg.appendChild(currentArc);
-      }
-      
-      // Skála jelölések (tick marks) - opcionális
-      const tickGroup = document.createElementNS(svgNS, "g");
-      tickGroup.setAttribute("class", "myio-thermo-ticks");
-      svg.appendChild(tickGroup);
-      
-      const updateTicks = () => {
-        tickGroup.innerHTML = "";
-        const tickCount = 7;
-        for (let i = 0; i <= tickCount; i++) {
-          const tickTemp = scaleMinTemp + (scaleMaxTemp - scaleMinTemp) * (i / tickCount);
-          const tickAngle = tempToAngle(tickTemp);
-          const innerR = radius - strokeWidth - 2;
-          const outerR = radius - strokeWidth - 6;
-          const p1 = polarToCartesian(cx, cy, innerR, tickAngle);
-          const p2 = polarToCartesian(cx, cy, outerR, tickAngle);
-          
-          const tick = document.createElementNS(svgNS, "line");
-          tick.setAttribute("x1", p1.x);
-          tick.setAttribute("y1", p1.y);
-          tick.setAttribute("x2", p2.x);
-          tick.setAttribute("y2", p2.y);
-          tick.setAttribute("stroke", "rgba(255,255,255,0.3)");
-          tick.setAttribute("stroke-width", "1");
-          tickGroup.appendChild(tick);
+        // Aktív zóna
+        if (maxAng - minAng > 0.5) {
+          activeArc.setAttribute("d", describeArc(minAng, maxAng));
+        } else {
+          activeArc.setAttribute("d", "");
+        }
+        
+        // Aktuális hőmérséklet ív
+        if (isActive && sensorValue >= scaleMinTemp && sensorValue <= scaleMaxTemp) {
+          const sensorAng = tempToAngle(sensorValue);
+          const targetAng = tempToAngle(isHeating ? currentOnVal : currentOffVal);
+          if (Math.abs(sensorAng - targetAng) > 0.5) {
+            currentArc.setAttribute("d", describeArc(Math.min(sensorAng, targetAng), Math.max(sensorAng, targetAng)));
+          } else {
+            currentArc.setAttribute("d", "");
+          }
+        } else {
+          currentArc.setAttribute("d", "");
         }
       };
-      updateTicks();
       
-      // Drag handlerek (ON és OFF pontok)
+      updateArcs();
+      
+      // Handle-ök
       let onHandle = null;
       let offHandle = null;
       
+      const updateHandlePosition = (handle, temp) => {
+        const angle = tempToAngle(temp);
+        const pos = polarToCartesian(angle);
+        handle.setAttribute("cx", pos.x);
+        handle.setAttribute("cy", pos.y);
+      };
+      
       if (writable) {
-        const onPos = polarToCartesian(cx, cy, radius, onAngle);
-        const offPos = polarToCartesian(cx, cy, radius, offAngle);
-        
-        // ON handle
+        // ON handle (színes)
         onHandle = document.createElementNS(svgNS, "circle");
-        onHandle.setAttribute("cx", onPos.x);
-        onHandle.setAttribute("cy", onPos.y);
         onHandle.setAttribute("r", handleRadius);
         onHandle.setAttribute("fill", modeColor);
         onHandle.setAttribute("stroke", "#fff");
-        onHandle.setAttribute("stroke-width", "2");
-        onHandle.setAttribute("class", "myio-thermo-handle myio-thermo-handle-on");
-        onHandle.style.cursor = "pointer";
+        onHandle.setAttribute("stroke-width", "3");
+        onHandle.setAttribute("class", "myio-thermo-handle");
+        onHandle.style.cursor = "grab";
+        onHandle.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.3))";
+        updateHandlePosition(onHandle, onVal);
         svg.appendChild(onHandle);
         
-        // OFF handle
+        // OFF handle (szürke)
         offHandle = document.createElementNS(svgNS, "circle");
-        offHandle.setAttribute("cx", offPos.x);
-        offHandle.setAttribute("cy", offPos.y);
         offHandle.setAttribute("r", handleRadius);
-        offHandle.setAttribute("fill", "#888");
+        offHandle.setAttribute("fill", "#666");
         offHandle.setAttribute("stroke", "#fff");
-        offHandle.setAttribute("stroke-width", "2");
-        offHandle.setAttribute("class", "myio-thermo-handle myio-thermo-handle-off");
-        offHandle.style.cursor = "pointer";
+        offHandle.setAttribute("stroke-width", "3");
+        offHandle.setAttribute("class", "myio-thermo-handle");
+        offHandle.style.cursor = "grab";
+        offHandle.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.3))";
+        updateHandlePosition(offHandle, offVal);
         svg.appendChild(offHandle);
         
-        // Drag logika
-        let draggingHandle = null;
-        let currentOnVal = onVal;
-        let currentOffVal = offVal;
+        // Drag state
+        let dragging = null;
         
-        const getSvgPoint = (e) => {
+        const getAngleFromEvent = (e) => {
           const rect = svg.getBoundingClientRect();
           const clientX = e.touches ? e.touches[0].clientX : e.clientX;
           const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-          const scaleX = size / rect.width;
-          const scaleY = size / rect.height;
-          return {
-            x: (clientX - rect.left) * scaleX,
-            y: (clientY - rect.top) * scaleY
-          };
-        };
-        
-        const getAngleFromPoint = (pt) => {
-          const dx = pt.x - cx;
-          const dy = pt.y - cy;
-          let angle = Math.atan2(dy, dx) * 180 / Math.PI + 90;
-          if (angle < 0) angle += 360;
+          
+          const svgX = (clientX - rect.left) * (size / rect.width);
+          const svgY = (clientY - rect.top) * (size / rect.height);
+          
+          const dx = svgX - cx;
+          const dy = svgY - cy;
+          
+          // Szög számítás (0° = fel)
+          let angle = Math.atan2(dx, -dy) * 180 / Math.PI;
           return angle;
         };
         
-        const updateHandle = (handle, temp) => {
-          const angle = tempToAngle(temp);
-          const pos = polarToCartesian(cx, cy, radius, angle);
-          handle.setAttribute("cx", pos.x);
-          handle.setAttribute("cy", pos.y);
-        };
-        
-        const updateAllArcs = () => {
-          // Háttér ív frissítése
-          bgArc.setAttribute("d", describeArc(cx, cy, radius, arcStart, arcStart + arcSpan));
-          
-          // Aktív ív frissítése
-          const onAng = tempToAngle(currentOnVal);
-          const offAng = tempToAngle(currentOffVal);
-          const sAngle = Math.min(onAng, offAng);
-          const eAngle = Math.max(onAng, offAng);
-          activeArc.setAttribute("d", describeArc(cx, cy, radius, sAngle, eAngle));
-          
-          // Tick marks frissítése
-          updateTicks();
-        };
-        
-        // Dinamikus skálázás - ha a handlek túl közeliek, zoomolunk
-        const adjustScaleForProximity = (draggedIsOn) => {
-          const distance = Math.abs(currentOnVal - currentOffVal);
-          
-          if (distance < minHandleDistance) {
-            // Zoomolunk: a skálát úgy állítjuk, hogy a másik handle "elmeneküljön"
-            const avg = (currentOnVal + currentOffVal) / 2;
-            const halfSpan = minHandleDistance * 3; // A zoom mértéke
-            
-            scaleMinTemp = Math.max(defaultMinTemp, avg - halfSpan);
-            scaleMaxTemp = Math.min(defaultMaxTemp, avg + halfSpan);
-            
-            // Ha elértük a határokat, kompenzáljunk
-            if (scaleMinTemp === defaultMinTemp) {
-              scaleMaxTemp = Math.min(defaultMaxTemp, scaleMinTemp + halfSpan * 2);
-            }
-            if (scaleMaxTemp === defaultMaxTemp) {
-              scaleMinTemp = Math.max(defaultMinTemp, scaleMaxTemp - halfSpan * 2);
-            }
-          } else if (distance > minHandleDistance * 2) {
-            // Visszaállítjuk az alapértelmezett skálát, ha már elég távol vannak
-            scaleMinTemp = defaultMinTemp;
-            scaleMaxTemp = defaultMaxTemp;
-          }
-          
-          // Frissítjük mindkét handle pozícióját az új skálán
-          updateHandle(onHandle, currentOnVal);
-          updateHandle(offHandle, currentOffVal);
-          updateAllArcs();
-        };
-        
-        const startDrag = (handle, isOn) => (e) => {
+        const startDrag = (handle, isOnHandle) => (e) => {
           e.preventDefault();
           e.stopPropagation();
-          draggingHandle = { handle, isOn };
-          handle.setAttribute("r", handleRadius + 4);
+          dragging = { handle, isOn: isOnHandle };
+          handle.style.cursor = "grabbing";
+          handle.setAttribute("r", handleRadius + 3);
         };
         
         const doDrag = (e) => {
-          if (!draggingHandle) return;
+          if (!dragging) return;
           e.preventDefault();
           
-          const pt = getSvgPoint(e);
-          let angle = getAngleFromPoint(pt);
+          const angle = getAngleFromEvent(e);
+          let temp = angleToTemp(angle);
+          temp = Math.round(temp * 10) / 10;
+          temp = Math.max(defaultMinTemp, Math.min(defaultMaxTemp, temp));
           
-          // Korlátozás az ív tartományára (240-480 fokos tartomány)
-          // Figyelembe vesszük, hogy az ív átlépi a 360 fokot
-          let normalizedAngle = angle;
-          if (normalizedAngle < arcStart && normalizedAngle > arcStart - 60) {
-            normalizedAngle = arcStart;
-          } else if (normalizedAngle < arcStart - 60) {
-            normalizedAngle = normalizedAngle + 360;
-          }
-          if (normalizedAngle > arcStart + arcSpan) {
-            normalizedAngle = arcStart + arcSpan;
-          }
-          if (normalizedAngle < arcStart) {
-            normalizedAngle = arcStart;
-          }
-          
-          const temp = Math.round(angleToTemp(normalizedAngle) * 10) / 10;
-          
-          // Korlátozás az abszolút min/max értékekre
-          const clampedTemp = Math.max(defaultMinTemp, Math.min(defaultMaxTemp, temp));
-          
-          if (draggingHandle.isOn) {
-            currentOnVal = clampedTemp;
-            updateHandle(draggingHandle.handle, clampedTemp);
+          if (dragging.isOn) {
+            currentOnVal = temp;
+            updateHandlePosition(onHandle, temp);
           } else {
-            currentOffVal = clampedTemp;
-            updateHandle(draggingHandle.handle, clampedTemp);
+            currentOffVal = temp;
+            updateHandlePosition(offHandle, temp);
           }
           
-          // Dinamikus skálázás
-          adjustScaleForProximity(draggingHandle.isOn);
+          // Dinamikus zoom ha túl közel vannak
+          const distance = Math.abs(currentOnVal - currentOffVal);
+          if (distance < minHandleDistance) {
+            const center = (currentOnVal + currentOffVal) / 2;
+            const zoomRange = minHandleDistance * 4;
+            scaleMinTemp = Math.max(defaultMinTemp, center - zoomRange);
+            scaleMaxTemp = Math.min(defaultMaxTemp, center + zoomRange);
+            
+            // Háttér ív újrarajzolása nem kell, az marad
+            // De a handle pozíciókat frissíteni kell az új skálán
+            updateHandlePosition(onHandle, currentOnVal);
+            updateHandlePosition(offHandle, currentOffVal);
+          }
           
-          // Frissítjük a kijelzőt
+          updateArcs();
+          
+          // Kijelző frissítése
           const newAvg = (currentOnVal + currentOffVal) / 2;
           const newHyst = Math.abs(currentOffVal - currentOnVal) / 2;
-          avgDisplay.textContent = newAvg.toFixed(1).replace(".", ",");
+          avgDisplay.innerHTML = `${Math.floor(newAvg)}<span class="decimal">,${Math.round((newAvg - Math.floor(newAvg)) * 10)}</span><span class="unit">°</span>`;
           hystDisplay.textContent = `±${newHyst.toFixed(1)} ${unitText}`;
         };
         
         const endDrag = () => {
-          if (!draggingHandle) return;
-          draggingHandle.handle.setAttribute("r", handleRadius);
+          if (!dragging) return;
           
-          // Visszaállítjuk az alapértelmezett skálát
+          dragging.handle.style.cursor = "grab";
+          dragging.handle.setAttribute("r", handleRadius);
+          
+          // Visszaállítjuk az alap skálát
           scaleMinTemp = defaultMinTemp;
           scaleMaxTemp = defaultMaxTemp;
-          updateHandle(onHandle, currentOnVal);
-          updateHandle(offHandle, currentOffVal);
-          updateAllArcs();
+          updateHandlePosition(onHandle, currentOnVal);
+          updateHandlePosition(offHandle, currentOffVal);
+          updateArcs();
           
-          // Küldjük el a változásokat
+          // Értékek küldése
           try {
             const onInput = document.createElement("input");
             onInput.name = onName;
@@ -1130,47 +1088,47 @@ let isDraggingCard = false;
             console.error("Thermostat update error:", err);
           }
           
-          draggingHandle = null;
+          dragging = null;
         };
         
-        // Event listeners a handlekhez
+        // Event listeners
         onHandle.addEventListener("mousedown", startDrag(onHandle, true));
         onHandle.addEventListener("touchstart", startDrag(onHandle, true), { passive: false });
         offHandle.addEventListener("mousedown", startDrag(offHandle, false));
         offHandle.addEventListener("touchstart", startDrag(offHandle, false), { passive: false });
         
+        svg.addEventListener("mousemove", doDrag);
+        svg.addEventListener("touchmove", doDrag, { passive: false });
         document.addEventListener("mousemove", doDrag);
         document.addEventListener("touchmove", doDrag, { passive: false });
+        
+        svg.addEventListener("mouseup", endDrag);
+        svg.addEventListener("touchend", endDrag);
         document.addEventListener("mouseup", endDrag);
         document.addEventListener("touchend", endDrag);
+        svg.addEventListener("mouseleave", endDrag);
       }
       
       thermoContainer.appendChild(svg);
       
-      // Középső kijelző (SVG-n kívül, pozícionálva)
+      // Középső kijelző
       const centerDisplay = el("div", { class: "myio-thermo-center" });
       
-      // Mód kijelző (fűtés/hűtés)
       const modeDisplay = el("div", { 
         class: "myio-thermo-mode" + (isActive ? " active" : ""),
-        style: `color: ${isActive ? modeColor : "#999"}`
+        style: `color: ${isActive ? modeColor : "#888"}`
       });
       modeDisplay.textContent = isActive ? modeText : (typeof str_Off !== "undefined" ? str_Off : "Off");
       centerDisplay.appendChild(modeDisplay);
       
-      // Átlag hőmérséklet nagy számmal
       const avgDisplay = el("div", { class: "myio-thermo-avgtemp" });
-      const avgWhole = Math.floor(avgTemp);
-      const avgDecimal = Math.round((avgTemp - avgWhole) * 10);
-      avgDisplay.innerHTML = `${avgWhole}<span class="decimal">,${avgDecimal}</span><span class="unit">°</span>`;
+      avgDisplay.innerHTML = `${Math.floor(avgTemp)}<span class="decimal">,${Math.round((avgTemp - Math.floor(avgTemp)) * 10)}</span><span class="unit">°</span>`;
       centerDisplay.appendChild(avgDisplay);
       
-      // Hiszterézis kijelző
       const hystDisplay = el("div", { class: "myio-thermo-hyst" });
       hystDisplay.textContent = `±${hysteresis.toFixed(1)} ${unitText}`;
       centerDisplay.appendChild(hystDisplay);
       
-      // Szenzor érték
       const sensorDisplay = el("div", { class: "myio-thermo-sensor" });
       sensorDisplay.innerHTML = `<span class="icon">${isActive ? modeIcon : "🌡️"}</span> ${sensorValue.toFixed(1)} ${unitText}`;
       centerDisplay.appendChild(sensorDisplay);
@@ -1184,69 +1142,54 @@ let isDraggingCard = false;
         const minusBtn = el("button", { class: "myio-thermo-btn minus", text: "−" });
         const plusBtn = el("button", { class: "myio-thermo-btn plus", text: "+" });
         
-        let currentOn = onVal;
-        let currentOff = offVal;
-        
         const adjustTemp = (delta) => {
-          currentOn = Math.round((currentOn + delta) * 10) / 10;
-          currentOff = Math.round((currentOff + delta) * 10) / 10;
+          currentOnVal = Math.round((currentOnVal + delta) * 10) / 10;
+          currentOffVal = Math.round((currentOffVal + delta) * 10) / 10;
           
           // Korlátozás
-          if (currentOn < defaultMinTemp) { currentOn = defaultMinTemp; currentOff = currentOff - delta + (defaultMinTemp - (currentOn - delta)); }
-          if (currentOff > defaultMaxTemp) { currentOff = defaultMaxTemp; currentOn = currentOn - delta + (defaultMaxTemp - (currentOff - delta)); }
-          if (currentOn > defaultMaxTemp) currentOn = defaultMaxTemp;
-          if (currentOff < defaultMinTemp) currentOff = defaultMinTemp;
+          if (currentOnVal < defaultMinTemp || currentOffVal < defaultMinTemp) {
+            const minVal = Math.min(currentOnVal, currentOffVal);
+            const shift = defaultMinTemp - minVal;
+            currentOnVal += shift;
+            currentOffVal += shift;
+          }
+          if (currentOnVal > defaultMaxTemp || currentOffVal > defaultMaxTemp) {
+            const maxVal = Math.max(currentOnVal, currentOffVal);
+            const shift = maxVal - defaultMaxTemp;
+            currentOnVal -= shift;
+            currentOffVal -= shift;
+          }
           
           // Frissítés
-          const newAvg = (currentOn + currentOff) / 2;
-          const newHyst = Math.abs(currentOff - currentOn) / 2;
+          if (onHandle && offHandle) {
+            updateHandlePosition(onHandle, currentOnVal);
+            updateHandlePosition(offHandle, currentOffVal);
+          }
+          updateArcs();
+          
+          const newAvg = (currentOnVal + currentOffVal) / 2;
+          const newHyst = Math.abs(currentOffVal - currentOnVal) / 2;
           avgDisplay.innerHTML = `${Math.floor(newAvg)}<span class="decimal">,${Math.round((newAvg - Math.floor(newAvg)) * 10)}</span><span class="unit">°</span>`;
           hystDisplay.textContent = `±${newHyst.toFixed(1)} ${unitText}`;
           
-          // Handle pozíciók frissítése
-          if (onHandle && offHandle) {
-            const onAngle = tempToAngle(currentOn);
-            const offAngle = tempToAngle(currentOff);
-            const onPos = polarToCartesian(cx, cy, radius, onAngle);
-            const offPos = polarToCartesian(cx, cy, radius, offAngle);
-            onHandle.setAttribute("cx", onPos.x);
-            onHandle.setAttribute("cy", onPos.y);
-            offHandle.setAttribute("cx", offPos.x);
-            offHandle.setAttribute("cy", offPos.y);
-            
-            // Active arc frissítése
-            const sAngle = Math.min(onAngle, offAngle);
-            const eAngle = Math.max(onAngle, offAngle);
-            activeArc.setAttribute("d", describeArc(cx, cy, radius, sAngle, eAngle));
-          }
-          
-          // Küldjük el a változásokat
+          // Értékek küldése
           try {
             const onInput = document.createElement("input");
             onInput.name = onName;
-            onInput.value = String(Math.round(currentOn * 10));
+            onInput.value = String(Math.round(currentOnVal * 10));
             changed(onInput, onInput.name, 10);
             
             const offInput = document.createElement("input");
             offInput.name = offName;
-            offInput.value = String(Math.round(currentOff * 10));
+            offInput.value = String(Math.round(currentOffVal * 10));
             changed(offInput, offInput.name, 10);
           } catch (err) {
             console.error("Thermostat adjust error:", err);
           }
         };
         
-        minusBtn.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          adjustTemp(-0.1);
-        });
-        
-        plusBtn.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          adjustTemp(0.1);
-        });
+        minusBtn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); adjustTemp(-0.1); });
+        plusBtn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); adjustTemp(0.1); });
         
         btnContainer.appendChild(minusBtn);
         btnContainer.appendChild(plusBtn);
