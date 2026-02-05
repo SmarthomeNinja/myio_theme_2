@@ -986,7 +986,7 @@ let isDraggingCard = false;
         avgDisplay.innerHTML = `${Math.floor(newAvg)}<span class="decimal">,${Math.round((newAvg - Math.floor(newAvg)) * 10)}</span><span class="unit">°</span>`;
         hystDisplay.textContent = `±${newHyst.toFixed(1)} ${unitText}`;
         sensorDisplay.innerHTML = `<span class="icon" `;
-        if(!isActive)sensorDisplay.innerHTML +='style="transform: rotate(90deg)"';        
+        if(!isActive)sensorDisplay.innerHTML +='transform= rotate(90deg)';        
         sensorDisplay.innerHTML += `>${getModeIcon(currentIsHeating, isActive)}</span> ${sensorValue.toFixed(1)} ${unitText}`;
       }
       
