@@ -118,6 +118,61 @@ function changed(obj, name = obj.name, multiplier = 1, forceRefresh = getCookie(
 		}
 	}
 }
+function changedPair(obj1, name1 = obj1.name,obj2, name2 = obj2.name, multiplier = 1, forceRefresh = getCookie("AutoRefresh"),areYouSure=false) {
+	var _confirmed = true;
+	if (areYouSure) {
+		if (!confirm(str_AreYouSure)) {
+			_confirmed = false;
+		  }
+	}
+	if (_confirmed) {
+		if (multiplier == 1) {
+			value1 = obj1.value;
+			value2 = obj2.value;
+		} else {
+			value1 = Math.round(obj1.value * multiplier);
+			value2 = Math.round(obj2.value * multiplier);
+		}
+		if (name1.startsWith("fet*")
+			|| name1.startsWith("fetM")
+			|| name1.startsWith("PCA*")
+			|| name1.startsWith("PCAMIN")
+			|| name1.startsWith("PCAMAX")
+		) {
+			value1 = Math.round(value1 * 255 / 100);
+		}
+		
+		// Index oldalon AJAX parancsküldés használata (ha MyIOLive elérhető)
+		const isIndexPage = window.location.pathname == "/" || window.location.pathname == "/index";
+		
+		if (isIndexPage && typeof MyIOLive !== 'undefined') {
+			// AJAX GET parancsküldés - nem tölti újra az oldalt!
+			MyIOLive.sendCommand(name1 + "=" + value1 + "&" + name2 + "=" +value2, true);
+		} else if (getCookie("AutoRefresh") == "1"
+			|| forceRefresh == "1"
+			|| forceRefresh == 1
+			|| name == "ReInit"
+			|| window.location.pathname == "/"
+			|| window.location.pathname == "/index"
+			|| window.location.pathname == "/chart"
+			|| window.location.pathname == "/log"
+			|| window.location.pathname == "/users"
+			|| window.location.pathname == "/config"
+			|| window.location.pathname == "/timer"
+		) {
+			document.getElementById("sending").name = name;
+			document.getElementById("sending").value = value;
+			sendForm();
+		} else {
+			sendXMLHttp(name + "=" + value);
+		}
+		if (obj.parentNode.parentNode.getAttribute("name1") != null) {
+			visibleItem(obj.parentNode.parentNode.getAttribute("name1"), obj.parentNode.parentNode.getAttribute("name2"));
+		} else if (obj.getAttribute("name1") != null) {
+			visibleItem(obj.getAttribute("name1"), obj.getAttribute("name2"));
+		}
+	}
+}
 function changedSens(obj){
 	if(obj.name=='thsens*'){
 		document.getElementById("sending").name = obj.name+thsens;
