@@ -334,7 +334,7 @@
     }
     if (!any && hasRelays) {
       for (let i = 0; i < relays.length; i++) {
-        if (thermoActivator[i] > 0  && thermoActivator[i] <255 && relay_description && relay_description[i + 1] != null) { any = true; break; }
+        if (thermoActivator[i] > 0  && thermoActivator[i] < 255 && relay_description && relay_description[i + 1] != null) { any = true; break; }
       }
     }
     if (!any) return;
@@ -344,7 +344,7 @@
     // PCA thermo
     if (hasPCA) {
       for (let i = 0; i < PCA.length; i++) {
-        if (PCA_thermoActivator[i] == 0 || !(PCARead[i] || PCAWrite[i]) || !PCA_description || PCA_description[i + 1] == null) continue;
+        if (PCA_thermoActivator[i] == 0 || PCA_thermoActivator[i] == 255 ||!(PCARead[i] || PCAWrite[i]) || !PCA_description || PCA_description[i + 1] == null) continue;
 
         const id = `thermo:pca:${i + 1}`;
         const makeFn = () => {
@@ -379,7 +379,7 @@
     // Relay thermo
     if (hasRelays) {
       for (let i = 0; i < relays.length; i++) {
-        if (thermoActivator[i] == 0 || !relay_description || relay_description[i + 1] == null) continue;
+        if (thermoActivator[i] == 0 || thermoActivator[i] == 255|| !relay_description || relay_description[i + 1] == null) continue;
 
         const id = `thermo:relay:${i + 1}`;
         const makeFn = () => {
