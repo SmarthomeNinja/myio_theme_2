@@ -2,7 +2,24 @@
    Modulok: utils, storage, cards, sections, renderers, thermo, reorder, settings-modal
    CSS: styles.css (külön betöltendő, vagy ide injektálva)
 */
+// Stíluslap betöltése: host + "styles.css"
+(() => {
+  try {
+    const scriptURL = new URL(document.currentScript?.src || window.location.href, window.location.href);
+    const host = scriptURL.origin + '/';
+    const href = host + 'styles.css';
 
+    if (!document.querySelector(`link[rel="stylesheet"][href="${href}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      link.onerror = () => console.error('Nem sikerült betölteni a styles.css fájlt:', href);
+      document.head.appendChild(link);
+    }
+  } catch (e) {
+    console.error('Stíluslap betöltése közben hiba történt:', e);
+  }
+})();
 let isDraggingCard = false;
 
 // Dinamikus modul betöltő
