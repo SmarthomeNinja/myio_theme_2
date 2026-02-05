@@ -290,7 +290,7 @@ const MyIOLive = (function() {
     }
     if(isThermoCard) {
       log('Thermo card detected in relays, ensure thermo-specific UI elements are updated');
-      renderThermo();
+      
     }
   }
   
