@@ -28,66 +28,26 @@
 
   function createSunIcon(sunrise = true) {
     return svgIcon((svg) => {
-      // Színek - minimalista paletta
-      const sunColor = "#FF9500"; // meleg narancs
-      const horizonColor = "#8B4513"; // földbarna horizont
-      const rayColor = "#FFB347"; // világosabb sárga
-      const arrowColor = "#333333"; // sötét szürke nyíl
+      // Egyetlen path mindennel - maximálisan tömör
+      const d = sunrise ? 
+        // ↑ napkelte: horizont, nap, felnyíl
+        "M4,18 L20,18 M12,14 a4,4 0 0,1 0,-4 M12,6 L12,10 M8,8 L10,10 M16,8 L14,10 M9,4 L12,1 L15,4" :
+        // ↓ naplemente: horizont, nap, lenyíl  
+        "M4,18 L20,18 M12,14 a4,4 0 0,0 0,4 M12,6 L12,10 M8,8 L10,10 M16,8 L14,10 M9,1 L12,4 L15,1";
       
-      // Horizont vonal (enyhén ívelt)
-      const horizon = document.createElementNS(SVG_NS, "path");
-      horizon.setAttribute("d", "M4,18 Q12,16 20,18");
-      horizon.setAttribute("stroke", horizonColor);
-      horizon.setAttribute("stroke-width", "1.5");
-      horizon.setAttribute("fill", "none");
-      svg.appendChild(horizon);
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", d);
+      path.setAttribute("stroke", "#2C3E50");
+      path.setAttribute("stroke-width", "1.5");
+      path.setAttribute("stroke-linecap", "round");
+      path.setAttribute("fill", "none");
+      svg.appendChild(path);
       
-      // Nap (félkör a horizont felett/alatt)
+      // Nap kitöltés
       const sun = document.createElementNS(SVG_NS, "path");
-      if (sunrise) {
-        // Napkelte: nap a horizont felett
-        sun.setAttribute("d", "M12,14 a4,4 0 1,0 0,1 z");
-        sun.setAttribute("transform", "translate(0, -2)");
-      } else {
-        // Naplemente: nap a horizont alatt
-        sun.setAttribute("d", "M12,22 a4,4 0 1,1 0,-1 z");
-        sun.setAttribute("transform", "translate(0, 2)");
-      }
-      sun.setAttribute("fill", sunColor);
+      sun.setAttribute("d", sunrise ? "M12,14 a4,4 0 0,1 0,-4" : "M12,14 a4,4 0 0,0 0,4");
+      sun.setAttribute("fill", "#F39C12");
       svg.appendChild(sun);
-      
-      // Egyszerű sugarak
-      const rays = [
-        [12, sunrise ? 10 : 14, 12, sunrise ? 12 : 16], // középső
-        [8, sunrise ? 11 : 15, 9, sunrise ? 13 : 17],   // bal
-        [16, sunrise ? 11 : 15, 15, sunrise ? 13 : 17], // jobb
-      ];
-      
-      rays.forEach(([x1, y1, x2, y2]) => {
-        const ray = document.createElementNS(SVG_NS, "line");
-        ray.setAttribute("x1", x1.toString());
-        ray.setAttribute("y1", y1.toString());
-        ray.setAttribute("x2", x2.toString());
-        ray.setAttribute("y2", y2.toString());
-        ray.setAttribute("stroke", rayColor);
-        ray.setAttribute("stroke-width", "1");
-        ray.setAttribute("stroke-linecap", "round");
-        svg.appendChild(ray);
-      });
-      
-      // Tiszta, minimalista nyíl
-      const arrow = document.createElementNS(SVG_NS, "path");
-      if (sunrise) {
-        arrow.setAttribute("d", "M9,5 L12,2 L15,5 M12,2 L12,7");
-      } else {
-        arrow.setAttribute("d", "M9,7 L12,10 L15,7 M12,10 L12,5");
-      }
-      arrow.setAttribute("stroke", arrowColor);
-      arrow.setAttribute("stroke-width", "1.5");
-      arrow.setAttribute("stroke-linecap", "round");
-      arrow.setAttribute("stroke-linejoin", "round");
-      arrow.setAttribute("fill", "none");
-      svg.appendChild(arrow);
     });
   }
   
