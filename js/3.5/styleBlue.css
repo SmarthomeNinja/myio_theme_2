@@ -1006,9 +1006,9 @@ body {
 		text-shadow:0 2px 2px rgba(50,50,50,.45);
 	  }
 	  .myio-card.myio-on .myio-favInTitle:not(.is-fav){
-		
+		color:white;
 		-webkit-text-stroke:1px rgba(50,50,50,.85);
-		text-stroke:1px rgba(50,50,50,.85);
+		text-stroke:2px rgba(0, 0, 0, 0.85);
 		text-shadow:none;
 	  }
 	  .myio-card.myio-on .myio-favInTitle.is-fav{
