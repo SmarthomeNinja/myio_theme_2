@@ -846,7 +846,7 @@ let isDraggingCard = false;
         } else {
           // °C-nál: min 2x, max 10x
           // Lineáris: 10 - (fullHyst * 0.8), de min 2
-          multiplier = Math.max(2, Math.min(10, 10 - fullHysteresis * 0.8));
+          multiplier = Math.max(2, Math.min(5, 5 - fullHysteresis * 0.8));
         }
         
         // A skála = teljes hiszterézis * szorzó
