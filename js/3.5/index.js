@@ -1240,7 +1240,7 @@ let isDraggingCard = false;
       .myio-thermo-avgtemp .decimal {
         font-size: calc(24px * var(--myio-zoom));
         vertical-align: top;
-        margin-left: -2px;
+        margin-left: 0px;
       }
       .myio-thermo-avgtemp .unit {
         font-size: calc(18px * var(--myio-zoom));
