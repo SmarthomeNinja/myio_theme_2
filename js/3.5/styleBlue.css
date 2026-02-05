@@ -987,7 +987,7 @@ body {
 		gap:6px;
 	  }
 	  .myio-favInTitle{
-		color:rgba(200,200,200);
+		color:rgba(240,240,240);
 		margin-right:8px;
 		border:0;
 		background:transparent;
@@ -995,7 +995,8 @@ body {
 		font-size:calc(20px * var(--myio-zoom));
 		line-height:1;
 		padding:0;
-		text-shadow:2px 2px 3px rgba(0, 0, 0)
+		-webkit-text-stroke:1px rgba(50,50,50,.85);
+		text-shadow:0 2px 2px rgba(0, 0, 0, 0.45)
 	  }
 	  .myio-headTitleBtn .myio-favInTitle{ margin-right:6px; }
 	  .myio-favInTitle.is-fav{
