@@ -79,14 +79,14 @@
   
   function sunsetSVG() {
     return svgIcon((svg) => {
-      // sun (filled half circle)
+      // ---- sun (filled half circle) ----
       const sun = document.createElementNS(SVG_NS, "path");
       sun.setAttribute("d", "M6 14a6 6 0 0 1 12 0Z");
       sun.setAttribute("fill", "currentColor");
       sun.setAttribute("stroke", "none");
       svg.appendChild(sun);
   
-      // horizon small segments (left/right)
+      // ---- horizon small segments (left/right) ----
       [
         ["2", "14", "5", "14"],
         ["19", "14", "22", "14"],
@@ -97,13 +97,13 @@
         svg.appendChild(l);
       });
   
-      // rays
+      // ---- symmetric rays (same as sunrise) ----
       const rays = [
         [12, 2.5, 12, 5.5],
-        [6.2, 6.8, 7.8, 8.4],
-        [17.8, 8.4, 19.4, 6.8],
-        [2.6, 10, 5.0, 10],
-        [19.0, 10, 21.4, 10],
+        [6.6, 5.8, 8.2, 7.4],
+        [17.4, 5.8, 15.8, 7.4],
+        [3.0, 10.0, 5.4, 10.0],
+        [21.0, 10.0, 18.6, 10.0],
       ];
       rays.forEach(([x1,y1,x2,y2]) => {
         const r = document.createElementNS(SVG_NS, "line");
@@ -112,13 +112,22 @@
         svg.appendChild(r);
       });
   
-      // bottom line with chevron DOWN
+      // ---- base line + emphasized chevron (DOWN) ----
       const base = document.createElementNS(SVG_NS, "path");
-      base.setAttribute("d", "M2 18H8.5L12 21.5L15.5 18H22");
+      base.setAttribute("d", "M2 18H8.3L12 14.8L15.7 18H22");
       base.setAttribute("fill", "none");
       svg.appendChild(base);
+  
+      const chevron = document.createElementNS(SVG_NS, "path");
+      chevron.setAttribute("d", "M9.4 15.4L12 17.8L14.6 15.4");
+      chevron.setAttribute("fill", "none");
+      chevron.setAttribute("stroke-width", "3.2");   // hangsúlyosabb
+      chevron.setAttribute("stroke-linecap", "round");
+      chevron.setAttribute("stroke-linejoin", "round");
+      svg.appendChild(chevron);
     });
   }
+  
   
 
   function buildSunIcons(onVal, offVal) {
