@@ -26,17 +26,61 @@
     return svg;
   }
 
-  const chevron = document.createElementNS(SVG_NS, "path");
-  // Nagyon széles és magas chevron
-  chevron.setAttribute("d", "M5 17L12 8L19 17");  // 8 → 17: +9 magasság, 5 → 19: +14 szélesség
-  chevron.setAttribute("fill", "none");
-  chevron.setAttribute("stroke-width", "4");   // Még vastagabb
-  chevron.setAttribute("stroke-linecap", "round");
-  chevron.setAttribute("stroke-linejoin", "round");
-  chevron.setAttribute("stroke", "currentColor");
-  chevron.setAttribute("stroke-miterlimit", "10");
-  chevron.setAttribute("vector-effect", "non-scaling-stroke");
-  svg.appendChild(chevron);
+  function sunriseSVG() {
+    return svgIcon((svg) => {
+      // ---- sun (filled half circle) ----
+      const sun = document.createElementNS(SVG_NS, "path");
+      sun.setAttribute("d", "M6 14a6 6 0 0 1 12 0Z");
+      sun.setAttribute("fill", "currentColor");
+      sun.setAttribute("stroke", "none");
+      svg.appendChild(sun);
+  
+      // ---- horizon small segments (left/right) ----
+      [
+        ["2", "14", "5", "14"],
+        ["19", "14", "22", "14"],
+      ].forEach(([x1, y1, x2, y2]) => {
+        const l = document.createElementNS(SVG_NS, "line");
+        l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+        l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+        svg.appendChild(l);
+      });
+  
+      // ---- symmetric rays (5 pcs) ----
+      const rays = [
+        [12, 2.5, 12, 5.5],     // top
+        [6.6, 5.8, 8.2, 7.4],   // upper-left
+        [17.4, 5.8, 15.8, 7.4], // upper-right
+        [3.0, 10.0, 5.4, 10.0], // left
+        [21.0, 10.0, 18.6, 10.0], // right
+      ];
+      rays.forEach(([x1,y1,x2,y2]) => {
+        const r = document.createElementNS(SVG_NS, "line");
+        r.setAttribute("x1", x1); r.setAttribute("y1", y1);
+        r.setAttribute("x2", x2); r.setAttribute("y2", y2);
+        svg.appendChild(r);
+      });
+  
+      // ---- base line + emphasized chevron (UP) ----
+      const base = document.createElementNS(SVG_NS, "path");
+      base.setAttribute("d", "M2 18H8.3L12 14.8L15.7 18H22");
+      base.setAttribute("fill", "none");
+      svg.appendChild(base);
+  
+      const chevron = document.createElementNS(SVG_NS, "path");
+// Nagyon széles és magas chevron
+chevron.setAttribute("d", "M5 17L12 8L19 17");  // 8 → 17: +9 magasság, 5 → 19: +14 szélesség
+chevron.setAttribute("fill", "none");
+chevron.setAttribute("stroke-width", "4");   // Még vastagabb
+chevron.setAttribute("stroke-linecap", "round");
+chevron.setAttribute("stroke-linejoin", "round");
+chevron.setAttribute("stroke", "currentColor");
+chevron.setAttribute("stroke-miterlimit", "10");
+chevron.setAttribute("vector-effect", "non-scaling-stroke");
+svg.appendChild(chevron);
+     
+    });
+  }
   
   function sunsetSVG() {
     return svgIcon((svg) => {
