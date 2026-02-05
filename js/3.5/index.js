@@ -1149,12 +1149,12 @@ let isDraggingCard = false;
           try {
             const onInput = document.createElement("input");
             onInput.name = onName;
-            onInput.value = String(Math.round(currentOnVal * 10));
+            onInput.value = String(Math.round(currentOnVal ));
             changed(onInput, onInput.name, 10);
             
             const offInput = document.createElement("input");
             offInput.name = offName;
-            offInput.value = String(Math.round(currentOffVal * 10));
+            offInput.value = String(Math.round(currentOffVal));
             changed(offInput, offInput.name, 10);
           } catch (err) {
             console.error("Thermostat update error:", err);
