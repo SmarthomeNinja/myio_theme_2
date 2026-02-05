@@ -108,7 +108,7 @@
   
       // ---- base line + emphasized chevron (DOWN) ----
       const base = document.createElementNS(SVG_NS, "path");
-      base.setAttribute("d", "M2 18H8.3L12 22L15.7 18H22");
+      base.setAttribute("d", "M2 18H7L12 22L17 18H22");
       base.setAttribute("fill", "none");
       svg.appendChild(base);
   
