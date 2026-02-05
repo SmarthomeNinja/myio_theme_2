@@ -28,65 +28,56 @@
 
   function sunriseSVG() {
     return svgIcon((svg) => {
-  
-      // --- sun (filled half circle) ---
+      // ---- sun (filled half circle) ----
       const sun = document.createElementNS(SVG_NS, "path");
       sun.setAttribute("d", "M6 14a6 6 0 0 1 12 0Z");
       sun.setAttribute("fill", "currentColor");
       sun.setAttribute("stroke", "none");
       svg.appendChild(sun);
   
-      // --- horizon segments ---
+      // ---- horizon small segments (left/right) ----
       [
-        [2,14,5,14],
-        [19,14,22,14],
-      ].forEach(([x1,y1,x2,y2]) => {
+        ["2", "14", "5", "14"],
+        ["19", "14", "22", "14"],
+      ].forEach(([x1, y1, x2, y2]) => {
         const l = document.createElementNS(SVG_NS, "line");
-        l.setAttribute("x1", x1);
-        l.setAttribute("y1", y1);
-        l.setAttribute("x2", x2);
-        l.setAttribute("y2", y2);
+        l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+        l.setAttribute("x2", x2); l.setAttribute("y2", y2);
         svg.appendChild(l);
       });
   
-      // --- symmetric rays ---
+      // ---- symmetric rays (5 pcs) ----
       const rays = [
-        [12,2.5,12,5.5],
-        [6.6,5.8,8.2,7.4],
-        [17.4,5.8,15.8,7.4],
-        [3.0,10.0,5.4,10.0],
-        [21.0,10.0,18.6,10.0],
+        [12, 2.5, 12, 5.5],     // top
+        [6.6, 5.8, 8.2, 7.4],   // upper-left
+        [17.4, 5.8, 15.8, 7.4], // upper-right
+        [3.0, 10.0, 5.4, 10.0], // left
+        [21.0, 10.0, 18.6, 10.0], // right
       ];
       rays.forEach(([x1,y1,x2,y2]) => {
         const r = document.createElementNS(SVG_NS, "line");
-        r.setAttribute("x1", x1);
-        r.setAttribute("y1", y1);
-        r.setAttribute("x2", x2);
-        r.setAttribute("y2", y2);
+        r.setAttribute("x1", x1); r.setAttribute("y1", y1);
+        r.setAttribute("x2", x2); r.setAttribute("y2", y2);
         svg.appendChild(r);
       });
   
-      // --- base line ---
-      const base = document.createElementNS(SVG_NS, "line");
-      base.setAttribute("x1", "2");
-      base.setAttribute("y1", "18");
-      base.setAttribute("x2", "22");
-      base.setAttribute("y2", "18");
+      // ---- base line + emphasized chevron (UP) ----
+      const base = document.createElementNS(SVG_NS, "path");
+      base.setAttribute("d", "M2 18H8.3L12 14.8L15.7 18H22");
+      base.setAttribute("fill", "none");
       svg.appendChild(base);
   
-      // --- emphasized chevron UP (bigger geometry) ---
-      const chevron = document.createElementNS(SVG_NS, "polyline");
-      chevron.setAttribute(
-        "points",
-        "7.5,18 12,13.8 16.5,18"
-      );
+      const chevron = document.createElementNS(SVG_NS, "path");
+      // Nagyobb, szebb chevron - meghosszabbított nyilak
+      chevron.setAttribute("d", "M8.5 16.5L12 13L15.5 16.5");
       chevron.setAttribute("fill", "none");
+      chevron.setAttribute("stroke-width", "3.5");   // Még hangsúlyosabb
       chevron.setAttribute("stroke-linecap", "round");
       chevron.setAttribute("stroke-linejoin", "round");
+      chevron.setAttribute("stroke", "currentColor"); // Explicit szín beállítás
       svg.appendChild(chevron);
     });
   }
-  
   
   function sunsetSVG() {
     return svgIcon((svg) => {
@@ -130,11 +121,13 @@
       svg.appendChild(base);
   
       const chevron = document.createElementNS(SVG_NS, "path");
-      chevron.setAttribute("d", "M9.4 15.4L12 17.8L14.6 15.4");
+      // Nagyobb, szebb chevron - meghosszabbított nyilak
+      chevron.setAttribute("d", "M8.5 16.5L12 20L15.5 16.5");
       chevron.setAttribute("fill", "none");
-      chevron.setAttribute("stroke-width", "3.2");   // hangsúlyosabb
+      chevron.setAttribute("stroke-width", "3.5");   // Még hangsúlyosabb
       chevron.setAttribute("stroke-linecap", "round");
       chevron.setAttribute("stroke-linejoin", "round");
+      chevron.setAttribute("stroke", "currentColor"); // Explicit szín beállítás
       svg.appendChild(chevron);
     });
   }
