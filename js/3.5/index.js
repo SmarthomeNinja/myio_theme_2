@@ -1243,7 +1243,7 @@ let isDraggingCard = false;
         margin-left: -2px;
       }
       .myio-thermo-avgtemp .unit {
-        font-size: 18px;
+        font-size: calc(18px * var(--myio-zoom));
         vertical-align: top;
         margin-left: 2px;
         font-weight: 400;
