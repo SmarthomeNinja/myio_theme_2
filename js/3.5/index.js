@@ -1256,7 +1256,7 @@ let isDraggingCard = false;
         margin-top: 2px;
       }
       .myio-thermo-sensor {
-        font-size: clamp(16px, 16px * var(--myio-zoom), 24px);
+        font-size: clamp(12px, 16px * var(--myio-zoom), 24px);
         color: #666;
         margin-top: 8px;
         display: flex;
