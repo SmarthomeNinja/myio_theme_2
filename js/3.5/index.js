@@ -985,7 +985,9 @@ let isDraggingCard = false;
         
         avgDisplay.innerHTML = `${Math.floor(newAvg)}<span class="decimal">,${Math.round((newAvg - Math.floor(newAvg)) * 10)}</span><span class="unit">°</span>`;
         hystDisplay.textContent = `±${newHyst.toFixed(1)} ${unitText}`;
-        sensorDisplay.innerHTML = `<span class="icon">${getModeIcon(currentIsHeating, isActive)}</span> ${sensorValue.toFixed(1)} ${unitText}`;
+        sensorDisplay.innerHTML = `<span class="icon" `;
+        if(!active)sensorDisplay.innerHTML +='transform: rotate(90deg)';        
+        sensorDisplay.innerHTML += `>${getModeIcon(currentIsHeating, isActive)}</span> ${sensorValue.toFixed(1)} ${unitText}`;
       }
       
       cardEl.classList.remove("myio-heat", "myio-cool");
