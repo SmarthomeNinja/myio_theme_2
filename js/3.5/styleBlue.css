@@ -1013,7 +1013,7 @@ body {
 	  .myio-card.myio-on .myio-favInTitle.is-fav{
 		color:#d7a63a;
 		-webkit-text-stroke:1px rgba(0,0,0,.35);
-		text-stroke:1px rgba(0,0,0,.35);
+		text-stroke:1px rgba(0,0,0,.85);
 	  }
 	  
 	  /* long press feedback */
