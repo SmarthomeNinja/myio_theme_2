@@ -1240,7 +1240,6 @@ let isDraggingCard = false;
       .myio-thermo-avgtemp .decimal {
         font-size: calc(24px * var(--myio-zoom));
         vertical-align: top;
-        margin-left: 0px;
       }
       .myio-thermo-avgtemp .unit {
         font-size: calc(18px * var(--myio-zoom));
@@ -1252,7 +1251,7 @@ let isDraggingCard = false;
         font-size: 14px;
       }
       .myio-thermo-hyst {
-        font-size: 11px;
+        font-size: calc(11px * var(--myio-zoom));
         color: #888;
         margin-top: 2px;
       }
