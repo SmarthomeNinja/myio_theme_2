@@ -151,7 +151,7 @@ function changedPair(obj1, name1 = obj1.name,obj2, name2 = obj2.name, multiplier
 		} else if (getCookie("AutoRefresh") == "1"
 			|| forceRefresh == "1"
 			|| forceRefresh == 1
-			|| name == "ReInit"
+			|| name1 == "ReInit"
 			|| window.location.pathname == "/"
 			|| window.location.pathname == "/index"
 			|| window.location.pathname == "/chart"
@@ -160,11 +160,11 @@ function changedPair(obj1, name1 = obj1.name,obj2, name2 = obj2.name, multiplier
 			|| window.location.pathname == "/config"
 			|| window.location.pathname == "/timer"
 		) {
-			document.getElementById("sending").name = name;
-			document.getElementById("sending").value = value;
+			document.getElementById("sending").name = name1;
+			document.getElementById("sending").value = value1;
 			sendForm();
 		} else {
-			sendXMLHttp(name + "=" + value);
+			sendXMLHttp(name1 + "=" + value1 + "&" + name2 + "=" +value2);
 		}
 		if (obj.parentNode.parentNode.getAttribute("name1") != null) {
 			visibleItem(obj.parentNode.parentNode.getAttribute("name1"), obj.parentNode.parentNode.getAttribute("name2"));
