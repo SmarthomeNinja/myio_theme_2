@@ -7,6 +7,111 @@
   const { makeSection } = window.myioSections;
   const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
 
+  // --- Sunrise/Sunset SVG ikonok ---
+  const SVG_NS = "http://www.w3.org/2000/svg";
+
+  function svgIcon(pathsOrBuilder, viewBox = "0 0 24 24") {
+    const svg = document.createElementNS(SVG_NS, "svg");
+    svg.setAttribute("viewBox", viewBox);
+    svg.setAttribute("width", "22");
+    svg.setAttribute("height", "22");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    if (typeof pathsOrBuilder === "function") {
+      pathsOrBuilder(svg);
+    }
+    return svg;
+  }
+
+  function sunriseSVG() {
+    return svgIcon((svg) => {
+      // horizon line
+      const line = document.createElementNS(SVG_NS, "line");
+      line.setAttribute("x1", "2"); line.setAttribute("y1", "18");
+      line.setAttribute("x2", "22"); line.setAttribute("y2", "18");
+      svg.appendChild(line);
+      // sun arc (half circle above horizon)
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", "M12 18a6 6 0 0 1 6-6M12 18a6 6 0 0 0-6-6");
+      svg.appendChild(path);
+      // rays
+      const rays = [
+        [12, 2, 12, 5],   // top
+        [4.2, 7.8, 6.3, 9.9],
+        [19.8, 7.8, 17.7, 9.9],
+      ];
+      rays.forEach(([x1,y1,x2,y2]) => {
+        const r = document.createElementNS(SVG_NS, "line");
+        r.setAttribute("x1", x1); r.setAttribute("y1", y1);
+        r.setAttribute("x2", x2); r.setAttribute("y2", y2);
+        svg.appendChild(r);
+      });
+      // arrow up
+      const arrow = document.createElementNS(SVG_NS, "polyline");
+      arrow.setAttribute("points", "9,5 12,2 15,5");
+      svg.appendChild(arrow);
+    });
+  }
+
+  function sunsetSVG() {
+    return svgIcon((svg) => {
+      // horizon line
+      const line = document.createElementNS(SVG_NS, "line");
+      line.setAttribute("x1", "2"); line.setAttribute("y1", "18");
+      line.setAttribute("x2", "22"); line.setAttribute("y2", "18");
+      svg.appendChild(line);
+      // sun arc (half circle above horizon)
+      const path = document.createElementNS(SVG_NS, "path");
+      path.setAttribute("d", "M12 18a6 6 0 0 1 6-6M12 18a6 6 0 0 0-6-6");
+      svg.appendChild(path);
+      // rays
+      const rays = [
+        [12, 2, 12, 5],
+        [4.2, 7.8, 6.3, 9.9],
+        [19.8, 7.8, 17.7, 9.9],
+      ];
+      rays.forEach(([x1,y1,x2,y2]) => {
+        const r = document.createElementNS(SVG_NS, "line");
+        r.setAttribute("x1", x1); r.setAttribute("y1", y1);
+        r.setAttribute("x2", x2); r.setAttribute("y2", y2);
+        svg.appendChild(r);
+      });
+      // arrow down
+      const arrow = document.createElementNS(SVG_NS, "polyline");
+      arrow.setAttribute("points", "9,2 12,5 15,2");
+      svg.appendChild(arrow);
+    });
+  }
+
+  function buildSunIcons(onVal, offVal) {
+    // onVal: min_temp_ON value - 1=sunrise ON, 2=sunset ON
+    // offVal: max_temp_OFF value - 1=sunrise OFF, 2=sunset OFF
+    if (!onVal && !offVal) return null;
+
+    const container = el("div", { class: "myio-sunrise-sunset-icons" });
+
+    // ON event - bright/light icon
+    if (onVal === 1 || onVal === 2) {
+      const wrapper = el("span", { class: "myio-sun-icon myio-sun-on" });
+      wrapper.title = onVal === 1 ? "ON @ Sunrise" : "ON @ Sunset";
+      wrapper.appendChild(onVal === 1 ? sunriseSVG() : sunsetSVG());
+      container.append(wrapper);
+    }
+
+    // OFF event - dark icon
+    if (offVal === 1 || offVal === 2) {
+      const wrapper = el("span", { class: "myio-sun-icon myio-sun-off" });
+      wrapper.title = offVal === 1 ? "OFF @ Sunrise" : "OFF @ Sunset";
+      wrapper.appendChild(offVal === 1 ? sunriseSVG() : sunsetSVG());
+      container.append(wrapper);
+    }
+
+    return container.children.length > 0 ? container : null;
+  }
+
   // --- Sensors ---
   function renderSensors(root) {
     const { section, grid } = makeSection(typeof str_Sensors !== "undefined" ? str_Sensors : "Sensors", "", "myio.section.sensors");
@@ -149,30 +254,10 @@
 
         // Napkelte-napnyugta ikonok hozzáadása
         if (isSunriseSunset) {
-          const hasMinTemp = typeof PCA_min_temp_ON !== "undefined" && PCA_min_temp_ON[i];
-          const hasMaxTemp = typeof PCA_max_temp_OFF !== "undefined" && PCA_max_temp_OFF[i];
-
-          const iconContainer = el("div", { class: "myio-sunrise-sunset-icons" });
-
-          if (hasMinTemp) {
-            const isSunrise = PCA_min_temp_ON[i] === 1;
-            const icon = isSunrise
-              ? el("span", { class: "myio-sunrise-icon myio-sunrise-on", text: "☀️" })
-              : el("span", { class: "myio-sunset-icon myio-sunset-on", text: "🌅" });
-            iconContainer.append(icon);
-          }
-
-          if (hasMaxTemp) {
-            const isSunset = PCA_max_temp_OFF[i] === 2;
-            const icon = isSunset
-              ? el("span", { class: "myio-sunset-icon myio-sunset-off", text: "🌙" })
-              : el("span", { class: "myio-sunrise-icon myio-sunrise-off", text: "🌄" });
-            iconContainer.append(icon);
-          }
-
-          if (iconContainer.children.length > 0) {
-            c.append(iconContainer);
-          }
+          const onVal = (typeof PCA_min_temp_ON !== "undefined") ? PCA_min_temp_ON[i] : 0;
+          const offVal = (typeof PCA_max_temp_OFF !== "undefined") ? PCA_max_temp_OFF[i] : 0;
+          const icons = buildSunIcons(onVal, offVal);
+          if (icons) c.append(icons);
         }
 
         return c;
@@ -272,30 +357,10 @@
 
           // Napkelte-napnyugta ikonok hozzáadása
           if (isSunriseSunset) {
-            const hasRelayMinTemp = typeof relay_min_temp_ON !== "undefined" && relay_min_temp_ON[i];
-            const hasRelayMaxTemp = typeof relay_max_temp_OFF !== "undefined" && relay_max_temp_OFF[i];
-
-            const iconContainer = el("div", { class: "myio-sunrise-sunset-icons" });
-
-            if (hasRelayMinTemp) {
-              const isSunrise = relay_min_temp_ON[i] === 1;
-              const icon = isSunrise
-                ? el("span", { class: "myio-sunrise-icon myio-sunrise-on", text: "☀️" })
-                : el("span", { class: "myio-sunset-icon myio-sunset-on", text: "🌅" });
-              iconContainer.append(icon);
-            }
-
-            if (hasRelayMaxTemp) {
-              const isSunset = relay_max_temp_OFF[i] === 2;
-              const icon = isSunset
-                ? el("span", { class: "myio-sunset-icon myio-sunset-off", text: "🌙" })
-                : el("span", { class: "myio-sunrise-icon myio-sunrise-off", text: "🌄" });
-              iconContainer.append(icon);
-            }
-
-            if (iconContainer.children.length > 0) {
-              c.append(iconContainer);
-            }
+            const onVal = (typeof min_temp_ON !== "undefined") ? min_temp_ON[i] : 0;
+            const offVal = (typeof max_temp_OFF !== "undefined") ? max_temp_OFF[i] : 0;
+            const icons = buildSunIcons(onVal, offVal);
+            if (icons) c.append(icons);
           }
 
           return c;
