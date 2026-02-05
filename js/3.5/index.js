@@ -6,7 +6,6 @@
 (() => {
   try {
     const scriptURL = new URL(document.currentScript?.src || window.location.href, window.location.href);
-    const host = scriptURL.origin + '/';
     const href = host + 'styles.css';
 
     if (!document.querySelector(`link[rel="stylesheet"][href="${href}"]`)) {
