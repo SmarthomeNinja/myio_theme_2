@@ -26,81 +26,28 @@
     return svg;
   }
 
-  function sunriseSVG() {
-    return svgIcon((svg) => {
-      svg.setAttribute("viewBox", "0 0 24 24");
-      svg.setAttribute("stroke-linecap", "round");
-      svg.setAttribute("stroke-linejoin", "round");
-      
-      // horizon line (dotted for softer look)
-      const line = document.createElementNS(SVG_NS, "line");
-      line.setAttribute("x1", "3"); line.setAttribute("y1", "16");
-      line.setAttribute("x2", "21"); line.setAttribute("y2", "16");
-      line.setAttribute("stroke-dasharray", "1,2");
-      svg.appendChild(line);
-      
-      // sun (full circle for better visibility)
-      const sun = document.createElementNS(SVG_NS, "circle");
-      sun.setAttribute("cx", "12"); sun.setAttribute("cy", "10");
-      sun.setAttribute("r", "5");
-      svg.appendChild(sun);
-      
-      // rays (simplified, symmetrical)
-      for(let i = 0; i < 8; i++) {
-        const angle = (i * Math.PI / 4);
-        const length = 2.5;
-        const r = document.createElementNS(SVG_NS, "line");
-        r.setAttribute("x1", 12 + Math.cos(angle) * 5.5);
-        r.setAttribute("y1", 10 + Math.sin(angle) * 5.5);
-        r.setAttribute("x2", 12 + Math.cos(angle) * (5.5 + length));
-        r.setAttribute("y2", 10 + Math.sin(angle) * (5.5 + length));
-        svg.appendChild(r);
-      }
-      
-      // arrow up (filled for clarity)
-      const arrow = document.createElementNS(SVG_NS, "polygon");
-      arrow.setAttribute("points", "10,18 12,14 14,18");
-      svg.appendChild(arrow);
-    });
-  }
+// Minimalista változat
+function sunriseSVG() {
+  return svgIcon((svg) => {
+    svg.setAttribute("viewBox", "0 0 24 24");
+    
+    // Egyszerűsített nap (felkelő)
+    const sun = document.createElementNS(SVG_NS, "path");
+    sun.setAttribute("d", "M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 0v-3m-4.2 2.2L5 5m11.8.2L19 5m-7 12v3");
+    svg.appendChild(sun);
+  });
+}
 
-  function sunsetSVG() {
-    return svgIcon((svg) => {
-      svg.setAttribute("viewBox", "0 0 24 24");
-      svg.setAttribute("stroke-linecap", "round");
-      svg.setAttribute("stroke-linejoin", "round");
-      
-      // horizon line (dotted)
-      const line = document.createElementNS(SVG_NS, "line");
-      line.setAttribute("x1", "3"); line.setAttribute("y1", "16");
-      line.setAttribute("x2", "21"); line.setAttribute("y2", "16");
-      line.setAttribute("stroke-dasharray", "1,2");
-      svg.appendChild(line);
-      
-      // sun (full circle)
-      const sun = document.createElementNS(SVG_NS, "circle");
-      sun.setAttribute("cx", "12"); sun.setAttribute("cy", "10");
-      sun.setAttribute("r", "5");
-      svg.appendChild(sun);
-      
-      // rays (same as sunrise but different fill for sunset effect)
-      for(let i = 0; i < 8; i++) {
-        const angle = (i * Math.PI / 4);
-        const length = 2.5;
-        const r = document.createElementNS(SVG_NS, "line");
-        r.setAttribute("x1", 12 + Math.cos(angle) * 5.5);
-        r.setAttribute("y1", 10 + Math.sin(angle) * 5.5);
-        r.setAttribute("x2", 12 + Math.cos(angle) * (5.5 + length));
-        r.setAttribute("y2", 10 + Math.sin(angle) * (5.5 + length));
-        svg.appendChild(r);
-      }
-      
-      // arrow down
-      const arrow = document.createElementNS(SVG_NS, "polygon");
-      arrow.setAttribute("points", "10,14 12,18 14,14");
-      svg.appendChild(arrow);
-    });
-  }
+function sunsetSVG() {
+  return svgIcon((svg) => {
+    svg.setAttribute("viewBox", "0 0 24 24");
+    
+    // Egyszerűsített nap (lenyugvó)
+    const sun = document.createElementNS(SVG_NS, "path");
+    sun.setAttribute("d", "M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 0v3m-4.2 9.8L5 19m11.8-.2L19 19m-7-12v-3");
+    svg.appendChild(sun);
+  });
+}
 
   function buildSunIcons(onVal, offVal) {
     // onVal: min_temp_ON value - 1=sunrise ON, 2=sunset ON
