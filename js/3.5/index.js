@@ -1251,7 +1251,7 @@ let isDraggingCard = false;
         font-size: 14px;
       }
       .myio-thermo-hyst {
-        font-size: minmax(10px, calc(12px * var(--myio-zoom)));
+        font-size: minmax(10px, calc(11px * var(--myio-zoom)));
         color: #888;
         margin-top: 2px;
       }
