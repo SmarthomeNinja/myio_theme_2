@@ -171,13 +171,22 @@ const MyIOLive = (function() {
     if (data.relays && typeof relays !== 'undefined') {
       for (const key in data.relays) {
         const idx = parseInt(key);
-        const relay = data.relays[key];
+        const relay = data.relays[key];        
         // A régi formátum: relays[i] értéke tartalmazza a read/write flag-eket is
         // state: 0 vagy 1, de a régi relays tömbben 110/111/101 stb. van
         // Megtartjuk a read/write flag-eket, csak a state-et frissítjük
         const oldVal = relays[idx];
         const baseVal = Math.floor(oldVal / 10) * 10; // read/write flags
         relays[idx] = baseVal + relay.state;
+
+        if (typeof themoActivator !== 'undefined') {
+          themoActivator[idx] = relay.sensor || 0;
+        }
+        if (typeof min_temp_ON !== 'undefined') {
+           min_temp_ON[idx] = relay.sensorON || 0;
+        }
+        if (typeof relay_max_temp_OFF !== 'undefined') {
+          max_temp_OFF[idx] = relay.sensorOFF || 0;
       }
     }
     
