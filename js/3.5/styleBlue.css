@@ -987,6 +987,7 @@ body {
 		gap:6px;
 	  }
 	  .myio-favInTitle{
+		color:white;
 		margin-right:8px;
 		border:0;
 		background:transparent;
@@ -998,7 +999,7 @@ body {
 	  .myio-headTitleBtn .myio-favInTitle{ margin-right:6px; }
 	  .myio-favInTitle.is-fav{
 		color:#ffd36a;
-		text-shadow:0 2px 2px rgba(0,0,0,.45);
+		text-shadow:0 2px 2px rgba(0, 0, 0, 0.45);
 	  }
 	  .myio-favInTitle:hover{
 		transform:scale(1.1);
