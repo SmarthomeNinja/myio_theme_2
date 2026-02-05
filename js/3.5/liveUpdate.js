@@ -185,8 +185,8 @@ const MyIOLive = (function() {
         if (typeof min_temp_ON !== 'undefined') {
            min_temp_ON[idx] = relay.sensorON || 0;
         }
-        if (typeof max_temp_OFF !== 'undefined') {
-          max_temp_OFF[idx] = Number.isFinite(Number(relay.sensorOFF)) ? Number(relay.sensorOFF) : 0;
+        if (typeof relay_max_temp_OFF !== 'undefined') {
+          max_temp_OFF[idx] = relay.sensorOFF || 0;
         }
       }
     }
@@ -300,103 +300,17 @@ const MyIOLive = (function() {
     }
     if(isThermoCard) {
       console.log('Thermo card detected in relays, ensure thermo-specific UI elements are updated');
-      // Update thermo-specific UI elements for relay thermo cards
-      try {
-        log('Updating thermo-specific relay cards...');
-        let thermoCardTotal = 0;
-
-        for (const key in relaysData) {
-          const idx = parseInt(key);
-          const relay = relaysData[key];
-
-          if (!relay) {
-        log(`Relay ${idx + 1}: missing relay data`);
-        continue;
-          }
-
-          if (relay.sensor > 0) {
-        const relayId = idx + 1;
-        const cards = document.querySelectorAll(`[data-cardid="thermo:relay:${relayId}"]`);
-        thermoCardTotal += cards.length;
-
-        log(`Relay ${relayId} thermo: sensor=${relay.sensor}, ON=${relay.sensorON}, OFF=${relay.sensorOFF}, cards=${cards.length}`);
-
-        cards.forEach((card, ci) => {
-          // Normalize thermo values
-          const sensorId = Number(relay.sensor) || 0;
-          const onRaw = Number(relay.sensorON);
-          const offRaw = Number(relay.sensorOFF);
-          const hasOn = Number.isFinite(onRaw);
-          const hasOff = Number.isFinite(offRaw);
-          const onC = hasOn ? onRaw : 0;
-          const offC = hasOff ? offRaw : 0;
-
-          // ON/OFF threshold inputs (in 0.1°C units -> show as X.Y)
-          const onInput = card.querySelector('input[name^="min_temp_ON"]') || card.querySelector('input[name^="relay_min_temp_ON"]');
-          const offInput = card.querySelector('input[name^="max_temp_OFF"]') || card.querySelector('input[name^="relay_max_temp_OFF"]');
-
-          if (onInput) {
-            const onVal = (onC / 10).toFixed(1);
-            if (onInput.value !== onVal) {
-              log(`Relay ${relayId} card#${ci}: set ON threshold ${onInput.value} -> ${onVal}`);
-              onInput.value = onVal;
-              onInput.dispatchEvent(new Event('input', { bubbles: true }));
-              onInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-          } else {
-            log(`Relay ${relayId} card#${ci}: ON input not found`);
-          }
-
-          if (offInput) {
-            const offVal = (offC / 10).toFixed(1);
-            if (offInput.value !== offVal) {
-              log(`Relay ${relayId} card#${ci}: set OFF threshold ${offInput.value} -> ${offVal}`);
-              offInput.value = offVal;
-              offInput.dispatchEvent(new Event('input', { bubbles: true }));
-              offInput.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-          } else {
-            log(`Relay ${relayId} card#${ci}: OFF input not found`);
-          }
-
-          // Sensor binding/display (optional elements)
-          const sensorIdEl = card.querySelector('[data-sensor-id]');
-          if (sensorIdEl) {
-            const prev = sensorIdEl.textContent;
-            const next = String(sensorId);
-            if (prev !== next) {
-              log(`Relay ${relayId} card#${ci}: sensor id ${prev} -> ${next}`);
-              sensorIdEl.textContent = next;
-            }
-          } else {
-            log(`Relay ${relayId} card#${ci}: sensor id element not found`);
-          }
-
-          // Heat/Cool state styling based on thresholds
-          const wasHeat = card.classList.contains('myio-heat');
-          const wasCool = card.classList.contains('myio-cool');
-          card.classList.remove('myio-heat', 'myio-cool');
-
-          if (hasOn && hasOff && onC < offC) {
-            card.classList.add('myio-heat');
-          } else if (hasOn && hasOff && offC < onC) {
-            card.classList.add('myio-cool');
-          }
-
-          const isHeat = card.classList.contains('myio-heat');
-          const isCool = card.classList.contains('myio-cool');
-          if (wasHeat !== isHeat || wasCool !== isCool) {
-            log(`Relay ${relayId} card#${ci}: style changed heat=${isHeat}, cool=${isCool}`);
+      console.log(PCA_min_temp_ON[0]);
+      if (typeof window.renderThermo === 'function') {
+        requestAnimationFrame(() => {
+          try {
+            window.renderThermo();
+          } catch (e) {
+            console.warn('[MyIOLive] renderThermo error:', e);
           }
         });
-          } else {
-        log(`Relay ${idx + 1}: not thermo (sensor=${relay.sensor})`);
-          }
-        }
-
-        log(`Thermo relay cards updated: ${thermoCardTotal}`);
-      } catch (e) {
-        console.error('[MyIOLive] Thermo relay update error:', e);
+      } else {
+        log('renderThermo() not available');
       }
     }
   }
