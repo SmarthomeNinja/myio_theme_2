@@ -1238,7 +1238,7 @@ let isDraggingCard = false;
         color: #333;
       }
       .myio-thermo-avgtemp .decimal {
-        font-size: 24px;
+        font-size: calc(24px * var(--myio-zoom));
         vertical-align: top;
         margin-left: -2px;
       }
