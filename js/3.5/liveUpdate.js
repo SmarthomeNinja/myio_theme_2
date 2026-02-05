@@ -310,6 +310,7 @@ const MyIOLive = (function() {
           }
         });
       } else {
+        renderThermo(); // Próbáljuk meg hívni közvetlenül, ha elérhető
         log('renderThermo() not available');
       }
     }
