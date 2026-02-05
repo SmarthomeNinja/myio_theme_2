@@ -28,89 +28,42 @@
 
   function createSunIcon(sunrise = true) {
     return svgIcon((svg) => {
-      // Színek - meleg napsütéses hangulat
-      const sunColor = "#FF6B35"; // narancssárga nap
-      const skyColor = "#4A90E2"; // égszínkék
-      const horizonColor = "#FFA726"; // aranyos horizont
-      const rayColor = "#FFD54F"; // aranyszínű sugarak
+      // Színek - minimalista paletta
+      const sunColor = "#FF9500"; // meleg narancs
+      const horizonColor = "#8B4513"; // földbarna horizont
+      const rayColor = "#FFB347"; // világosabb sárga
+      const arrowColor = "#333333"; // sötét szürke nyíl
       
-      // Gradiens háttér
-      const defs = document.createElementNS(SVG_NS, "defs");
-      
-      // Égbolt gradienst
-      const gradient = document.createElementNS(SVG_NS, "linearGradient");
-      gradient.setAttribute("id", "skyGradient");
-      gradient.setAttribute("x1", "0%");
-      gradient.setAttribute("y1", sunrise ? "100%" : "0%");
-      gradient.setAttribute("x2", "0%");
-      gradient.setAttribute("y2", sunrise ? "0%" : "100%");
-      
-      const stop1 = document.createElementNS(SVG_NS, "stop");
-      stop1.setAttribute("offset", "0%");
-      stop1.setAttribute("stop-color", sunrise ? "#FFB74D" : "#1A237E");
-      
-      const stop2 = document.createElementNS(SVG_NS, "stop");
-      stop2.setAttribute("offset", "100%");
-      stop2.setAttribute("stop-color", sunrise ? "#4FC3F7" : "#283593");
-      
-      gradient.appendChild(stop1);
-      gradient.appendChild(stop2);
-      defs.appendChild(gradient);
-      
-      // Nap gradienst
-      const sunGradient = document.createElementNS(SVG_NS, "radialGradient");
-      sunGradient.setAttribute("id", "sunGradient");
-      
-      const sunStop1 = document.createElementNS(SVG_NS, "stop");
-      sunStop1.setAttribute("offset", "0%");
-      sunStop1.setAttribute("stop-color", "#FFEB3B");
-      
-      const sunStop2 = document.createElementNS(SVG_NS, "stop");
-      sunStop2.setAttribute("offset", "100%");
-      sunStop2.setAttribute("stop-color", sunrise ? "#FF9800" : "#FF5722");
-      
-      sunGradient.appendChild(sunStop1);
-      sunGradient.appendChild(sunStop2);
-      defs.appendChild(sunGradient);
-      
-      svg.appendChild(defs);
-      
-      // Háttér téglalap gradiensekkel
-      const background = document.createElementNS(SVG_NS, "rect");
-      background.setAttribute("width", "24");
-      background.setAttribute("height", "24");
-      background.setAttribute("fill", "url(#skyGradient)");
-      background.setAttribute("rx", "3"); // enyhén lekerekített sarkok
-      svg.appendChild(background);
-      
-      // Horizont vonal kifinomultabb verzióban
-      const horizon = document.createElementNS(SVG_NS, "line");
-      horizon.setAttribute("x1", "2");
-      horizon.setAttribute("y1", sunrise ? "16" : "8");
-      horizon.setAttribute("x2", "22");
-      horizon.setAttribute("y2", sunrise ? "16" : "8");
+      // Horizont vonal (enyhén ívelt)
+      const horizon = document.createElementNS(SVG_NS, "path");
+      horizon.setAttribute("d", "M4,18 Q12,16 20,18");
       horizon.setAttribute("stroke", horizonColor);
       horizon.setAttribute("stroke-width", "1.5");
-      horizon.setAttribute("stroke-opacity", "0.8");
+      horizon.setAttribute("fill", "none");
       svg.appendChild(horizon);
       
-      // Nap (kör) - pozíció változik napkelte/naplemente szerint
-      const sunY = sunrise ? 12 : 20; // magasabban/lejjebb
-      const sun = document.createElementNS(SVG_NS, "circle");
-      sun.setAttribute("cx", "12");
-      sun.setAttribute("cy", sunY.toString());
-      sun.setAttribute("r", "4");
-      sun.setAttribute("fill", "url(#sunGradient)");
-      sun.setAttribute("stroke", "#FFA000");
-      sun.setAttribute("stroke-width", "0.5");
+      // Nap (félkör a horizont felett/alatt)
+      const sun = document.createElementNS(SVG_NS, "path");
+      if (sunrise) {
+        // Napkelte: nap a horizont felett
+        sun.setAttribute("d", "M12,14 a4,4 0 1,0 0,1 z");
+        sun.setAttribute("transform", "translate(0, -2)");
+      } else {
+        // Naplemente: nap a horizont alatt
+        sun.setAttribute("d", "M12,22 a4,4 0 1,1 0,-1 z");
+        sun.setAttribute("transform", "translate(0, 2)");
+      }
+      sun.setAttribute("fill", sunColor);
       svg.appendChild(sun);
       
-      // Sugárzó nap sugarak animációval
-      const rays = sunrise ? 
-        [[12, 8, 12, 6], [8, 10, 9, 8], [16, 10, 15, 8]] : 
-        [[12, 16, 12, 18], [8, 14, 9, 16], [16, 14, 15, 16]];
+      // Egyszerű sugarak
+      const rays = [
+        [12, sunrise ? 10 : 14, 12, sunrise ? 12 : 16], // középső
+        [8, sunrise ? 11 : 15, 9, sunrise ? 13 : 17],   // bal
+        [16, sunrise ? 11 : 15, 15, sunrise ? 13 : 17], // jobb
+      ];
       
-      rays.forEach(([x1, y1, x2, y2], index) => {
+      rays.forEach(([x1, y1, x2, y2]) => {
         const ray = document.createElementNS(SVG_NS, "line");
         ray.setAttribute("x1", x1.toString());
         ray.setAttribute("y1", y1.toString());
@@ -119,58 +72,26 @@
         ray.setAttribute("stroke", rayColor);
         ray.setAttribute("stroke-width", "1");
         ray.setAttribute("stroke-linecap", "round");
-        
-        // Animáció a sugarakra
-        const animate = document.createElementNS(SVG_NS, "animate");
-        animate.setAttribute("attributeName", "opacity");
-        animate.setAttribute("values", "0.3;1;0.3");
-        animate.setAttribute("dur", "2s");
-        animate.setAttribute("begin", `${index * 0.3}s`);
-        animate.setAttribute("repeatCount", "indefinite");
-        ray.appendChild(animate);
-        
         svg.appendChild(ray);
       });
       
-      // Felhők vagy horizont effekt
-      const clouds = document.createElementNS(SVG_NS, "path");
-      if (sunrise) {
-        clouds.setAttribute("d", "M5,14 Q7,12 9,14 Q11,12 13,14 Q15,12 17,14 Q19,12 21,14");
-      } else {
-        clouds.setAttribute("d", "M4,10 Q6,8 8,10 Q10,8 12,10 Q14,8 16,10 Q18,8 20,10");
-      }
-      clouds.setAttribute("fill", "none");
-      clouds.setAttribute("stroke", "rgba(255,255,255,0.6)");
-      clouds.setAttribute("stroke-width", "1");
-      svg.appendChild(clouds);
-      
-      // Irányjelző nyíl kifinomultabb formában
+      // Tiszta, minimalista nyíl
       const arrow = document.createElementNS(SVG_NS, "path");
       if (sunrise) {
-        arrow.setAttribute("d", "M12,19 L12,22 M12,22 L9,19 M12,22 L15,19");
+        arrow.setAttribute("d", "M9,5 L12,2 L15,5 M12,2 L12,7");
       } else {
-        arrow.setAttribute("d", "M12,5 L12,2 M12,2 L9,5 M12,2 L15,5");
+        arrow.setAttribute("d", "M9,7 L12,10 L15,7 M12,10 L12,5");
       }
-      arrow.setAttribute("stroke", "#FFFFFF");
+      arrow.setAttribute("stroke", arrowColor);
       arrow.setAttribute("stroke-width", "1.5");
       arrow.setAttribute("stroke-linecap", "round");
       arrow.setAttribute("stroke-linejoin", "round");
+      arrow.setAttribute("fill", "none");
       svg.appendChild(arrow);
-      
-      // Fényhatás a nap körül
-      const glow = document.createElementNS(SVG_NS, "circle");
-      glow.setAttribute("cx", "12");
-      glow.setAttribute("cy", sunY.toString());
-      glow.setAttribute("r", "6");
-      glow.setAttribute("fill", "none");
-      glow.setAttribute("stroke", "#FFEB3B");
-      glow.setAttribute("stroke-width", "1");
-      glow.setAttribute("stroke-opacity", "0.3");
-      svg.appendChild(glow);
     });
   }
   
-  // Kompatibilitás a régi függvényekkel
+  // Kompatibilitás
   function sunriseSVG() {
     return createSunIcon(true);
   }
