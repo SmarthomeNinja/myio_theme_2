@@ -1150,7 +1150,7 @@ let isDraggingCard = false;
             const onInput = document.createElement("input");
             onInput.name = onName;
             onInput.value = String(Math.round(currentOnVal*10 ));
-            changed(onInput, onInput.name);
+            changedPair(onInput, onInput.name,offInput, offInput.name);
             
             const offInput = document.createElement("input");
             offInput.name = offName;
