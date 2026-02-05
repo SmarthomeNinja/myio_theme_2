@@ -855,7 +855,7 @@ let isDraggingCard = false;
         // Skála közepe = átlaghőmérséklet
         let minT = avgTemp - range / 2;
         let maxT = avgTemp + range / 2;
-        
+        /*
         // Korlátozás az abszolút határokra (de a közép maradjon az átlagnál amennyire lehet)
         if (minT < defaultMinTemp) {
           minT = defaultMinTemp;
@@ -865,6 +865,7 @@ let isDraggingCard = false;
           maxT = defaultMaxTemp;
           minT = maxT - range;
         }
+        */
         // Végső korlátozás
       //  minT = Math.max(defaultMinTemp, minT);
       //  maxT = Math.min(defaultMaxTemp, maxT);
