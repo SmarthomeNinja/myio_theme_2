@@ -290,7 +290,8 @@ const MyIOLive = (function() {
     }
     if(isThermoCard) {
       log('Thermo card detected in relays, ensure thermo-specific UI elements are updated');
-      renderThermo(root);
+      window.myioRenderThermo = renderThermo; // Biztosítjuk, hogy a thermo render függvény elérhető legyen 
+      renderThermo(); // Újrarendereljük a thermo kártyákat, hogy a szenzor értékek is frissüljenek
     }
   }
   
