@@ -28,14 +28,14 @@
 
   function sunriseSVG() {
     return svgIcon((svg) => {
-      // sun (filled half circle)
+      // ---- sun (filled half circle) ----
       const sun = document.createElementNS(SVG_NS, "path");
       sun.setAttribute("d", "M6 14a6 6 0 0 1 12 0Z");
       sun.setAttribute("fill", "currentColor");
       sun.setAttribute("stroke", "none");
       svg.appendChild(sun);
   
-      // horizon small segments (left/right)
+      // ---- horizon small segments (left/right) ----
       [
         ["2", "14", "5", "14"],
         ["19", "14", "22", "14"],
@@ -46,13 +46,13 @@
         svg.appendChild(l);
       });
   
-      // rays
+      // ---- symmetric rays (5 pcs) ----
       const rays = [
         [12, 2.5, 12, 5.5],     // top
-        [6.2, 6.8, 7.8, 8.4],   // diag left
-        [17.8, 8.4, 19.4, 6.8], // diag right
-        [2.6, 10, 5.0, 10],     // left
-        [19.0, 10, 21.4, 10],   // right
+        [6.6, 5.8, 8.2, 7.4],   // upper-left
+        [17.4, 5.8, 15.8, 7.4], // upper-right
+        [3.0, 10.0, 5.4, 10.0], // left
+        [21.0, 10.0, 18.6, 10.0], // right
       ];
       rays.forEach(([x1,y1,x2,y2]) => {
         const r = document.createElementNS(SVG_NS, "line");
@@ -61,11 +61,19 @@
         svg.appendChild(r);
       });
   
-      // bottom line with chevron UP
+      // ---- base line + emphasized chevron (UP) ----
       const base = document.createElementNS(SVG_NS, "path");
-      base.setAttribute("d", "M2 18H8.5L12 15.5L15.5 18H22");
+      base.setAttribute("d", "M2 18H8.3L12 14.8L15.7 18H22");
       base.setAttribute("fill", "none");
       svg.appendChild(base);
+  
+      const chevron = document.createElementNS(SVG_NS, "path");
+      chevron.setAttribute("d", "M9.4 17.8L12 15.4L14.6 17.8");
+      chevron.setAttribute("fill", "none");
+      chevron.setAttribute("stroke-width", "3.2");   // hangsúlyosabb
+      chevron.setAttribute("stroke-linecap", "round");
+      chevron.setAttribute("stroke-linejoin", "round");
+      svg.appendChild(chevron);
     });
   }
   
