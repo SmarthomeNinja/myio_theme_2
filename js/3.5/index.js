@@ -806,7 +806,7 @@ let isDraggingCard = false;
     
     function createCircularThermoCard(cardEl, onVal, offVal, onName, offName, unitText, sensorValue, isActive, isHeating, writable) {
       // SVG paraméterek
-      const size = 160;
+      const size = 170;
       const cx = size / 2;
       const cy = size / 2;
       const radius = 70;
