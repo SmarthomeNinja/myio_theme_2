@@ -5,7 +5,7 @@
 // Stíluslap betöltése: host + "styles.css"
 (() => {
   try {
-    const scriptURL = new URL(document.currentScript?.src || window.location.href, window.location.href);
+    
     const href = host + 'styles.css';
 
     if (!document.querySelector(`link[rel="stylesheet"][href="${href}"]`)) {
