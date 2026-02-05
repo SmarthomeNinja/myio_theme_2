@@ -1264,7 +1264,9 @@ let isDraggingCard = false;
         gap: 4px;
       }
       .myio-thermo-sensor .icon {
+        display: inline-block;
         font-size: 16px;
+        transform: rotate(90deg);
       }
       .myio-thermo-buttons {
         display: flex;
@@ -1920,7 +1922,8 @@ let isDraggingCard = false;
       if (!t) return false;
       return !!t.closest(
         ".myio-cardTitle, .myio-headRow, .myio-headTitleBtn, .myio-titleBtn," +
-        "button, a, input, textarea, select, label, .myio-btnRow, .myio-miniToggle, .myio-pcaRow"
+        "button, a, input, textarea, select, label, .myio-btnRow, .myio-miniToggle, .myio-pcaRow," +
+        ".myio-thermo-circular, .myio-thermo-handle, .myio-thermo-svg, .myio-thermo-btn, .myio-thermo-buttons"
       );
     }
 
