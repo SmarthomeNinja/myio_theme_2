@@ -866,8 +866,8 @@ let isDraggingCard = false;
           minT = maxT - range;
         }
         // Végső korlátozás
-        minT = Math.max(defaultMinTemp, minT);
-        maxT = Math.min(defaultMaxTemp, maxT);
+      //  minT = Math.max(defaultMinTemp, minT);
+      //  maxT = Math.min(defaultMaxTemp, maxT);
         
         return { minT, maxT, hysteresis: displayHysteresis, avgTemp };
       };
