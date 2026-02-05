@@ -1216,7 +1216,7 @@ let isDraggingCard = false;
         position: absolute;
         top: 52%;
         left: 50%;
-        transform: translate(-50%, -60%);
+        transform: translate(-50%, -70%);
         text-align: center;
         pointer-events: none;
       }
