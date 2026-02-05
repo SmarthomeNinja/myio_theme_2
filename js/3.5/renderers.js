@@ -60,7 +60,7 @@
         r.setAttribute("x2", x2); r.setAttribute("y2", y2);
         svg.appendChild(r);
       });
-  
+  /*
       // ---- base line + emphasized chevron (UP) ----
       const base = document.createElementNS(SVG_NS, "path");
       base.setAttribute("d", "M2 18H8.3L12 14.8L15.7 18H22");
@@ -76,7 +76,7 @@
       chevron.setAttribute("stroke-linejoin", "round");
       chevron.setAttribute("stroke", "currentColor"); // Explicit szín beállítás
       svg.appendChild(chevron);
-      
+     */ 
     });
   }
   
