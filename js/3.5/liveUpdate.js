@@ -304,7 +304,7 @@ const MyIOLive = (function() {
       if (typeof window.renderThermo === 'function') {
         requestAnimationFrame(() => {
           try {
-            window.renderThermo();
+            window.renderAll();
           } catch (e) {
             console.warn('[MyIOLive] renderThermo error:', e);
           }
