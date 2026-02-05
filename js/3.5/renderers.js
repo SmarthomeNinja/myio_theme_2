@@ -28,79 +28,90 @@
 
   function sunriseSVG() {
     return svgIcon((svg) => {
-      svg.setAttribute("viewBox", "0 0 24 24");
-      svg.setAttribute("stroke-linecap", "round");
-      svg.setAttribute("stroke-linejoin", "round");
-      
-      // horizon line (dotted for softer look)
-      const line = document.createElementNS(SVG_NS, "line");
-      line.setAttribute("x1", "3"); line.setAttribute("y1", "16");
-      line.setAttribute("x2", "21"); line.setAttribute("y2", "16");
-      line.setAttribute("stroke-dasharray", "1,2");
-      svg.appendChild(line);
-      
-      // sun (full circle for better visibility)
-      const sun = document.createElementNS(SVG_NS, "circle");
-      sun.setAttribute("cx", "12"); sun.setAttribute("cy", "10");
-      sun.setAttribute("r", "5");
+      // sun (filled half circle)
+      const sun = document.createElementNS(SVG_NS, "path");
+      sun.setAttribute("d", "M6 14a6 6 0 0 1 12 0Z");
+      sun.setAttribute("fill", "currentColor");
+      sun.setAttribute("stroke", "none");
       svg.appendChild(sun);
-      
-      // rays (simplified, symmetrical)
-      for(let i = 0; i < 8; i++) {
-        const angle = (i * Math.PI / 4);
-        const length = 2.5;
+  
+      // horizon small segments (left/right)
+      [
+        ["2", "14", "5", "14"],
+        ["19", "14", "22", "14"],
+      ].forEach(([x1, y1, x2, y2]) => {
+        const l = document.createElementNS(SVG_NS, "line");
+        l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+        l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+        svg.appendChild(l);
+      });
+  
+      // rays
+      const rays = [
+        [12, 2.5, 12, 5.5],     // top
+        [6.2, 6.8, 7.8, 8.4],   // diag left
+        [17.8, 8.4, 19.4, 6.8], // diag right
+        [2.6, 10, 5.0, 10],     // left
+        [19.0, 10, 21.4, 10],   // right
+      ];
+      rays.forEach(([x1,y1,x2,y2]) => {
         const r = document.createElementNS(SVG_NS, "line");
-        r.setAttribute("x1", 12 + Math.cos(angle) * 5.5);
-        r.setAttribute("y1", 10 + Math.sin(angle) * 5.5);
-        r.setAttribute("x2", 12 + Math.cos(angle) * (5.5 + length));
-        r.setAttribute("y2", 10 + Math.sin(angle) * (5.5 + length));
+        r.setAttribute("x1", x1); r.setAttribute("y1", y1);
+        r.setAttribute("x2", x2); r.setAttribute("y2", y2);
         svg.appendChild(r);
-      }
-      
-      // arrow up (filled for clarity)
-      const arrow = document.createElementNS(SVG_NS, "polygon");
-      arrow.setAttribute("points", "10,18 12,14 14,18");
-      svg.appendChild(arrow);
+      });
+  
+      // bottom line with chevron UP
+      const base = document.createElementNS(SVG_NS, "path");
+      base.setAttribute("d", "M2 18H8.5L12 15.5L15.5 18H22");
+      base.setAttribute("fill", "none");
+      svg.appendChild(base);
     });
   }
-
+  
   function sunsetSVG() {
     return svgIcon((svg) => {
-      svg.setAttribute("viewBox", "0 0 24 24");
-      svg.setAttribute("stroke-linecap", "round");
-      svg.setAttribute("stroke-linejoin", "round");
-      
-      // horizon line (dotted)
-      const line = document.createElementNS(SVG_NS, "line");
-      line.setAttribute("x1", "3"); line.setAttribute("y1", "16");
-      line.setAttribute("x2", "21"); line.setAttribute("y2", "16");
-      line.setAttribute("stroke-dasharray", "1,2");
-      svg.appendChild(line);
-      
-      // sun (full circle)
-      const sun = document.createElementNS(SVG_NS, "circle");
-      sun.setAttribute("cx", "12"); sun.setAttribute("cy", "10");
-      sun.setAttribute("r", "5");
+      // sun (filled half circle)
+      const sun = document.createElementNS(SVG_NS, "path");
+      sun.setAttribute("d", "M6 14a6 6 0 0 1 12 0Z");
+      sun.setAttribute("fill", "currentColor");
+      sun.setAttribute("stroke", "none");
       svg.appendChild(sun);
-      
-      // rays (same as sunrise but different fill for sunset effect)
-      for(let i = 0; i < 8; i++) {
-        const angle = (i * Math.PI / 4);
-        const length = 2.5;
+  
+      // horizon small segments (left/right)
+      [
+        ["2", "14", "5", "14"],
+        ["19", "14", "22", "14"],
+      ].forEach(([x1, y1, x2, y2]) => {
+        const l = document.createElementNS(SVG_NS, "line");
+        l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+        l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+        svg.appendChild(l);
+      });
+  
+      // rays
+      const rays = [
+        [12, 2.5, 12, 5.5],
+        [6.2, 6.8, 7.8, 8.4],
+        [17.8, 8.4, 19.4, 6.8],
+        [2.6, 10, 5.0, 10],
+        [19.0, 10, 21.4, 10],
+      ];
+      rays.forEach(([x1,y1,x2,y2]) => {
         const r = document.createElementNS(SVG_NS, "line");
-        r.setAttribute("x1", 12 + Math.cos(angle) * 5.5);
-        r.setAttribute("y1", 10 + Math.sin(angle) * 5.5);
-        r.setAttribute("x2", 12 + Math.cos(angle) * (5.5 + length));
-        r.setAttribute("y2", 10 + Math.sin(angle) * (5.5 + length));
+        r.setAttribute("x1", x1); r.setAttribute("y1", y1);
+        r.setAttribute("x2", x2); r.setAttribute("y2", y2);
         svg.appendChild(r);
-      }
-      
-      // arrow down
-      const arrow = document.createElementNS(SVG_NS, "polygon");
-      arrow.setAttribute("points", "10,14 12,18 14,14");
-      svg.appendChild(arrow);
+      });
+  
+      // bottom line with chevron DOWN
+      const base = document.createElementNS(SVG_NS, "path");
+      base.setAttribute("d", "M2 18H8.5L12 21.5L15.5 18H22");
+      base.setAttribute("fill", "none");
+      svg.appendChild(base);
     });
   }
+  
 
   function buildSunIcons(onVal, offVal) {
     // onVal: min_temp_ON value - 1=sunrise ON, 2=sunset ON
