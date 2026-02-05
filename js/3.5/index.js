@@ -1265,8 +1265,7 @@ let isDraggingCard = false;
       }
       .myio-thermo-sensor .icon {
         display: inline-block;
-        font-size: 16px;
-        transform: rotate(90deg);
+        font-size: 16px;        
       }
       .myio-thermo-buttons {
         display: flex;
