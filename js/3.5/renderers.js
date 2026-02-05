@@ -66,7 +66,7 @@
       base.setAttribute("d", "M2 18H8.3L12 14.8L15.7 18H22");
       base.setAttribute("fill", "none");
       svg.appendChild(base);
-  /*
+  
       const chevron = document.createElementNS(SVG_NS, "path");
       // Nagyobb, szebb chevron - meghosszabbított nyilak
       chevron.setAttribute("d", "M8.5 16.5L12 13L15.5 16.5");
@@ -76,7 +76,7 @@
       chevron.setAttribute("stroke-linejoin", "round");
       chevron.setAttribute("stroke", "currentColor"); // Explicit szín beállítás
       svg.appendChild(chevron);
-      */
+      
     });
   }
   
