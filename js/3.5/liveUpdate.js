@@ -246,6 +246,7 @@ const MyIOLive = (function() {
    * JAVÍTÁS: querySelectorAll használata, hogy mindegyik kártya frissüljön
    */
   function updateRelays(relaysData) {
+    var isThermoCard = false;
     for (const key in relaysData) {
       const idx = parseInt(key);
       const relay = relaysData[key];
@@ -253,6 +254,7 @@ const MyIOLive = (function() {
       const isOn = relay.state === 1;
       const isThermo = relay.sensor > 0; // Ha van szenzor, akkor thermo kártya
       const cardType = isThermo ? 'thermo' : 'relay';
+      isThermoCard = isThermo ? true : isThermoCard;
       
       // JAVÍTÁS: querySelectorAll minden olyan kártyát megtalál
       // amelyik ezzel a data-cardid értékkel rendelkezik (favorit + eredeti hely)
