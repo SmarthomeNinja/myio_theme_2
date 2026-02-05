@@ -995,7 +995,7 @@ body {
 		font-size:calc(20px * var(--myio-zoom));
 		line-height:1;
 		padding:0;
-		text-shadow:2px 0px 0px rgba(0, 0, 0)
+		text-shadow:2px 2px 0px rgba(0, 0, 0)
 	  }
 	  .myio-headTitleBtn .myio-favInTitle{ margin-right:6px; }
 	  .myio-favInTitle.is-fav{
