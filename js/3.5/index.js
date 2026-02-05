@@ -1226,7 +1226,7 @@ let isDraggingCard = false;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-top: calc(3px * var(--myio-zoom));
-        margin-bottom: clamp(2,calc(5px * var(--myio-zoom)),20px);
+        margin-bottom: calc(3px * var(--myio-zoom));
         opacity: 0.7;
       }
       .myio-thermo-mode.active {
