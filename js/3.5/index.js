@@ -1470,7 +1470,7 @@ let isDraggingCard = false;
     if (grid.childNodes.length > 0) root.append(section);
   }
   // Expose for external usage
-  //window.myioRenderThermo = renderThermo;
+  window.myioRenderThermo = renderThermo;
   
   function renderFavorites(root) {
     const favs = loadFavs();
