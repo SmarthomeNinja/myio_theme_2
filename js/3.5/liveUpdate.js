@@ -273,7 +273,7 @@ const MyIOLive = (function() {
       }
     }
   }
-
+  
   /**
    * PCA kimenetek UI frissítése
    * JAVÍTÁS: querySelectorAll használata
