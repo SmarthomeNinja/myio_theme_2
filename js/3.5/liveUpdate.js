@@ -187,6 +187,7 @@ const MyIOLive = (function() {
         }
         if (typeof relay_max_temp_OFF !== 'undefined') {
           max_temp_OFF[idx] = relay.sensorOFF || 0;
+        }
       }
     }
     
