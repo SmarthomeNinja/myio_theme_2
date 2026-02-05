@@ -26,64 +26,51 @@
     return svg;
   }
 
-  function sunriseSVG() {
+  function sunSVG(isSunrise = true) {
     return svgIcon((svg) => {
       // horizon line
       const line = document.createElementNS(SVG_NS, "line");
-      line.setAttribute("x1", "2"); line.setAttribute("y1", "18");
-      line.setAttribute("x2", "22"); line.setAttribute("y2", "18");
+      line.setAttribute("x1", "2"); 
+      line.setAttribute("y1", "18");
+      line.setAttribute("x2", "22"); 
+      line.setAttribute("y2", "18");
       svg.appendChild(line);
+      
       // sun arc (half circle above horizon)
       const path = document.createElementNS(SVG_NS, "path");
       path.setAttribute("d", "M12 18a6 6 0 0 1 6-6M12 18a6 6 0 0 0-6-6");
       svg.appendChild(path);
+      
       // rays
       const rays = [
         [12, 2, 12, 5],   // top
         [4.2, 7.8, 6.3, 9.9],
         [19.8, 7.8, 17.7, 9.9],
       ];
-      rays.forEach(([x1,y1,x2,y2]) => {
+      
+      rays.forEach(([x1, y1, x2, y2]) => {
         const r = document.createElementNS(SVG_NS, "line");
-        r.setAttribute("x1", x1); r.setAttribute("y1", y1);
-        r.setAttribute("x2", x2); r.setAttribute("y2", y2);
+        r.setAttribute("x1", x1); 
+        r.setAttribute("y1", y1);
+        r.setAttribute("x2", x2); 
+        r.setAttribute("y2", y2);
         svg.appendChild(r);
       });
-      // arrow up
+      
+      // arrow - direction depends on sunrise/sunset
       const arrow = document.createElementNS(SVG_NS, "polyline");
-      arrow.setAttribute("points", "9,5 12,2 15,5");
+      arrow.setAttribute("points", isSunrise ? "9,5 12,2 15,5" : "9,2 12,5 15,2");
       svg.appendChild(arrow);
     });
   }
-
+  
+  // Keep the original function names for compatibility
+  function sunriseSVG() {
+    return sunSVG(true);
+  }
+  
   function sunsetSVG() {
-    return svgIcon((svg) => {
-      // horizon line
-      const line = document.createElementNS(SVG_NS, "line");
-      line.setAttribute("x1", "2"); line.setAttribute("y1", "18");
-      line.setAttribute("x2", "22"); line.setAttribute("y2", "18");
-      svg.appendChild(line);
-      // sun arc (half circle above horizon)
-      const path = document.createElementNS(SVG_NS, "path");
-      path.setAttribute("d", "M12 18a6 6 0 0 1 6-6M12 18a6 6 0 0 0-6-6");
-      svg.appendChild(path);
-      // rays
-      const rays = [
-        [12, 2, 12, 5],
-        [4.2, 7.8, 6.3, 9.9],
-        [19.8, 7.8, 17.7, 9.9],
-      ];
-      rays.forEach(([x1,y1,x2,y2]) => {
-        const r = document.createElementNS(SVG_NS, "line");
-        r.setAttribute("x1", x1); r.setAttribute("y1", y1);
-        r.setAttribute("x2", x2); r.setAttribute("y2", y2);
-        svg.appendChild(r);
-      });
-      // arrow down
-      const arrow = document.createElementNS(SVG_NS, "polyline");
-      arrow.setAttribute("points", "9,2 12,5 15,2");
-      svg.appendChild(arrow);
-    });
+    return sunSVG(false);
   }
 
   function buildSunIcons(onVal, offVal) {
