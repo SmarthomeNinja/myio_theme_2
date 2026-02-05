@@ -1214,7 +1214,7 @@ let isDraggingCard = false;
       }
       .myio-thermo-center {
         position: absolute;
-        top: 50%;
+        top: 55%;
         left: 50%;
         transform: translate(-50%, -60%);
         text-align: center;
