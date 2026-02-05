@@ -68,13 +68,13 @@
       svg.appendChild(base);
   
       const chevron = document.createElementNS(SVG_NS, "path");
-      // Nagyobb, szebb chevron - meghosszabbított nyilak
-      chevron.setAttribute("d", "M8.5 16.5L12 13L15.5 16.5");
+      // MÉGNagyobb, kiemeltebb chevron - jelentősen megnagyítva
+      chevron.setAttribute("d", "M7.5 15L12 10L16.5 15");
       chevron.setAttribute("fill", "none");
-      chevron.setAttribute("stroke-width", "2");   // Még hangsúlyosabb
+      chevron.setAttribute("stroke-width", "4.0");   // Még vastagabb
       chevron.setAttribute("stroke-linecap", "round");
       chevron.setAttribute("stroke-linejoin", "round");
-      chevron.setAttribute("stroke", "currentColor"); // Explicit szín beállítás
+      chevron.setAttribute("stroke", "currentColor");
       svg.appendChild(chevron);
     });
   }
@@ -121,13 +121,13 @@
       svg.appendChild(base);
   
       const chevron = document.createElementNS(SVG_NS, "path");
-      // Nagyobb, szebb chevron - meghosszabbított nyilak
-      chevron.setAttribute("d", "M8.5 16.5L12 20L15.5 16.5");
+      // MÉGNagyobb, kiemeltebb chevron - jelentősen megnagyítva
+      chevron.setAttribute("d", "M7.5 15L12 20L16.5 15");
       chevron.setAttribute("fill", "none");
-      chevron.setAttribute("stroke-width", "2");   // Még hangsúlyosabb
+      chevron.setAttribute("stroke-width", "4.0");   // Még vastagabb
       chevron.setAttribute("stroke-linecap", "round");
       chevron.setAttribute("stroke-linejoin", "round");
-      chevron.setAttribute("stroke", "currentColor"); // Explicit szín beállítás
+      chevron.setAttribute("stroke", "currentColor");
       svg.appendChild(chevron);
     });
   }
