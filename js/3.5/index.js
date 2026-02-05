@@ -1221,7 +1221,7 @@ let isDraggingCard = false;
         pointer-events: none;
       }
       .myio-thermo-mode {
-        font-size: clamp(0,calc(20px * var(--myio-zoom),20px));
+        font-size: calc(20px * var(--myio-zoom));
         font-weight: 500;
         text-transform: uppercase;
         letter-spacing: 0.5px;
