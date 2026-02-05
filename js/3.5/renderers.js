@@ -68,7 +68,6 @@
       svg.appendChild(base);
   
       const chevron = document.createElementNS(SVG_NS, "path");
-      const chevron = document.createElementNS(SVG_NS, "path");
       // A teljes szélességtartomány jobb kihasználása
       chevron.setAttribute("d", "M4 16L12 8L20 16");  // 4-20 = 16 egység széles, 8 egység magas
       chevron.setAttribute("fill", "none");
