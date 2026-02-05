@@ -290,7 +290,7 @@ const MyIOLive = (function() {
     }
     if(isThermoCard) {
       console.log('Thermo card detected in relays, ensure thermo-specific UI elements are updated');
-      console.log(PCA_min_temp_ON[8]);
+      console.log(PCA_min_temp_ON[9]);
       if (typeof window.renderThermo === 'function') {
         requestAnimationFrame(() => {
           try {
