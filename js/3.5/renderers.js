@@ -65,8 +65,7 @@
       const base = document.createElementNS(SVG_NS, "path");
       base.setAttribute("d", "M2 18H8.3L12 14.8L15.7 18H22");
       base.setAttribute("fill", "none");
-      svg.appendChild(base);
-  
+      svg.appendChild(base);  
       
      
     });
@@ -113,18 +112,7 @@
       base.setAttribute("fill", "none");
       svg.appendChild(base);
   
-      const chevron = document.createElementNS(SVG_NS, "path");
-      // MEGASABB, SZÉLESEBB CHEVRON - megnövelt méret és szélesség
-      chevron.setAttribute("d", "M7 16L12 21L17 16");
-      chevron.setAttribute("fill", "none");
-      chevron.setAttribute("stroke-width", "3");   // Erőteljesebb vonalvastagság
-      chevron.setAttribute("stroke-linecap", "round");
-      chevron.setAttribute("stroke-linejoin", "round");
-      chevron.setAttribute("stroke", "currentColor");
-      // További hangsúlyosítás
-      chevron.setAttribute("stroke-miterlimit", "10");
-      chevron.setAttribute("vector-effect", "non-scaling-stroke");
-      svg.appendChild(chevron);
+  
     });
   }
   
