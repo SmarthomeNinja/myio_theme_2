@@ -135,6 +135,11 @@ const MyIOLive = (function() {
       // Globális változók frissítése (kompatibilitás)
       updateGlobalVariables(data);
       
+      // Hőmérséklet szenzorok frissítése (thermo kártyák előtt!)
+      if (data.sensors) {
+        updateThermoSensors(data.sensors);
+      }
+      
       // Relay kártyák frissítése
       if (data.relays) {
         updateRelays(data.relays);
@@ -179,13 +184,13 @@ const MyIOLive = (function() {
         const baseVal = Math.floor(oldVal / 10) * 10; // read/write flags
         relays[idx] = baseVal + relay.state;
 
-        if (typeof themoActivator !== 'undefined') {
-          themoActivator[idx] = relay.sensor || 0;
+        if (typeof thermoActivator !== 'undefined') {
+          thermoActivator[idx] = relay.sensor || 0;
         }
         if (typeof min_temp_ON !== 'undefined') {
-           min_temp_ON[idx] = relay.sensorON || 0;
+          min_temp_ON[idx] = relay.sensorON || 0;
         }
-        if (typeof relay_max_temp_OFF !== 'undefined') {
+        if (typeof max_temp_OFF !== 'undefined') {
           max_temp_OFF[idx] = relay.sensorOFF || 0;
         }
       }
@@ -242,7 +247,6 @@ const MyIOLive = (function() {
       }
     }
     
-    // Thermo szenzorok - ezek a sens_out.json-ban nincsenek, de ha lennének
     // Fogyasztás adatok
     if (data.sensors) {
       if (data.sensors['200'] && typeof consumption !== 'undefined') {
@@ -252,72 +256,96 @@ const MyIOLive = (function() {
   }
 
   /**
+   * Hőmérséklet szenzorok frissítése (thermo_temps globális változó és UI)
+   */
+  function updateThermoSensors(sensorsData) {
+    // Hőmérséklet szenzorok (1-99)
+    if (typeof thermo_temps !== 'undefined' && typeof thermo_eepromIndex !== 'undefined') {
+      for (const key in sensorsData) {
+        const sensorId = parseInt(key);
+        if (sensorId >= 1 && sensorId <= 99 && sensorsData[key].temp !== undefined) {
+          // Keressük meg a thermo_eepromIndex-ben ezt az ID-t
+          for (let i = 0; i < thermo_eepromIndex.length; i++) {
+            if (thermo_eepromIndex[i] === sensorId) {
+              thermo_temps[i] = sensorsData[key].temp;
+              log(`Thermo sensor ${sensorId} updated: ${sensorsData[key].temp / 100}°C`);
+              
+              // Frissítsük a szenzor kártyát is
+              const cards = document.querySelectorAll(`[data-cardid="sensors:thermo:${sensorId}"]`);
+              cards.forEach(card => {
+                const valueEl = card.querySelector('.myio-value');
+                if (valueEl) {
+                  valueEl.textContent = (sensorsData[key].temp / 100) + ' °C';
+                }
+              });
+              break;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Relay kártyák UI frissítése
-   * JAVÍTÁS: querySelectorAll használata, hogy mindegyik kártya frissüljön
+   * JAVÍTÁS: querySelectorAll használata és thermo kártyák teljes frissítése
    */
   function updateRelays(relaysData) {
-    var isThermoCard = false;
     for (const key in relaysData) {
       const idx = parseInt(key);
       const relay = relaysData[key];
       const relayId = idx + 1; // relay ID = tömb index + 1
       const isOn = relay.state === 1;
       const isThermo = relay.sensor > 0; // Ha van szenzor, akkor thermo kártya
-      const cardType = isThermo ? 'thermo' : 'relay';
-      isThermoCard = isThermo ? true : isThermoCard;
       
-      // JAVÍTÁS: querySelectorAll minden olyan kártyát megtalál
-      // amelyik ezzel a data-cardid értékkel rendelkezik (favorit + eredeti hely)
+      // Normál relay kártyák
       const cards = document.querySelectorAll(`[data-cardid="relay:${relayId}"]`);
-      const thermoCards = document.querySelectorAll(`[data-cardid="thermo:relay:${relayId}"]`);
-
       cards.forEach(card => {
-        // Osztály frissítése
         card.classList.remove('myio-on', 'myio-off');
         card.classList.add(isOn ? 'myio-on' : 'myio-off');
         
-        // Toggle input frissítése
         const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
         if (toggle && toggle.checked !== isOn) {
           toggle.checked = isOn;
         }
       });
+      
+      // Thermo relay kártyák
+      const thermoCards = document.querySelectorAll(`[data-cardid="thermo:relay:${relayId}"]`);
       thermoCards.forEach(card => {
-        // Osztály frissítése
-        card.classList.remove('myio-on', 'myio-off');
-        card.classList.add(isOn ? 'myio-on' : 'myio-off');
+        // On/Off állapot frissítése
+        card.classList.remove('myio-on', 'myio-off', 'myio-heat', 'myio-cool');
+        if (isOn) {
+          card.classList.add('myio-on');
+          // Heat/cool meghatározása
+          if (relay.sensorON < relay.sensorOFF) {
+            card.classList.add('myio-heat');
+          } else if (relay.sensorOFF < relay.sensorON) {
+            card.classList.add('myio-cool');
+          }
+        } else {
+          card.classList.add('myio-off');
+        }
         
-        // Toggle input frissítése
+        // Toggle frissítése
         const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
         if (toggle && toggle.checked !== isOn) {
           toggle.checked = isOn;
         }
+        
+        // Thermo circular UI frissítése
+        updateThermoCircularUI(card, relay, isOn);
       });
       
       if (cards.length > 0) {
         log(`Relay ${relayId}: ${isOn ? 'ON' : 'OFF'} (${cards.length} cards updated)`);
       }
     }
-    if(isThermoCard) {
-      console.log('Thermo card detected in relays, ensure thermo-specific UI elements are updated');
-      console.log(PCA_min_temp_ON[0]);
-      if (typeof window.renderThermo === 'function') {
-        requestAnimationFrame(() => {
-          try {
-            window.renderThermo();
-          } catch (e) {
-            console.warn('[MyIOLive] renderThermo error:', e);
-          }
-        });
-      } else {
-        log('renderThermo() not available');
-      }
-    }
   }
   
   /**
    * PCA kimenetek UI frissítése
-   * JAVÍTÁS: querySelectorAll használata
+   * JAVÍTÁS: querySelectorAll használata és thermo kártyák teljes frissítése
    */
   function updatePCA(pcaData) {
     for (const key in pcaData) {
@@ -327,21 +355,38 @@ const MyIOLive = (function() {
       const val255 = pca.state;
       const isOn = val255 > 0;
       const pct = Math.round(val255 / 2.55);
+      const isThermo = pca.sensor > 0;
       
       // Normál PCA kártyák
-      let cards = document.querySelectorAll(`[data-cardid="pca:${pcaId}"]`);
+      const normalCards = document.querySelectorAll(`[data-cardid="pca:${pcaId}"]`);
+      normalCards.forEach(card => {
+        card.classList.remove('myio-on', 'myio-off');
+        card.classList.add(isOn ? 'myio-on' : 'myio-off');
+        
+        const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
+        if (toggle && toggle.checked !== isOn) {
+          toggle.checked = isOn;
+        }
+        
+        const rangeInput = card.querySelector('input[type="range"]');
+        const numInput = card.querySelector('input[type="number"]');
+        
+        if (rangeInput && parseInt(rangeInput.value) !== pct) {
+          rangeInput.value = pct;
+        }
+        if (numInput && parseInt(numInput.value) !== pct) {
+          numInput.value = pct;
+        }
+      });
       
-      // Ha nincs normál, keress thermo PCA kártyákat
-      if (cards.length === 0) {
-        cards = document.querySelectorAll(`[data-cardid="thermo:pca:${pcaId}"]`);
-      }
-      
-      cards.forEach(card => {
-        // Osztály frissítése
+      // Thermo PCA kártyák
+      const thermoCards = document.querySelectorAll(`[data-cardid="thermo:pca:${pcaId}"]`);
+      thermoCards.forEach(card => {
+        // On/Off állapot frissítése
         card.classList.remove('myio-on', 'myio-off', 'myio-heat', 'myio-cool');
         if (isOn) {
           card.classList.add('myio-on');
-          // Heat/cool meghatározása a szenzor küszöbök alapján
+          // Heat/cool meghatározása
           if (pca.sensorON < pca.sensorOFF) {
             card.classList.add('myio-heat');
           } else if (pca.sensorOFF < pca.sensorON) {
@@ -357,36 +402,104 @@ const MyIOLive = (function() {
           toggle.checked = isOn;
         }
         
-        // Slider és number input frissítése
-        const rangeInput = card.querySelector('input[type="range"]');
-        const numInput = card.querySelector('input[type="number"]');
-        
-        if (rangeInput && parseInt(rangeInput.value) !== pct) {
-          rangeInput.value = pct;
-        }
-        if (numInput && parseInt(numInput.value) !== pct) {
-          numInput.value = pct;
-        }
-        
-        // Thermo chip-ek frissítése (On/Off értékek)
-        if (pca.sensor > 0) {
-          const onInput = card.querySelector('input[name^="PCA_min_temp_ON"]');
-          const offInput = card.querySelector('input[name^="PCA_max_temp_OFF"]');
-          if (onInput) {
-            const onVal = (pca.sensorON / 10).toFixed(1);
-            if (onInput.value !== onVal) onInput.value = onVal;
-          }
-          if (offInput) {
-            const offVal = (pca.sensorOFF / 10).toFixed(1);
-            if (offInput.value !== offVal) offInput.value = offVal;
-          }
-        }
+        // Thermo circular UI frissítése
+        updateThermoCircularUI(card, pca, isOn);
       });
       
-      if (cards.length > 0) {
-        log(`PCA ${pcaId}: ${pct}% (${cards.length} cards updated)`);
+      if (normalCards.length > 0) {
+        log(`PCA ${pcaId}: ${pct}% (${normalCards.length} cards updated)`);
       }
     }
+  }
+
+  /**
+   * Thermo circular UI frissítése (közös a relay és PCA thermo kártyákhoz)
+   */
+  function updateThermoCircularUI(card, deviceData, isActive) {
+    const thermoContainer = card.querySelector('.myio-thermo-circular');
+    if (!thermoContainer) return;
+    
+    // On/Off értékek frissítése
+    const onVal = (deviceData.sensorON || 0) / 10;
+    const offVal = (deviceData.sensorOFF || 0) / 10;
+    const isHeating = onVal < offVal;
+    
+    // Szenzor érték lekérése
+    let sensorValue = 0;
+    const sensorId = deviceData.sensor || 0;
+    if (sensorId > 0 && sensorId < 100) {
+      // Hőmérséklet szenzor
+      if (typeof thermo_temps !== 'undefined' && typeof thermo_eepromIndex !== 'undefined') {
+        for (let i = 0; i < thermo_eepromIndex.length; i++) {
+          if (thermo_eepromIndex[i] === sensorId) {
+            sensorValue = thermo_temps[i] / 100;
+            break;
+          }
+        }
+      }
+    } else if (sensorId >= 101 && sensorId <= 108) {
+      // Páratartalom szenzor
+      const humIdx = sensorId - 101;
+      if (typeof humidity !== 'undefined' && humidity[humIdx] !== undefined) {
+        sensorValue = humidity[humIdx] / 10;
+      }
+    }
+    
+    // Szenzor kijelző frissítése
+    const sensorDisplay = thermoContainer.querySelector('.myio-thermo-sensor');
+    if (sensorDisplay) {
+      const unitText = (sensorId >= 101 && sensorId <= 108) ? '%' : '°C';
+      const icon = isActive ? (isHeating ? '🔥' : '❄️') : '🌡️';
+      sensorDisplay.innerHTML = `<span class="icon">${icon}</span> ${sensorValue.toFixed(1)} ${unitText}`;
+    }
+    
+    // Mode kijelző frissítése
+    const modeDisplay = thermoContainer.querySelector('.myio-thermo-mode');
+    if (modeDisplay) {
+      const modeText = isActive 
+        ? (isHeating ? (typeof str_Heating !== 'undefined' ? str_Heating : 'Heating') : (typeof str_Cooling !== 'undefined' ? str_Cooling : 'Cooling'))
+        : (typeof str_Off !== 'undefined' ? str_Off : 'Off');
+      const modeColor = isActive ? (isHeating ? '#FF6B35' : '#35B8FF') : '#888';
+      modeDisplay.textContent = modeText;
+      modeDisplay.style.color = modeColor;
+      modeDisplay.classList.toggle('active', isActive);
+    }
+    
+    // Átlag hőmérséklet és hiszterézis frissítése
+    const avgDisplay = thermoContainer.querySelector('.myio-thermo-avgtemp');
+    const hystDisplay = thermoContainer.querySelector('.myio-thermo-hyst');
+    if (avgDisplay) {
+      const avgTemp = (onVal + offVal) / 2;
+      avgDisplay.innerHTML = `${Math.floor(avgTemp)}<span class="decimal">,${Math.round((avgTemp - Math.floor(avgTemp)) * 10)}</span><span class="unit">°</span>`;
+    }
+    if (hystDisplay) {
+      const hysteresis = Math.abs(offVal - onVal) / 2;
+      const unitText = (sensorId >= 101 && sensorId <= 108) ? '%' : '°C';
+      hystDisplay.textContent = `±${hysteresis.toFixed(1)} ${unitText}`;
+    }
+    
+    // SVG arc-ok frissítése (handle-ök nélkül, mivel azok drag közben mozognak)
+    const svg = thermoContainer.querySelector('.myio-thermo-svg');
+    if (svg) {
+      const activeArc = svg.querySelector('path:nth-of-type(2)');
+      const currentArc = svg.querySelector('path:nth-of-type(3)');
+      
+      if (activeArc && currentArc) {
+        const colorLight = isHeating ? 'rgba(255, 107, 53, 0.3)' : 'rgba(53, 184, 255, 0.3)';
+        const color = isHeating ? '#FF6B35' : '#35B8FF';
+        activeArc.setAttribute('stroke', colorLight);
+        currentArc.setAttribute('stroke', color);
+      }
+      
+      // Handle-ök színének frissítése
+      const handles = svg.querySelectorAll('.myio-thermo-handle');
+      if (handles.length >= 1) {
+        const color = isHeating ? '#FF6B35' : '#35B8FF';
+        handles[0].setAttribute('fill', color);
+      }
+    }
+    
+    log(`Thermo card updated: sensor=${sensorValue.toFixed(1)}, on=${onVal}, off=${offVal}, active=${isActive}`);
   }
 
   /**
