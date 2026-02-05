@@ -275,7 +275,7 @@ const MyIOLive = (function() {
       thermoCards.forEach(card => {
         // Osztály frissítése
         card.classList.remove('myio-on', 'myio-off');
-        card.classList.add(isOn ? 'myio-cool' : 'myio-off');
+        card.classList.add(isOn ? 'myio-on' : 'myio-off');
         
         // Toggle input frissítése
         const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
