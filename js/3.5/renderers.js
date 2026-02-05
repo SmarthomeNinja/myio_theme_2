@@ -99,14 +99,18 @@
     for (let i = 0; i < PCA.length; i++) {
       const d = decodeRW(PCA[i]);
       PCARead[i] = d.read; PCAWrite[i] = d.write; PCAVal[i] = d.val;
-      if ((PCARead[i] || PCAWrite[i]) && PCA_description[i + 1] != null && PCA_thermoActivator[i] == 0) any = true;
+      const isSunriseSunset = (typeof PCA_thermoActivator !== "undefined" && PCA_thermoActivator[i] === 255);
+      if ((PCARead[i] || PCAWrite[i]) && PCA_description[i + 1] != null && (PCA_thermoActivator[i] == 0 || isSunriseSunset)) {
+        any = true;
+      }
     }
     if (!any) return;
 
     const { section, grid } = makeSection(typeof str_PCA_Output !== "undefined" ? str_PCA_Output : "PCA Output", "", "myio.section.pca");
 
     for (let i = 0; i < PCA.length; i++) {
-      if (!((PCARead[i] || PCAWrite[i]) && PCA_description[i + 1] != null && PCA_thermoActivator[i] == 0)) continue;
+      const isSunriseSunset = (typeof PCA_thermoActivator !== "undefined" && PCA_thermoActivator[i] === 255);
+      if (!((PCARead[i] || PCAWrite[i]) && PCA_description[i + 1] != null && (PCA_thermoActivator[i] == 0 || isSunriseSunset))) continue;
 
       const id = `pca:${i + 1}`;
       const makeFn = () => {
@@ -142,6 +146,35 @@
         } else {
           c.append(el("div", { class: "myio-sub", text: String(Math.round(val255 / 2.55)) }));
         }
+
+        // Napkelte-napnyugta ikonok hozzáadása
+        if (isSunriseSunset) {
+          const hasMinTemp = typeof PCA_min_temp_ON !== "undefined" && PCA_min_temp_ON[i];
+          const hasMaxTemp = typeof PCA_max_temp_OFF !== "undefined" && PCA_max_temp_OFF[i];
+
+          const iconContainer = el("div", { class: "myio-sunrise-sunset-icons" });
+
+          if (hasMinTemp) {
+            const isSunrise = PCA_min_temp_ON[i] === 1;
+            const icon = isSunrise
+              ? el("span", { class: "myio-sunrise-icon myio-sunrise-on", text: "☀️" })
+              : el("span", { class: "myio-sunset-icon myio-sunset-on", text: "🌅" });
+            iconContainer.append(icon);
+          }
+
+          if (hasMaxTemp) {
+            const isSunset = PCA_max_temp_OFF[i] === 2;
+            const icon = isSunset
+              ? el("span", { class: "myio-sunset-icon myio-sunset-off", text: "🌙" })
+              : el("span", { class: "myio-sunrise-icon myio-sunrise-off", text: "🌄" });
+            iconContainer.append(icon);
+          }
+
+          if (iconContainer.children.length > 0) {
+            c.append(iconContainer);
+          }
+        }
+
         return c;
       };
       registerCardFactory(id, makeFn);
@@ -212,13 +245,18 @@
 
     let any = false;
     for (let i = 0; i < relays.length; i++) {
-      if (relays[i] != 0 && relay_description[i + 1] != null && thermoActivator[i] == 0) { any = true; break; }
+      const isSunriseSunset = (typeof thermoActivator !== "undefined" && thermoActivator[i] === 255);
+      if (relays[i] != 0 && relay_description[i + 1] != null && (thermoActivator[i] == 0 || isSunriseSunset)) {
+        any = true;
+        break;
+      }
     }
     if (!any) return;
 
     const { section, grid } = makeSection(typeof str_Output !== "undefined" ? str_Output : "Output", "", "myio.section.relays");
     for (let i = 0; i < relays.length; i++) {
-      if (relays[i] != 0 && thermoActivator[i] == 0 && relay_description[i + 1] != null) {
+      const isSunriseSunset = (typeof thermoActivator !== "undefined" && thermoActivator[i] === 255);
+      if (relays[i] != 0 && (thermoActivator[i] == 0 || isSunriseSunset) && relay_description[i + 1] != null) {
         const id = `relay:${i + 1}`;
         const makeFn = () => {
           const isOn = (relays[i] == 101 || relays[i] == 111 || relays[i] == 11);
@@ -231,6 +269,35 @@
           if (writable) {
             setCardHeaderWithInvAndToggle(c, relay_description[i + 1], "r_INV", "r_ON", "r_OFF", i + 1, isOn, id);
           }
+
+          // Napkelte-napnyugta ikonok hozzáadása
+          if (isSunriseSunset) {
+            const hasRelayMinTemp = typeof relay_min_temp_ON !== "undefined" && relay_min_temp_ON[i];
+            const hasRelayMaxTemp = typeof relay_max_temp_OFF !== "undefined" && relay_max_temp_OFF[i];
+
+            const iconContainer = el("div", { class: "myio-sunrise-sunset-icons" });
+
+            if (hasRelayMinTemp) {
+              const isSunrise = relay_min_temp_ON[i] === 1;
+              const icon = isSunrise
+                ? el("span", { class: "myio-sunrise-icon myio-sunrise-on", text: "☀️" })
+                : el("span", { class: "myio-sunset-icon myio-sunset-on", text: "🌅" });
+              iconContainer.append(icon);
+            }
+
+            if (hasRelayMaxTemp) {
+              const isSunset = relay_max_temp_OFF[i] === 2;
+              const icon = isSunset
+                ? el("span", { class: "myio-sunset-icon myio-sunset-off", text: "🌙" })
+                : el("span", { class: "myio-sunrise-icon myio-sunrise-off", text: "🌄" });
+              iconContainer.append(icon);
+            }
+
+            if (iconContainer.children.length > 0) {
+              c.append(iconContainer);
+            }
+          }
+
           return c;
         };
         registerCardFactory(id, makeFn);
