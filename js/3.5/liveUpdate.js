@@ -257,10 +257,21 @@ const MyIOLive = (function() {
       // JAVÍTÁS: querySelectorAll minden olyan kártyát megtalál
       // amelyik ezzel a data-cardid értékkel rendelkezik (favorit + eredeti hely)
       const cards = document.querySelectorAll(`[data-cardid="relay:${relayId}"]`);
-      
+      const thermoCards = document.querySelectorAll(`[data-cardid="thermo:relay:${relayId}"]`);
+
       cards.forEach(card => {
         // Osztály frissítése
-        if(cardType === 'relay') {
+        card.classList.remove('myio-on', 'myio-off');
+        card.classList.add(isOn ? 'myio-on' : 'myio-off');
+        
+        // Toggle input frissítése
+        const toggle = card.querySelector('.myio-miniToggle input[type="checkbox"]');
+        if (toggle && toggle.checked !== isOn) {
+          toggle.checked = isOn;
+        }
+      });
+      thermoCards.forEach(card => {
+        // Osztály frissítése
         card.classList.remove('myio-on', 'myio-off');
         card.classList.add(isOn ? 'myio-on' : 'myio-off');
         
