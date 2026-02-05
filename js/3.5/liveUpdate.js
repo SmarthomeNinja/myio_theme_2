@@ -300,28 +300,90 @@ const MyIOLive = (function() {
     }
     if(isThermoCard) {
       console.log('Thermo card detected in relays, ensure thermo-specific UI elements are updated');
-      console.log(min_temp_ON[8]);
-      if (typeof window.renderThermo === 'function') {
-        requestAnimationFrame(() => {
-          try {
-            window.renderAll();
-          } catch (e) {
-            console.warn('[MyIOLive] renderThermo error:', e);
+      // Update thermo-specific UI elements for relay thermo cards
+      try {
+        log('Updating thermo-specific relay cards...');
+        let thermoCardTotal = 0;
+
+        for (const key in relaysData) {
+          const idx = parseInt(key);
+          const relay = relaysData[key];
+
+          if (!relay) {
+        log(`Relay ${idx + 1}: missing relay data`);
+        continue;
+          }
+
+          if (relay.sensor > 0) {
+        const relayId = idx + 1;
+        const cards = document.querySelectorAll(`[data-cardid="thermo:relay:${relayId}"]`);
+        thermoCardTotal += cards.length;
+
+        log(`Relay ${relayId} thermo: sensor=${relay.sensor}, ON=${relay.sensorON}, OFF=${relay.sensorOFF}, cards=${cards.length}`);
+
+        cards.forEach((card, ci) => {
+          // ON/OFF threshold inputs (in 0.1°C units -> show as X.Y)
+          const onInput = card.querySelector('input[name^="min_temp_ON"]') || card.querySelector('input[name^="relay_min_temp_ON"]');
+          const offInput = card.querySelector('input[name^="max_temp_OFF"]') || card.querySelector('input[name^="relay_max_temp_OFF"]');
+
+          if (onInput) {
+            const onVal = (relay.sensorON / 10).toFixed(1);
+            if (onInput.value !== onVal) {
+          log(`Relay ${relayId} card#${ci}: set ON threshold ${onInput.value} -> ${onVal}`);
+          onInput.value = onVal;
+            }
+          } else {
+            log(`Relay ${relayId} card#${ci}: ON input not found`);
+          }
+
+          if (offInput) {
+            const offVal = (relay.sensorOFF / 10).toFixed(1);
+            if (offInput.value !== offVal) {
+          log(`Relay ${relayId} card#${ci}: set OFF threshold ${offInput.value} -> ${offVal}`);
+          offInput.value = offVal;
+            }
+          } else {
+            log(`Relay ${relayId} card#${ci}: OFF input not found`);
+          }
+
+          // Sensor binding/display (optional elements)
+          const sensorIdEl = card.querySelector('[data-sensor-id]');
+          if (sensorIdEl) {
+            const prev = sensorIdEl.textContent;
+            const next = String(relay.sensor);
+            if (prev !== next) {
+          log(`Relay ${relayId} card#${ci}: sensor id ${prev} -> ${next}`);
+          sensorIdEl.textContent = next;
+            }
+          } else {
+            log(`Relay ${relayId} card#${ci}: sensor id element not found`);
+          }
+
+          // Heat/Cool state styling based on thresholds
+          const wasHeat = card.classList.contains('myio-heat');
+          const wasCool = card.classList.contains('myio-cool');
+          card.classList.remove('myio-heat', 'myio-cool');
+
+          if (relay.sensorON < relay.sensorOFF) {
+            card.classList.add('myio-heat');
+          } else if (relay.sensorOFF < relay.sensorON) {
+            card.classList.add('myio-cool');
+          }
+
+          const isHeat = card.classList.contains('myio-heat');
+          const isCool = card.classList.contains('myio-cool');
+          if (wasHeat !== isHeat || wasCool !== isCool) {
+            log(`Relay ${relayId} card#${ci}: style changed heat=${isHeat}, cool=${isCool}`);
           }
         });
-      } else {
-        if (typeof window.rendelThermo === 'function') {
-          requestAnimationFrame(() => {
-            try {
-              window.rendelThermo();
-            } catch (e) {
-              console.warn('[MyIOLive] rendelThermo error:', e);
-            }
-          });
-        } else {
-          log('rendelThermo() not available');
+          } else {
+        log(`Relay ${idx + 1}: not thermo (sensor=${relay.sensor})`);
+          }
         }
-        log('renderThermo() not available');
+
+        log(`Thermo relay cards updated: ${thermoCardTotal}`);
+      } catch (e) {
+        console.error('[MyIOLive] Thermo relay update error:', e);
       }
     }
   }
