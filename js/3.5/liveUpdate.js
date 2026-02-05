@@ -251,6 +251,8 @@ const MyIOLive = (function() {
       const relay = relaysData[key];
       const relayId = idx + 1; // relay ID = tömb index + 1
       const isOn = relay.state === 1;
+      const isThermo = relay.sensor > 0; // Ha van szenzor, akkor thermo kártya
+      const cardType = isThermo ? 'thermo' : 'relay';
       
       // JAVÍTÁS: querySelectorAll minden olyan kártyát megtalál
       // amelyik ezzel a data-cardid értékkel rendelkezik (favorit + eredeti hely)
@@ -258,6 +260,7 @@ const MyIOLive = (function() {
       
       cards.forEach(card => {
         // Osztály frissítése
+        if(cardType === 'relay') {
         card.classList.remove('myio-on', 'myio-off');
         card.classList.add(isOn ? 'myio-on' : 'myio-off');
         
