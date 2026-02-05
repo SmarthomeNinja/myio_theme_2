@@ -744,10 +744,10 @@ let isDraggingCard = false;
 
     if (hasPCA) {
       for (let i = 0; i < PCA.length; i++) {
-        const d = decodeRW(PCA[i]);
-        PCARead[i] = d.read;
-        PCAWrite[i] = d.write;
-        PCAVal[i] = d.val;
+      const d = decodeRW(PCA[i]);
+      PCARead[i] = d.read;
+      PCAWrite[i] = d.write;
+      PCAVal[i] = d.val;
       }
     }
 
@@ -755,22 +755,22 @@ let isDraggingCard = false;
 
     if (hasPCA) {
       for (let i = 0; i < PCA.length; i++) {
-        if (
-          PCA_thermoActivator[i] != 0 &&
-          (PCARead[i] || PCAWrite[i]) &&
-          PCA_description &&
-          PCA_description[i + 1] != null
-        ) {
-          any = true; break;
-        }
+      if (
+        PCA_thermoActivator[i] != 0 &&
+        (PCARead[i] || PCAWrite[i]) &&
+        PCA_description &&
+        PCA_description[i + 1] != null
+      ) {
+        any = true; break;
+      }
       }
     }
 
     if (!any && hasRelays) {
       for (let i = 0; i < relays.length; i++) {
-        if (thermoActivator[i] != 0 && relay_description && relay_description[i + 1] != null) {
-          any = true; break;
-        }
+      if (thermoActivator[i] != 0 && relay_description && relay_description[i + 1] != null) {
+        any = true; break;
+      }
       }
     }
 
@@ -780,32 +780,31 @@ let isDraggingCard = false;
 
     function getSensorNameAndValue(activator) {
       if (activator < 100) {
-        let v = 0;
-        if (typeof thermo_eepromIndex !== "undefined" && typeof thermo_temps !== "undefined" && thermo_eepromIndex) {
-          for (let j = 0; j < thermo_eepromIndex.length; j++) {
-            if (activator == thermo_eepromIndex[j]) v = thermo_temps[j] / 100;
-          }
+      let v = 0;
+      if (typeof thermo_eepromIndex !== "undefined" && typeof thermo_temps !== "undefined" && thermo_eepromIndex) {
+        for (let j = 0; j < thermo_eepromIndex.length; j++) {
+        if (activator == thermo_eepromIndex[j]) v = thermo_temps[j] / 100;
         }
-        let name = "-";
-        if (typeof thermo_description !== "undefined" && thermo_description && thermo_description[activator] != null) {
-          name = thermo_description[activator];
-        }
-        return { name, value: v, unit: "°C", isTemp: true };
+      }
+      let name = "-";
+      if (typeof thermo_description !== "undefined" && thermo_description && thermo_description[activator] != null) {
+        name = thermo_description[activator];
+      }
+      return { name, value: v, unit: "°C", isTemp: true };
       } else {
-        const hi = activator - 101;
-        const v = (typeof humidity !== "undefined" && humidity && humidity[hi] != null) ? (humidity[hi] / 10) : 0;
-        let name = "-";
-        if (typeof hum_description !== "undefined" && hum_description && hum_description[hi] != null) {
-          name = hum_description[hi];
-        }
-        return { name, value: v, unit: "%", isTemp: false };
+      const hi = activator - 101;
+      const v = (typeof humidity !== "undefined" && humidity && humidity[hi] != null) ? (humidity[hi] / 10) : 0;
+      let name = "-";
+      if (typeof hum_description !== "undefined" && hum_description && hum_description[hi] != null) {
+        name = hum_description[hi];
+      }
+      return { name, value: v, unit: "%", isTemp: false };
       }
     }
 
     // ========== HA-style Circular Thermostat Card ==========
     
     function createCircularThermoCard(cardEl, onVal, offVal, onName, offName, unitText, sensorValue, isActive, isHeating, writable) {
-      // SVG paraméterek
       const size = 180;
       const cx = size / 2;
       const cy = size / 2;
@@ -813,128 +812,89 @@ let isDraggingCard = false;
       const strokeWidth = 8;
       const handleRadius = 12;
       
-      // Tartomány automatikus meghatározása az egység alapján
       const isPercent = unitText === "%" || unitText === " %";
       const defaultMinTemp = isPercent ? 0 : 5;
       const defaultMaxTemp = isPercent ? 100 : 40;
       
-      // Aktuális értékek (módosulhatnak drag alatt)
       let currentOnVal = onVal;
       let currentOffVal = offVal;
       
-      // Mód meghatározása: ha onVal < offVal -> fűtés, különben hűtés
-      // (fűtésnél alacsonyabb hőmérsékletnél kapcsol BE, magasabbnál KI)
       let currentIsHeating = currentOnVal < currentOffVal;
       
-      // Skála számítása a hiszterézis alapján
-      // Kis hiszterézis -> kis skála (x20), nagy hiszterézis -> nagyobb skála (min x3)
       const calculateScale = () => {
-        // hysteresis = ON és OFF közötti teljes távolság
-        const fullHysteresis = Math.abs(currentOffVal - currentOnVal);
-        const avgTemp = (currentOnVal + currentOffVal) / 2;
-        // A megjelenített hiszterézis (±érték) a fele
-        const displayHysteresis = fullHysteresis / 2;
-        
-        // Szorzó: kis hiszterézisnél nagyobb (max 10x), nagy hiszterézisnél kisebb (min 2x)
-        // FONTOS: minimum 2x, hogy legyen hely mozgatni a dragpontokat!
-        // 0.4°C fullHyst -> 10x szorzó -> 4°C skála
-        // 10°C fullHyst -> 2x szorzó -> 20°C skála
-        let multiplier;
-        if (isPercent) {
-          // %-nál: min 2x, max 8x
-          multiplier = Math.max(2, Math.min(8, 8 - fullHysteresis * 0.12));
-        } else {
-          // °C-nál: min 2x, max 10x
-          // Lineáris: 10 - (fullHyst * 0.8), de min 2
-          multiplier = Math.max(2, Math.min(5, 5 - fullHysteresis * 0.8));
-        }
-        
-        // A skála = teljes hiszterézis * szorzó
-        const range = fullHysteresis * multiplier;
-        
-        // Skála közepe = átlaghőmérséklet
-        let minT = avgTemp - range / 2;
-        let maxT = avgTemp + range / 2;
-        /*
-        // Korlátozás az abszolút határokra (de a közép maradjon az átlagnál amennyire lehet)
-        if (minT < defaultMinTemp) {
-          minT = defaultMinTemp;
-          maxT = minT + range;
-        }
-        if (maxT > defaultMaxTemp) {
-          maxT = defaultMaxTemp;
-          minT = maxT - range;
-        }
-        */
-        // Végső korlátozás
-      //  minT = Math.max(defaultMinTemp, minT);
-      //  maxT = Math.min(defaultMaxTemp, maxT);
-        
-        return { minT, maxT, hysteresis: displayHysteresis, avgTemp };
+      const fullHysteresis = Math.abs(currentOffVal - currentOnVal);
+      const avgTemp = (currentOnVal + currentOffVal) / 2;
+      const displayHysteresis = fullHysteresis / 2;
+      let multiplier;
+      if (isPercent) {
+        multiplier = Math.max(2, Math.min(8, 8 - fullHysteresis * 0.12));
+      } else {
+        multiplier = Math.max(2, Math.min(5, 5 - fullHysteresis * 0.8));
+      }
+      const range = fullHysteresis * multiplier;
+      let minT = avgTemp - range / 2;
+      let maxT = avgTemp + range / 2;
+      return { minT, maxT, hysteresis: displayHysteresis, avgTemp };
       };
       
       let scale = calculateScale();
       let scaleMinTemp = scale.minT;
       let scaleMaxTemp = scale.maxT;
       
-      // Arc paraméterek - NYÍLÁS ALUL
-      const arcStartDeg = 240;   // 8 óra pozíció
-      const arcSpan = 240;       // 240 fokos ív
-      const arcEndDeg = arcStartDeg + arcSpan; // = 480° = 120°
+      const arcStartDeg = 240;
+      const arcSpan = 240;
+      const arcEndDeg = arcStartDeg + arcSpan;
       
       const tempToAngle = (temp) => {
-        const ratio = Math.max(0, Math.min(1, (temp - scaleMinTemp) / (scaleMaxTemp - scaleMinTemp)));
-        return arcStartDeg + ratio * arcSpan;
+      const ratio = Math.max(0, Math.min(1, (temp - scaleMinTemp) / (scaleMaxTemp - scaleMinTemp)));
+      return arcStartDeg + ratio * arcSpan;
       };
       
       const angleToTemp = (angle) => {
-        let normAngle = angle;
-        while (normAngle < 0) normAngle += 360;
-        while (normAngle >= 360) normAngle -= 360;
-        
-        let arcAngle;
-        if (normAngle >= arcStartDeg) {
-          arcAngle = normAngle;
-        } else if (normAngle <= (arcEndDeg % 360)) {
-          arcAngle = normAngle + 360;
-        } else {
-          const distToEnd = normAngle - (arcEndDeg % 360);
-          const distToStart = arcStartDeg - normAngle;
-          arcAngle = distToEnd < distToStart ? arcEndDeg : arcStartDeg;
-        }
-        
-        const ratio = (arcAngle - arcStartDeg) / arcSpan;
-        return scaleMinTemp + Math.max(0, Math.min(1, ratio)) * (scaleMaxTemp - scaleMinTemp);
+      let normAngle = angle;
+      while (normAngle < 0) normAngle += 360;
+      while (normAngle >= 360) normAngle -= 360;
+      
+      let arcAngle;
+      if (normAngle >= arcStartDeg) {
+        arcAngle = normAngle;
+      } else if (normAngle <= (arcEndDeg % 360)) {
+        arcAngle = normAngle + 360;
+      } else {
+        const distToEnd = normAngle - (arcEndDeg % 360);
+        const distToStart = arcStartDeg - normAngle;
+        arcAngle = distToEnd < distToStart ? arcEndDeg : arcStartDeg;
+      }
+      
+      const ratio = (arcAngle - arcStartDeg) / arcSpan;
+      return scaleMinTemp + Math.max(0, Math.min(1, ratio)) * (scaleMaxTemp - scaleMinTemp);
       };
       
       const polarToCartesian = (angleDeg) => {
-        const rad = (angleDeg - 90) * Math.PI / 180;
-        return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+      const rad = (angleDeg - 90) * Math.PI / 180;
+      return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
       };
       
       const describeArc = (startAngle, endAngle) => {
-        if (Math.abs(endAngle - startAngle) < 0.1) return "";
-        const start = polarToCartesian(startAngle);
-        const end = polarToCartesian(endAngle);
-        const largeArc = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
-        return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`;
+      if (Math.abs(endAngle - startAngle) < 0.1) return "";
+      const start = polarToCartesian(startAngle);
+      const end = polarToCartesian(endAngle);
+      const largeArc = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
+      return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`;
       };
       
-      // Szín és ikon függvények (dinamikusan változhatnak)
       const getModeColor = (heating) => heating ? "#FF6B35" : "#35B8FF";
       const getModeColorLight = (heating) => heating ? "rgba(255, 107, 53, 0.3)" : "rgba(53, 184, 255, 0.3)";
       const getModeIcon = (heating, active) => {
-        if (!active) return "🌡️"; // Függőleges hőmérő ha OFF
-        return heating ? "🔥" : "❄️";
+      if (!active) return "🌡️";
+      return heating ? "🔥" : "❄️";
       };
       const getModeText = (heating) => heating 
-        ? (typeof str_Heating !== "undefined" ? str_Heating : "Heating") 
-        : (typeof str_Cooling !== "undefined" ? str_Cooling : "Cooling");
+      ? (typeof str_Heating !== "undefined" ? str_Heating : "Heating") 
+      : (typeof str_Cooling !== "undefined" ? str_Cooling : "Cooling");
       
-      // Container
       const thermoContainer = el("div", { class: "myio-thermo-circular" });
       
-      // SVG
       const svgNS = "http://www.w3.org/2000/svg";
       const svg = document.createElementNS(svgNS, "svg");
       svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
@@ -944,7 +904,6 @@ let isDraggingCard = false;
       svg.style.height = "auto";
       svg.style.touchAction = "none";
       
-      // Háttér ív
       const bgArc = document.createElementNS(svgNS, "path");
       bgArc.setAttribute("d", describeArc(arcStartDeg, arcEndDeg));
       bgArc.setAttribute("fill", "none");
@@ -953,7 +912,6 @@ let isDraggingCard = false;
       bgArc.setAttribute("stroke-linecap", "round");
       svg.appendChild(bgArc);
       
-      // Aktív zóna ív
       const activeArc = document.createElementNS(svgNS, "path");
       activeArc.setAttribute("fill", "none");
       activeArc.setAttribute("stroke", getModeColorLight(currentIsHeating));
@@ -961,7 +919,6 @@ let isDraggingCard = false;
       activeArc.setAttribute("stroke-linecap", "round");
       svg.appendChild(activeArc);
       
-      // Aktuális hőmérséklet ív
       const currentArc = document.createElementNS(svgNS, "path");
       currentArc.setAttribute("fill", "none");
       currentArc.setAttribute("stroke", getModeColor(currentIsHeating));
@@ -969,225 +926,200 @@ let isDraggingCard = false;
       currentArc.setAttribute("stroke-linecap", "round");
       svg.appendChild(currentArc);
       
-      // UI elemek (később frissítjük)
       let modeDisplay, avgDisplay, hystDisplay, sensorDisplay;
       let onHandle = null, offHandle = null;
       
-      // Teljes UI frissítés (skála, színek, pozíciók)
       const updateAll = () => {
-        // Mód újraszámítás
-        currentIsHeating = currentOnVal < currentOffVal;
+      currentIsHeating = currentOnVal < currentOffVal;
+      scale = calculateScale();
+      scaleMinTemp = scale.minT;
+      scaleMaxTemp = scale.maxT;
+      
+      const color = getModeColor(currentIsHeating);
+      const colorLight = getModeColorLight(currentIsHeating);
+      activeArc.setAttribute("stroke", colorLight);
+      currentArc.setAttribute("stroke", color);
+      
+      if (onHandle) {
+        onHandle.setAttribute("fill", color);
+      }
+      
+      const onAng = tempToAngle(currentOnVal);
+      const offAng = tempToAngle(currentOffVal);
+      const minAng = Math.min(onAng, offAng);
+      const maxAng = Math.max(onAng, offAng);
+      
+      if (maxAng - minAng > 0.5) {
+        activeArc.setAttribute("d", describeArc(minAng, maxAng));
+      } else {
+        activeArc.setAttribute("d", "");
+      }
+      
+      if (onHandle && offHandle) {
+        const onPos = polarToCartesian(onAng);
+        const offPos = polarToCartesian(offAng);
+        onHandle.setAttribute("cx", onPos.x);
+        onHandle.setAttribute("cy", onPos.y);
+        offHandle.setAttribute("cx", offPos.x);
+        offHandle.setAttribute("cy", offPos.y);
+      }
+      
+      if (isActive ) {
+        const sensorAng = tempToAngle(Math.max(scaleMinTemp, Math.min(scaleMaxTemp, sensorValue)));
+        const targetAng = currentIsHeating ? onAng : offAng;
+        if (Math.abs(sensorAng - targetAng) > 0.5) {
+        currentArc.setAttribute("d", describeArc(Math.min(sensorAng, targetAng), Math.max(sensorAng, targetAng)));
+        } else {
+        currentArc.setAttribute("d", "");
+        }
+      } else {
+        currentArc.setAttribute("d", "");
+      }
+      
+      if (modeDisplay && avgDisplay && hystDisplay && sensorDisplay) {
+        const newAvg = (currentOnVal + currentOffVal) / 2;
+        const newHyst = Math.abs(currentOffVal - currentOnVal) / 2;
         
-        // Skála újraszámítás
-        scale = calculateScale();
-        scaleMinTemp = scale.minT;
-        scaleMaxTemp = scale.maxT;
+        modeDisplay.textContent = isActive ? getModeText(currentIsHeating) : (typeof str_Off !== "undefined" ? str_Off : "Off");
+        modeDisplay.style.color = isActive ? getModeColor(currentIsHeating) : "#888";
         
-        // Színek frissítése
-        const color = getModeColor(currentIsHeating);
-        const colorLight = getModeColorLight(currentIsHeating);
-        activeArc.setAttribute("stroke", colorLight);
-        currentArc.setAttribute("stroke", color);
+        avgDisplay.innerHTML = `${Math.floor(newAvg)}<span class="decimal">,${Math.round((newAvg - Math.floor(newAvg)) * 10)}</span><span class="unit">°</span>`;
+        hystDisplay.textContent = `±${newHyst.toFixed(1)} ${unitText}`;
+        sensorDisplay.innerHTML = `<span class="icon">${getModeIcon(currentIsHeating, isActive)}</span> ${sensorValue.toFixed(1)} ${unitText}`;
+      }
+      
+      cardEl.classList.remove("myio-heat", "myio-cool");
+      if (isActive) {
+        cardEl.classList.add(currentIsHeating ? "myio-heat" : "myio-cool");
+      }
+      };
+      
+      updateAll();
+      
+      if (writable) {
+      onHandle = document.createElementNS(svgNS, "circle");
+      onHandle.setAttribute("r", handleRadius);
+      onHandle.setAttribute("fill", getModeColor(currentIsHeating));
+      onHandle.setAttribute("stroke", "#fff");
+      onHandle.setAttribute("stroke-width", "3");
+      onHandle.setAttribute("class", "myio-thermo-handle");
+      onHandle.style.cursor = "grab";
+      onHandle.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.3))";
+      svg.appendChild(onHandle);
+      
+      offHandle = document.createElementNS(svgNS, "circle");
+      offHandle.setAttribute("r", handleRadius);
+      offHandle.setAttribute("fill", "#666");
+      offHandle.setAttribute("stroke", "#fff");
+      offHandle.setAttribute("stroke-width", "3");
+      offHandle.setAttribute("class", "myio-thermo-handle");
+      offHandle.style.cursor = "grab";
+      offHandle.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.3))";
+      svg.appendChild(offHandle);
+      
+      updateAll();
+      
+      let dragging = null;
+      
+      const getAngleFromEvent = (e) => {
+        const rect = svg.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const svgX = (clientX - rect.left) * (size / rect.width);
+        const svgY = (clientY - rect.top) * (size / rect.height);
+        return Math.atan2(svgX - cx, -(svgY - cy)) * 180 / Math.PI;
+      };
+      
+      const startDrag = (handle, isOnHandle) => (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dragging = { handle, isOn: isOnHandle };
+        handle.style.cursor = "grabbing";
+        handle.setAttribute("r", handleRadius + 3);
+      };
+      
+      const doDrag = (e) => {
+        if (!dragging) return;
+        e.preventDefault();
         
-        if (onHandle) {
-          onHandle.setAttribute("fill", color);
+        const angle = getAngleFromEvent(e);
+        let temp = angleToTemp(angle);
+        temp = Math.round(temp * 10) / 10;
+        
+        if (dragging.isOn) {
+        currentOnVal = temp;
+        } else {
+        currentOffVal = temp;
         }
         
-        // Arc-ok frissítése
         const onAng = tempToAngle(currentOnVal);
         const offAng = tempToAngle(currentOffVal);
+        const onPos = polarToCartesian(onAng);
+        const offPos = polarToCartesian(offAng);
+        onHandle.setAttribute("cx", onPos.x);
+        onHandle.setAttribute("cy", onPos.y);
+        offHandle.setAttribute("cx", offPos.x);
+        offHandle.setAttribute("cy", offPos.y);
+        
         const minAng = Math.min(onAng, offAng);
         const maxAng = Math.max(onAng, offAng);
-        
         if (maxAng - minAng > 0.5) {
-          activeArc.setAttribute("d", describeArc(minAng, maxAng));
-        } else {
-          activeArc.setAttribute("d", "");
+        activeArc.setAttribute("d", describeArc(minAng, maxAng));
         }
         
-        // Handle pozíciók
-        if (onHandle && offHandle) {
-          const onPos = polarToCartesian(onAng);
-          const offPos = polarToCartesian(offAng);
-          onHandle.setAttribute("cx", onPos.x);
-          onHandle.setAttribute("cy", onPos.y);
-          offHandle.setAttribute("cx", offPos.x);
-          offHandle.setAttribute("cy", offPos.y);
-        }
+        const newAvg = (currentOnVal + currentOffVal) / 2;
+        const newHyst = Math.abs(currentOffVal - currentOnVal) / 2;
+        avgDisplay.innerHTML = `${Math.floor(newAvg)}<span class="decimal">,${Math.round((newAvg - Math.floor(newAvg)) * 10)}</span><span class="unit">°</span>`;
+        hystDisplay.textContent = `±${newHyst.toFixed(1)} ${unitText}`;
+      };
+      
+      const endDrag = () => {
+        if (!dragging) return;
         
-        // Sensor arc
-        if (isActive ) {
-          const sensorAng = tempToAngle(Math.max(scaleMinTemp, Math.min(scaleMaxTemp, sensorValue)));
-          const targetAng = currentIsHeating ? onAng : offAng;
-          if (Math.abs(sensorAng - targetAng) > 0.5) {
-            currentArc.setAttribute("d", describeArc(Math.min(sensorAng, targetAng), Math.max(sensorAng, targetAng)));
-          } else {
-            currentArc.setAttribute("d", "");
-          }
-        } else {
-          currentArc.setAttribute("d", "");
-        }
+        dragging.handle.style.cursor = "grab";
+        dragging.handle.setAttribute("r", handleRadius);
+        dragging = null;
         
-        // Kijelző frissítés
-        if (modeDisplay && avgDisplay && hystDisplay && sensorDisplay) {
-          const newAvg = (currentOnVal + currentOffVal) / 2;
-          const newHyst = Math.abs(currentOffVal - currentOnVal) / 2;
-          
-          modeDisplay.textContent = isActive ? getModeText(currentIsHeating) : (typeof str_Off !== "undefined" ? str_Off : "Off");
-          modeDisplay.style.color = isActive ? getModeColor(currentIsHeating) : "#888";
-          
-          avgDisplay.innerHTML = `${Math.floor(newAvg)}<span class="decimal">,${Math.round((newAvg - Math.floor(newAvg)) * 10)}</span><span class="unit">°</span>`;
-          hystDisplay.textContent = `±${newHyst.toFixed(1)} ${unitText}`;
-          sensorDisplay.innerHTML = `<span class="icon">${getModeIcon(currentIsHeating, isActive)}</span> ${sensorValue.toFixed(1)} ${unitText}`;
-        }
+        updateAll();
         
-        // Card class frissítés (fűtés/hűtés szín)
-        cardEl.classList.remove("myio-heat", "myio-cool");
-        if (isActive) {
-          cardEl.classList.add(currentIsHeating ? "myio-heat" : "myio-cool");
+        try {
+        const onInput = document.createElement("input");
+        onInput.name = onName;
+        onInput.value = String(Math.round(currentOnVal*10 ));
+        
+        const offInput = document.createElement("input");
+        offInput.name = offName;
+        offInput.value = String(Math.round(currentOffVal * 10));
+        
+        changedPair(onInput, onInput.name,offInput, offInput.name);
+        } catch (err) {
+        console.error("Thermostat update error:", err);
         }
       };
       
-      // Kezdeti renderelés
-      updateAll();
+      onHandle.addEventListener("mousedown", startDrag(onHandle, true));
+      onHandle.addEventListener("touchstart", startDrag(onHandle, true), { passive: false });
+      offHandle.addEventListener("mousedown", startDrag(offHandle, false));
+      offHandle.addEventListener("touchstart", startDrag(offHandle, false), { passive: false });
       
-      // Drag logika
-      if (writable) {
-        // ON handle
-        onHandle = document.createElementNS(svgNS, "circle");
-        onHandle.setAttribute("r", handleRadius);
-        onHandle.setAttribute("fill", getModeColor(currentIsHeating));
-        onHandle.setAttribute("stroke", "#fff");
-        onHandle.setAttribute("stroke-width", "3");
-        onHandle.setAttribute("class", "myio-thermo-handle");
-        onHandle.style.cursor = "grab";
-        onHandle.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.3))";
-        svg.appendChild(onHandle);
-        
-        // OFF handle
-        offHandle = document.createElementNS(svgNS, "circle");
-        offHandle.setAttribute("r", handleRadius);
-        offHandle.setAttribute("fill", "#666");
-        offHandle.setAttribute("stroke", "#fff");
-        offHandle.setAttribute("stroke-width", "3");
-        offHandle.setAttribute("class", "myio-thermo-handle");
-        offHandle.style.cursor = "grab";
-        offHandle.style.filter = "drop-shadow(0 2px 4px rgba(0,0,0,0.3))";
-        svg.appendChild(offHandle);
-        
-        // Pozíciók beállítása
-        updateAll();
-        
-        let dragging = null;
-        
-        const getAngleFromEvent = (e) => {
-          const rect = svg.getBoundingClientRect();
-          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-          const svgX = (clientX - rect.left) * (size / rect.width);
-          const svgY = (clientY - rect.top) * (size / rect.height);
-          return Math.atan2(svgX - cx, -(svgY - cy)) * 180 / Math.PI;
-        };
-        
-        const startDrag = (handle, isOnHandle) => (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          dragging = { handle, isOn: isOnHandle };
-          handle.style.cursor = "grabbing";
-          handle.setAttribute("r", handleRadius + 3);
-        };
-        
-        const doDrag = (e) => {
-          if (!dragging) return;
-          e.preventDefault();
-          
-          const angle = getAngleFromEvent(e);
-          let temp = angleToTemp(angle);
-          temp = Math.round(temp * 10) / 10;
-        //  temp = Math.max(defaultMinTemp, Math.min(defaultMaxTemp, temp));
-          
-          if (dragging.isOn) {
-            currentOnVal = temp;
-          } else {
-            currentOffVal = temp;
-          }
-          
-          // Drag közben NE frissítsük a skálát, csak a pozíciókat
-          const onAng = tempToAngle(currentOnVal);
-          const offAng = tempToAngle(currentOffVal);
-          const onPos = polarToCartesian(onAng);
-          const offPos = polarToCartesian(offAng);
-          onHandle.setAttribute("cx", onPos.x);
-          onHandle.setAttribute("cy", onPos.y);
-          offHandle.setAttribute("cx", offPos.x);
-          offHandle.setAttribute("cy", offPos.y);
-          
-          // Arc frissítés (csak pozíció, nem szín)
-          const minAng = Math.min(onAng, offAng);
-          const maxAng = Math.max(onAng, offAng);
-          if (maxAng - minAng > 0.5) {
-            activeArc.setAttribute("d", describeArc(minAng, maxAng));
-          }
-          
-          // Kijelző frissítés
-          const newAvg = (currentOnVal + currentOffVal) / 2;
-          const newHyst = Math.abs(currentOffVal - currentOnVal) / 2;
-          avgDisplay.innerHTML = `${Math.floor(newAvg)}<span class="decimal">,${Math.round((newAvg - Math.floor(newAvg)) * 10)}</span><span class="unit">°</span>`;
-          hystDisplay.textContent = `±${newHyst.toFixed(1)} ${unitText}`;
-        };
-        
-        const endDrag = () => {
-          if (!dragging) return;
-          
-          dragging.handle.style.cursor = "grab";
-          dragging.handle.setAttribute("r", handleRadius);
-          dragging = null;
-          
-          // DRAG UTÁN: teljes frissítés (skála, mód, színek)
-          updateAll();
-          
-          // Értékek küldése
-          try {
-            const onInput = document.createElement("input");
-            onInput.name = onName;
-            onInput.value = String(Math.round(currentOnVal*10 ));
-            
-            
-            const offInput = document.createElement("input");
-            offInput.name = offName;
-            offInput.value = String(Math.round(currentOffVal * 10));
-            
-            changedPair(onInput, onInput.name,offInput, offInput.name);
-          } catch (err) {
-            console.error("Thermostat update error:", err);
-          }
-        };
-        
-        // Event listeners
-        onHandle.addEventListener("mousedown", startDrag(onHandle, true));
-        onHandle.addEventListener("touchstart", startDrag(onHandle, true), { passive: false });
-        offHandle.addEventListener("mousedown", startDrag(offHandle, false));
-        offHandle.addEventListener("touchstart", startDrag(offHandle, false), { passive: false });
-        
-        svg.addEventListener("mousemove", doDrag);
-        svg.addEventListener("touchmove", doDrag, { passive: false });
-        document.addEventListener("mousemove", doDrag);
-        document.addEventListener("touchmove", doDrag, { passive: false });
-        
-        svg.addEventListener("mouseup", endDrag);
-        svg.addEventListener("touchend", endDrag);
-        document.addEventListener("mouseup", endDrag);
-        document.addEventListener("touchend", endDrag);
+      svg.addEventListener("mousemove", doDrag);
+      svg.addEventListener("touchmove", doDrag, { passive: false });
+      document.addEventListener("mousemove", doDrag);
+      document.addEventListener("touchmove", doDrag, { passive: false });
+      
+      svg.addEventListener("mouseup", endDrag);
+      svg.addEventListener("touchend", endDrag);
+      document.addEventListener("mouseup", endDrag);
+      document.addEventListener("touchend", endDrag);
       }
       
       thermoContainer.appendChild(svg);
       
-      // Középső kijelző
       const centerDisplay = el("div", { class: "myio-thermo-center" });
       
       modeDisplay = el("div", { 
-        class: "myio-thermo-mode" + (isActive ? " active" : ""),
-        style: `color: ${isActive ? getModeColor(currentIsHeating) : "#888"}`
+      class: "myio-thermo-mode" + (isActive ? " active" : ""),
+      style: `color: ${isActive ? getModeColor(currentIsHeating) : "#888"}`
       });
       modeDisplay.textContent = isActive ? getModeText(currentIsHeating) : (typeof str_Off !== "undefined" ? str_Off : "Off");
       centerDisplay.appendChild(modeDisplay);
@@ -1207,344 +1139,338 @@ let isDraggingCard = false;
       
       thermoContainer.appendChild(centerDisplay);
       
-      // +/- gombok
       if (writable) {
-        const btnContainer = el("div", { class: "myio-thermo-buttons" });
+      const btnContainer = el("div", { class: "myio-thermo-buttons" });
+      
+      const minusBtn = el("button", { class: "myio-thermo-btn minus", text: "−" });
+      const plusBtn = el("button", { class: "myio-thermo-btn plus", text: "+" });
+      
+      const adjustTemp = (delta) => {
+        currentOnVal = Math.round((currentOnVal + delta) * 10) / 10;
+        currentOffVal = Math.round((currentOffVal + delta) * 10) / 10;
         
-        const minusBtn = el("button", { class: "myio-thermo-btn minus", text: "−" });
-        const plusBtn = el("button", { class: "myio-thermo-btn plus", text: "+" });
+        const minVal = Math.min(currentOnVal, currentOffVal);
+        const maxVal = Math.max(currentOnVal, currentOffVal);
+        if (minVal < defaultMinTemp) {
+        const shift = defaultMinTemp - minVal;
+        currentOnVal += shift;
+        currentOffVal += shift;
+        }
+        if (maxVal > defaultMaxTemp) {
+        const shift = maxVal - defaultMaxTemp;
+        currentOnVal -= shift;
+        currentOffVal -= shift;
+        }
         
-        const adjustTemp = (delta) => {
-          currentOnVal = Math.round((currentOnVal + delta) * 10) / 10;
-          currentOffVal = Math.round((currentOffVal + delta) * 10) / 10;
-          
-          // Korlátozás
-          const minVal = Math.min(currentOnVal, currentOffVal);
-          const maxVal = Math.max(currentOnVal, currentOffVal);
-          if (minVal < defaultMinTemp) {
-            const shift = defaultMinTemp - minVal;
-            currentOnVal += shift;
-            currentOffVal += shift;
-          }
-          if (maxVal > defaultMaxTemp) {
-            const shift = maxVal - defaultMaxTemp;
-            currentOnVal -= shift;
-            currentOffVal -= shift;
-          }
-          
-          updateAll();
-          
-          // Értékek küldése
-          try {
-            const onInput = document.createElement("input");
-            onInput.name = onName;
-            onInput.value = String(Math.round(currentOnVal*10));
-            
-            const offInput = document.createElement("input");
-            offInput.name = offName;
-            offInput.value = String(Math.round(currentOffVal * 10));
-            
-            changedPair(onInput, onInput.name, offInput, offInput.name);
-          } catch (err) {
-            console.error("Thermostat adjust error:", err);
-          }
-        };
+        updateAll();
         
-        minusBtn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); adjustTemp(-0.1); });
-        plusBtn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); adjustTemp(0.1); });
+        try {
+        const onInput = document.createElement("input");
+        onInput.name = onName;
+        onInput.value = String(Math.round(currentOnVal*10));
         
-        btnContainer.appendChild(minusBtn);
-        btnContainer.appendChild(plusBtn);
-        thermoContainer.appendChild(btnContainer);
+        const offInput = document.createElement("input");
+        offInput.name = offName;
+        offInput.value = String(Math.round(currentOffVal * 10));
+        
+        changedPair(onInput, onInput.name, offInput, offInput.name);
+        } catch (err) {
+        console.error("Thermostat adjust error:", err);
+        }
+      };
+      
+      minusBtn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); adjustTemp(-0.1); });
+      plusBtn.addEventListener("click", (e) => { e.preventDefault(); e.stopPropagation(); adjustTemp(0.1); });
+      
+      btnContainer.appendChild(minusBtn);
+      btnContainer.appendChild(plusBtn);
+      thermoContainer.appendChild(btnContainer);
       }
       
       cardEl.appendChild(thermoContainer);
     }
 
-    // CSS injektálás a cirkuláris termosztáthoz
     if (!document.getElementById("myio-thermo-circular-css")) {
       const style = document.createElement("style");
       style.id = "myio-thermo-circular-css";
       style.textContent = `
-        .myio-thermo-circular {
-          position: relative;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          padding: 10px 0;
-        }
-        .myio-thermo-svg {
-          display: block;
-        }
-        .myio-thermo-handle {
-          transition: r 0.15s ease;
-        }
-        .myio-thermo-handle:hover {
-          filter: brightness(1.1);
-        }
-        .myio-thermo-center {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -60%);
-          text-align: center;
-          pointer-events: none;
-        }
-        .myio-thermo-mode {
-          font-size: 12px;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 2px;
-          opacity: 0.7;
-        }
-        .myio-thermo-mode.active {
-          opacity: 1;
-        }
+      .myio-thermo-circular {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px 0;
+      }
+      .myio-thermo-svg {
+        display: block;
+      }
+      .myio-thermo-handle {
+        transition: r 0.15s ease;
+      }
+      .myio-thermo-handle:hover {
+        filter: brightness(1.1);
+      }
+      .myio-thermo-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -60%);
+        text-align: center;
+        pointer-events: none;
+      }
+      .myio-thermo-mode {
+        font-size: 12px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+        opacity: 0.7;
+      }
+      .myio-thermo-mode.active {
+        opacity: 1;
+      }
+      .myio-thermo-avgtemp {
+        font-size: 42px;
+        font-weight: 300;
+        line-height: 1;
+        color: #333;
+      }
+      .myio-thermo-avgtemp .decimal {
+        font-size: 24px;
+        vertical-align: top;
+        margin-left: -2px;
+      }
+      .myio-thermo-avgtemp .unit {
+        font-size: 18px;
+        vertical-align: top;
+        margin-left: 2px;
+        font-weight: 400;
+      }
+      .myio-thermo-avgtemp .unit .c {
+        font-size: 14px;
+      }
+      .myio-thermo-hyst {
+        font-size: 11px;
+        color: #888;
+        margin-top: 2px;
+      }
+      .myio-thermo-sensor {
+        font-size: 14px;
+        color: #666;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+      .myio-thermo-sensor .icon {
+        font-size: 16px;
+      }
+      .myio-thermo-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 15px;
+      }
+      .myio-thermo-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        background: #fff;
+        font-size: 24px;
+        font-weight: 300;
+        color: #666;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+      }
+      .myio-thermo-btn:hover {
+        border-color: #aaa;
+        color: #333;
+      }
+      .myio-thermo-btn:active {
+        transform: scale(0.95);
+        background: #f5f5f5;
+      }
+      
+      @media (prefers-color-scheme: dark) {
         .myio-thermo-avgtemp {
-          font-size: 42px;
-          font-weight: 300;
-          line-height: 1;
-          color: #333;
-        }
-        .myio-thermo-avgtemp .decimal {
-          font-size: 24px;
-          vertical-align: top;
-          margin-left: -2px;
-        }
-        .myio-thermo-avgtemp .unit {
-          font-size: 18px;
-          vertical-align: top;
-          margin-left: 2px;
-          font-weight: 400;
-        }
-        .myio-thermo-avgtemp .unit .c {
-          font-size: 14px;
+        color: #fff;
         }
         .myio-thermo-hyst {
-          font-size: 11px;
-          color: #888;
-          margin-top: 2px;
+        color: #aaa;
         }
         .myio-thermo-sensor {
-          font-size: 14px;
-          color: #666;
-          margin-top: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-        }
-        .myio-thermo-sensor .icon {
-          font-size: 16px;
-        }
-        .myio-thermo-buttons {
-          display: flex;
-          justify-content: center;
-          gap: 20px;
-          margin-top: 15px;
+        color: #ccc;
         }
         .myio-thermo-btn {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          border: 2px solid #ddd;
-          background: #fff;
-          font-size: 24px;
-          font-weight: 300;
-          color: #666;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.15s ease;
+        background: #333;
+        border-color: #555;
+        color: #ccc;
         }
         .myio-thermo-btn:hover {
-          border-color: #aaa;
-          color: #333;
+        border-color: #777;
+        color: #fff;
         }
-        .myio-thermo-btn:active {
-          transform: scale(0.95);
-          background: #f5f5f5;
-        }
-        
-        /* Dark theme support */
-        @media (prefers-color-scheme: dark) {
-          .myio-thermo-avgtemp {
-            color: #fff;
-          }
-          .myio-thermo-hyst {
-            color: #aaa;
-          }
-          .myio-thermo-sensor {
-            color: #ccc;
-          }
-          .myio-thermo-btn {
-            background: #333;
-            border-color: #555;
-            color: #ccc;
-          }
-          .myio-thermo-btn:hover {
-            border-color: #777;
-            color: #fff;
-          }
-        }
-        
-        /* Card variant styles */
-        .myio-card.myio-heat .myio-thermo-mode.active {
-          color: #FF6B35;
-        }
-        .myio-card.myio-cool .myio-thermo-mode.active {
-          color: #35B8FF;
-        }
+      }
+      
+      .myio-card.myio-heat .myio-thermo-mode.active {
+        color: #FF6B35;
+      }
+      .myio-card.myio-cool .myio-thermo-mode.active {
+        color: #35B8FF;
+      }
       `;
       document.head.appendChild(style);
     }
 
     if (hasPCA) {
       for (let i = 0; i < PCA.length; i++) {
-        if (PCA_thermoActivator[i] == 0) continue;
-        if (!(PCARead[i] || PCAWrite[i])) continue;
-        if (!PCA_description || PCA_description[i + 1] == null) continue;
+      if (PCA_thermoActivator[i] == 0) continue;
+      if (!(PCARead[i] || PCAWrite[i])) continue;
+      if (!PCA_description || PCA_description[i + 1] == null) continue;
 
-        const id = `thermo:pca:${i + 1}`;
-        const makeFn = () => {
-          if (!PCA_description[i + 1]) PCA_description[i + 1] = "-";
+      const id = `thermo:pca:${i + 1}`;
+      const makeFn = () => {
+        if (!PCA_description[i + 1]) PCA_description[i + 1] = "-";
 
-          const isActive = (PCAVal[i] > (typeof PCAMIN !== "undefined" ? PCAMIN[i] : 0));
-          let status = "myio-off";
-          let isHeating = true;
-          if (isActive) {
-            if (typeof PCA_min_temp_ON !== "undefined" && typeof PCA_max_temp_OFF !== "undefined") {
-              if (PCA_min_temp_ON[i] < PCA_max_temp_OFF[i]) { status = "myio-on myio-heat"; isHeating = true; }
-              else if (PCA_max_temp_OFF[i] < PCA_min_temp_ON[i]) { status = "myio-on myio-cool"; isHeating = false; }
-              else status = "myio-on";
-            } else {
-              status = "myio-on";
-            }
-          } else {
-            // Meghatározzuk a módot akkor is, ha nincs aktív
-            if (typeof PCA_min_temp_ON !== "undefined" && typeof PCA_max_temp_OFF !== "undefined") {
-              isHeating = PCA_min_temp_ON[i] < PCA_max_temp_OFF[i];
-            }
-          }
+        const isActive = (PCAVal[i] > (typeof PCAMIN !== "undefined" ? PCAMIN[i] : 0));
+        let status = "myio-off";
+        let isHeating = true;
+        if (isActive) {
+        if (typeof PCA_min_temp_ON !== "undefined" && typeof PCA_max_temp_OFF !== "undefined") {
+          if (PCA_min_temp_ON[i] < PCA_max_temp_OFF[i]) { status = "myio-on myio-heat"; isHeating = true; }
+          else if (PCA_max_temp_OFF[i] < PCA_min_temp_ON[i]) { status = "myio-on myio-cool"; isHeating = false; }
+          else status = "myio-on";
+        } else {
+          status = "myio-on";
+        }
+        } else {
+        if (typeof PCA_min_temp_ON !== "undefined" && typeof PCA_max_temp_OFF !== "undefined") {
+          isHeating = PCA_min_temp_ON[i] < PCA_max_temp_OFF[i];
+        }
+        }
 
-          const c = card(PCA_description[i + 1], status, id);
+        const c = card(PCA_description[i + 1], status, id);
 
-          if (PCAWrite[i]) {
-            setCardHeaderWithInvAndToggle(
-              c,
-              PCA_description[i + 1],
-              "PCA_INV",
-              "PCA_ON",
-              "PCA_OFF",
-              i + 1,
-              isActive,
-              id
-            );
-          }
+        if (PCAWrite[i]) {
+        setCardHeaderWithInvAndToggle(
+          c,
+          PCA_description[i + 1],
+          "PCA_INV",
+          "PCA_ON",
+          "PCA_OFF",
+          i + 1,
+          isActive,
+          id
+        );
+        }
 
-          const sensor = getSensorNameAndValue(PCA_thermoActivator[i]);
-          const unitText = sensor.isTemp ? "°C" : "%";
+        const sensor = getSensorNameAndValue(PCA_thermoActivator[i]);
+        const unitText = sensor.isTemp ? "°C" : "%";
 
-          const onTh = (typeof PCA_min_temp_ON !== "undefined" ? (PCA_min_temp_ON[i] / 10) : 0);
-          const offTh = (typeof PCA_max_temp_OFF !== "undefined" ? (PCA_max_temp_OFF[i] / 10) : 0);
+        const onTh = (typeof PCA_min_temp_ON !== "undefined" ? (PCA_min_temp_ON[i] / 10) : 0);
+        const offTh = (typeof PCA_max_temp_OFF !== "undefined" ? (PCA_max_temp_OFF[i] / 10) : 0);
 
-          createCircularThermoCard(
-            c,
-            onTh,
-            offTh,
-            "PCA_temp_MIN*" + (i + 1),
-            "PCA_temp_MAX*" + (i + 1),
-            unitText,
-            sensor.value,
-            isActive,
-            isHeating,
-            PCAWrite[i]
-          );
+        createCircularThermoCard(
+        c,
+        onTh,
+        offTh,
+        "PCA_temp_MIN*" + (i + 1),
+        "PCA_temp_MAX*" + (i + 1),
+        unitText,
+        sensor.value,
+        isActive,
+        isHeating,
+        PCAWrite[i]
+        );
 
-          return c;
-        };
+        return c;
+      };
 
-        registerCardFactory(id, makeFn);
-        grid.append(makeFn());
+      registerCardFactory(id, makeFn);
+      grid.append(makeFn());
       }
     }
 
     if (hasRelays) {
       for (let i = 0; i < relays.length; i++) {
-        if (thermoActivator[i] == 0) continue;
-        if (!relay_description || relay_description[i + 1] == null) continue;
+      if (thermoActivator[i] == 0) continue;
+      if (!relay_description || relay_description[i + 1] == null) continue;
 
-        const id = `thermo:relay:${i + 1}`;
-        const makeFn = () => {
-          if (!relay_description[i + 1]) relay_description[i + 1] = "-";
+      const id = `thermo:relay:${i + 1}`;
+      const makeFn = () => {
+        if (!relay_description[i + 1]) relay_description[i + 1] = "-";
 
-          const isOn = (relays[i] == 101 || relays[i] == 111 || relays[i] == 11);
+        const isOn = (relays[i] == 101 || relays[i] == 111 || relays[i] == 11);
 
-          let status = "myio-off";
-          let isHeating = true;
-          if (isOn) {
-            if (typeof min_temp_ON !== "undefined" && typeof max_temp_OFF !== "undefined") {
-              if (min_temp_ON[i] < max_temp_OFF[i]) { status = "myio-on myio-heat"; isHeating = true; }
-              else if (max_temp_OFF[i] < min_temp_ON[i]) { status = "myio-on myio-cool"; isHeating = false; }
-              else status = "myio-on";
-            } else {
-              status = "myio-on";
-            }
-          } else {
-            // Meghatározzuk a módot akkor is, ha nincs aktív
-            if (typeof min_temp_ON !== "undefined" && typeof max_temp_OFF !== "undefined") {
-              isHeating = min_temp_ON[i] < max_temp_OFF[i];
-            }
-          }
+        let status = "myio-off";
+        let isHeating = true;
+        if (isOn) {
+        if (typeof min_temp_ON !== "undefined" && typeof max_temp_OFF !== "undefined") {
+          if (min_temp_ON[i] < max_temp_OFF[i]) { status = "myio-on myio-heat"; isHeating = true; }
+          else if (max_temp_OFF[i] < min_temp_ON[i]) { status = "myio-on myio-cool"; isHeating = false; }
+          else status = "myio-on";
+        } else {
+          status = "myio-on";
+        }
+        } else {
+        if (typeof min_temp_ON !== "undefined" && typeof max_temp_OFF !== "undefined") {
+          isHeating = min_temp_ON[i] < max_temp_OFF[i];
+        }
+        }
 
-          const c = card(relay_description[i + 1], status, id);
+        const c = card(relay_description[i + 1], status, id);
 
-          const writable = (parseInt(relays[i] / 10) == 1 || parseInt(relays[i] / 10) == 11);
+        const writable = (parseInt(relays[i] / 10) == 1 || parseInt(relays[i] / 10) == 11);
 
-          if (writable) {
-            setCardHeaderWithInvAndToggle(
-              c,
-              relay_description[i + 1],
-              "r_INV",
-              "r_ON",
-              "r_OFF",
-              i + 1,
-              isOn,
-              id
-            );
-          }
+        if (writable) {
+        setCardHeaderWithInvAndToggle(
+          c,
+          relay_description[i + 1],
+          "r_INV",
+          "r_ON",
+          "r_OFF",
+          i + 1,
+          isOn,
+          id
+        );
+        }
 
-          const sensor = getSensorNameAndValue(thermoActivator[i]);
-          const unitText = sensor.isTemp ? "°C" : "%";
+        const sensor = getSensorNameAndValue(thermoActivator[i]);
+        const unitText = sensor.isTemp ? "°C" : "%";
 
-          const onTh = (typeof min_temp_ON !== "undefined" ? (min_temp_ON[i] / 10) : 0);
-          const offTh = (typeof max_temp_OFF !== "undefined" ? (max_temp_OFF[i] / 10) : 0);
+        const onTh = (typeof min_temp_ON !== "undefined" ? (min_temp_ON[i] / 10) : 0);
+        const offTh = (typeof max_temp_OFF !== "undefined" ? (max_temp_OFF[i] / 10) : 0);
 
-          createCircularThermoCard(
-            c,
-            onTh,
-            offTh,
-            "min_temp_ON*" + (i + 1),
-            "max_temp_OFF*" + (i + 1),
-            unitText,
-            sensor.value,
-            isOn,
-            isHeating,
-            writable
-          );
+        createCircularThermoCard(
+        c,
+        onTh,
+        offTh,
+        "min_temp_ON*" + (i + 1),
+        "max_temp_OFF*" + (i + 1),
+        unitText,
+        sensor.value,
+        isOn,
+        isHeating,
+        writable
+        );
 
-          return c;
-        };
+        return c;
+      };
 
-        registerCardFactory(id, makeFn);
-        grid.append(makeFn());
+      registerCardFactory(id, makeFn);
+      grid.append(makeFn());
       }
     }
 
     if (grid.childNodes.length > 0) root.append(section);
   }
+  // Expose for external usage
+  //window.myioRenderThermo = renderThermo;
   
   function renderFavorites(root) {
     const favs = loadFavs();
