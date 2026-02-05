@@ -71,7 +71,7 @@
       // Nagyobb, szebb chevron - meghosszabbított nyilak
       chevron.setAttribute("d", "M8.5 16.5L12 13L15.5 16.5");
       chevron.setAttribute("fill", "none");
-      chevron.setAttribute("stroke-width", "3.5");   // Még hangsúlyosabb
+      chevron.setAttribute("stroke-width", "2");   // Még hangsúlyosabb
       chevron.setAttribute("stroke-linecap", "round");
       chevron.setAttribute("stroke-linejoin", "round");
       chevron.setAttribute("stroke", "currentColor"); // Explicit szín beállítás
@@ -124,7 +124,7 @@
       // Nagyobb, szebb chevron - meghosszabbított nyilak
       chevron.setAttribute("d", "M8.5 16.5L12 20L15.5 16.5");
       chevron.setAttribute("fill", "none");
-      chevron.setAttribute("stroke-width", "3.5");   // Még hangsúlyosabb
+      chevron.setAttribute("stroke-width", "2");   // Még hangsúlyosabb
       chevron.setAttribute("stroke-linecap", "round");
       chevron.setAttribute("stroke-linejoin", "round");
       chevron.setAttribute("stroke", "currentColor"); // Explicit szín beállítás
