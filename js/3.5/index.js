@@ -1016,7 +1016,7 @@ let isDraggingCard = false;
         }
         
         // Sensor arc
-        if (isActive && sensorValue >= defaultMinTemp && sensorValue <= defaultMaxTemp) {
+        if (isActive ) {
           const sensorAng = tempToAngle(Math.max(scaleMinTemp, Math.min(scaleMaxTemp, sensorValue)));
           const targetAng = currentIsHeating ? onAng : offAng;
           if (Math.abs(sensorAng - targetAng) > 0.5) {
