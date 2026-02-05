@@ -1104,7 +1104,7 @@ let isDraggingCard = false;
           const angle = getAngleFromEvent(e);
           let temp = angleToTemp(angle);
           temp = Math.round(temp * 10) / 10;
-          temp = Math.max(defaultMinTemp, Math.min(defaultMaxTemp, temp));
+        //  temp = Math.max(defaultMinTemp, Math.min(defaultMaxTemp, temp));
           
           if (dragging.isOn) {
             currentOnVal = temp;
