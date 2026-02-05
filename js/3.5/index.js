@@ -900,7 +900,7 @@ let isDraggingCard = false;
       svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
       svg.setAttribute("class", "myio-thermo-svg");
       svg.style.width = "100%";
-      svg.style.maxWidth = "200px";
+      svg.style.maxWidth = "250px";
       svg.style.height = "auto";
       svg.style.touchAction = "none";
       
