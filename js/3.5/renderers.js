@@ -68,10 +68,10 @@
       svg.appendChild(base);
   
       const chevron = document.createElementNS(SVG_NS, "path");
-// Nagyon széles és magas chevron
-chevron.setAttribute("d", "M5 17L12 8L19 17");  // 8 → 17: +9 magasság, 5 → 19: +14 szélesség
+// Kiegyensúlyozott szélesebb és magasabb
+chevron.setAttribute("d", "M6.5 15.5L12 10L17.5 15.5");  // +2.5 szélesség, +2 magasság
 chevron.setAttribute("fill", "none");
-chevron.setAttribute("stroke-width", "4");   // Még vastagabb
+chevron.setAttribute("stroke-width", "3.5");
 chevron.setAttribute("stroke-linecap", "round");
 chevron.setAttribute("stroke-linejoin", "round");
 chevron.setAttribute("stroke", "currentColor");
