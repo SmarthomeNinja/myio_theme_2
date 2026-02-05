@@ -1232,7 +1232,7 @@ let isDraggingCard = false;
         opacity: 1;
       }
       .myio-thermo-avgtemp {
-        font-size: 42px;
+        font-size: calc(40px * var(--myio-zoom));
         font-weight: 300;
         line-height: 1;
         color: #333;
