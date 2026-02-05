@@ -5,63 +5,120 @@
 
 let isDraggingCard = false;
 
-(function () {
-  const { $, myioNS } = window.myioUtils;
-  const { ensureShell, ensureHeaderMask } = window.myioSections;
-  const { clearCardFactories } = window.myioCards;
-  const { renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites } = window.myioRenderers;
-  const { renderThermo } = window.myioThermo;
-  const { setupSectionReorder, setupCardReorder } = window.myioReorder;
-  const { setupLongPressHandlers } = window.myioSettingsModal;
+// Dinamikus modul betöltő
+(function() {
+  const BASE_PATH = document.currentScript?.src?.replace(/index\.js.*$/, '') || '/js/3.5/';
+  
+  const modules = [
+    'utils.js',
+    'storage.js',
+    'sections.js',
+    'cards.js',
+    'renderers.js',
+    'thermo.js',
+    'reorder.js',
+    'settings-modal.js'
+  ];
 
-  function renderAll() {
-    ensureHeaderMask();
-    document.documentElement.classList.add("myio-noanim");
-    ensureShell();
-    clearCardFactories();
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      // Ellenőrizzük, hogy már betöltve van-e
+      const existing = document.querySelector(`script[src*="${src}"]`);
+      if (existing) {
+        resolve();
+        return;
+      }
+      
+      const script = document.createElement('script');
+      script.src = BASE_PATH + src;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error(`Nem sikerült betölteni: ${src}`));
+      document.head.appendChild(script);
+    });
+  }
 
-    const root = $("#myio-root");
-    root.innerHTML = "";
+  async function loadModules() {
+    for (const mod of modules) {
+      try {
+        await loadScript(mod);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
 
-    try { renderSensors(root); } catch (e) { console.error(e); }
-    try { renderThermo(root); } catch (e) { console.error(e); }
-    try { renderPCA(root); } catch (e) { console.error(e); }
-    try { renderRelays(root); } catch (e) { console.error(e); }
-    try { renderFET(root); } catch (e) { console.error(e); }
-    try { renderSwitches(root); } catch (e) { console.error(e); }
-    try { renderFavorites(root); } catch (e) { console.error(e); }
-
-    setupSectionReorder();
-    setupCardReorder();
-
-    if (typeof window.myioApplySavedSectionOrder === "function") window.myioApplySavedSectionOrder();
-    if (typeof window.myioApplySavedCardOrder === "function") window.myioApplySavedCardOrder();
-    if (typeof window.myioApplySavedSectionOrder === "function") window.myioApplySavedSectionOrder();
-
-    if (!root.children.length) {
-      const { section, grid } = window.myioSections.makeSection("Nincs megjeleníthető adat", "Ellenőrizd a szerver változókat");
-      const c = window.myioCards.card("Tippek", "myio-off", "tips:0");
-      window.myioCards.addValue(c, "—");
-      grid.append(c);
-      root.append(section);
+  function initDashboard() {
+    // Ellenőrizzük, hogy minden szükséges modul betöltve van-e
+    if (!window.myioUtils) {
+      console.error('myioUtils nem elérhető!');
+      return;
     }
 
-    requestAnimationFrame(() => document.documentElement.classList.remove("myio-noanim"));
+    const { $, myioNS } = window.myioUtils;
+    const { ensureShell, ensureHeaderMask } = window.myioSections || {};
+    const { clearCardFactories } = window.myioCards || {};
+    const { renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites } = window.myioRenderers || {};
+    const { renderThermo } = window.myioThermo || {};
+    const { setupSectionReorder, setupCardReorder } = window.myioReorder || {};
+    const { setupLongPressHandlers } = window.myioSettingsModal || {};
 
-    try { window.onpageshow = () => window.scrollTo(window.scrollX, window.scrollY); } catch { }
-    try { enableThumbOnlyRanges(document); } catch { }
-    try { if (typeof myioRO !== "undefined" && myioRO) myioRO.observe(document.body); } catch { }
+    function renderAll() {
+      if (ensureHeaderMask) ensureHeaderMask();
+      document.documentElement.classList.add("myio-noanim");
+      if (ensureShell) ensureShell();
+      if (clearCardFactories) clearCardFactories();
 
-    setupLongPressHandlers();
+      const root = $("#myio-root");
+      if (!root) {
+        console.error('myio-root nem található!');
+        return;
+      }
+      root.innerHTML = "";
+
+      if (renderSensors) try { renderSensors(root); } catch (e) { console.error(e); }
+      if (renderThermo) try { renderThermo(root); } catch (e) { console.error(e); }
+      if (renderPCA) try { renderPCA(root); } catch (e) { console.error(e); }
+      if (renderRelays) try { renderRelays(root); } catch (e) { console.error(e); }
+      if (renderFET) try { renderFET(root); } catch (e) { console.error(e); }
+      if (renderSwitches) try { renderSwitches(root); } catch (e) { console.error(e); }
+      if (renderFavorites) try { renderFavorites(root); } catch (e) { console.error(e); }
+
+      if (setupSectionReorder) setupSectionReorder();
+      if (setupCardReorder) setupCardReorder();
+
+      if (typeof window.myioApplySavedSectionOrder === "function") window.myioApplySavedSectionOrder();
+      if (typeof window.myioApplySavedCardOrder === "function") window.myioApplySavedCardOrder();
+
+      if (!root.children.length && window.myioSections && window.myioCards) {
+        const { section, grid } = window.myioSections.makeSection("Nincs megjeleníthető adat", "Ellenőrizd a szerver változókat");
+        const c = window.myioCards.card("Tippek", "myio-off", "tips:0");
+        window.myioCards.addValue(c, "—");
+        grid.append(c);
+        root.append(section);
+      }
+
+      requestAnimationFrame(() => document.documentElement.classList.remove("myio-noanim"));
+
+      try { window.onpageshow = () => window.scrollTo(window.scrollX, window.scrollY); } catch { }
+      try { if (typeof enableThumbOnlyRanges === "function") enableThumbOnlyRanges(document); } catch { }
+      try { if (typeof myioRO !== "undefined" && myioRO) myioRO.observe(document.body); } catch { }
+
+      if (setupLongPressHandlers) setupLongPressHandlers();
+    }
+
+    window.myioRenderAll = renderAll;
+    renderAll();
   }
 
-  window.myioRenderAll = renderAll;
-
-  const start = () => renderAll();
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start);
-  } else {
-    start();
+  async function start() {
+    await loadModules();
+    
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initDashboard);
+    } else {
+      initDashboard();
+    }
   }
+
+  start();
 })();
