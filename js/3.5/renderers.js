@@ -1,0 +1,265 @@
+/* renderers.js – Szekciók renderelése */
+
+(function() {
+  const { el, decodeRW, safe } = window.myioUtils;
+  const { loadFavs } = window.myioStorage;
+  const { card, cardWithInvTitle, addValue, addButtons, setCardHeaderWithInvAndToggle, registerCardFactory, getCardFactory, hasCardFactory } = window.myioCards;
+  const { makeSection } = window.myioSections;
+  const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
+
+  // --- Sensors ---
+  function renderSensors(root) {
+    const { section, grid } = makeSection(typeof str_Sensors !== "undefined" ? str_Sensors : "Sensors", "", "myio.section.sensors");
+    let count = 0;
+
+    if (typeof consumption !== "undefined" && consumption != 0) {
+      const id = "sensors:consumption";
+      const makeFn = () => {
+        const c = card(typeof str_Consump !== "undefined" ? str_Consump : "Consumption", "myio-sensor", id);
+        addValue(c, (consumption / 1000) + " " + safe(typeof consumptionUnit !== "undefined" ? consumptionUnit : "", ""));
+        return c;
+      };
+      registerCardFactory(id, makeFn);
+      grid.append(makeFn()); count++;
+    }
+
+    if (typeof thermo_eepromIndex !== "undefined" && typeof fullZeroArray === "function" && !fullZeroArray(thermo_eepromIndex)) {
+      for (let i = 0; i < thermo_eepromIndex.length; i++) {
+        if (thermo_eepromIndex[i] != 0) {
+          const idx = thermo_eepromIndex[i];
+          const id = `sensors:thermo:${idx}`;
+          const makeFn = () => {
+            if (thermo_description[idx] == null) thermo_description[idx] = "-";
+            const c = card(thermo_description[idx], "myio-sensor", id);
+            addValue(c, (thermo_temps[i] / 100) + " °C");
+            return c;
+          };
+          registerCardFactory(id, makeFn);
+          grid.append(makeFn()); count++;
+        }
+      }
+    }
+
+    if (typeof humidity !== "undefined") {
+      for (let i = 0; i < humidity.length; i++) {
+        if (humidity[i] != 0) {
+          const id = `sensors:hum:${i}`;
+          const makeFn = () => {
+            if (hum_description[i] == null) hum_description[i] = "-";
+            const c = card(hum_description[i], "myio-sensor", id);
+            addValue(c, (humidity[i] / 10) + " %");
+            return c;
+          };
+          registerCardFactory(id, makeFn);
+          grid.append(makeFn()); count++;
+        }
+      }
+    }
+
+    if (count) root.append(section);
+  }
+
+  // --- Switches ---
+  function renderSwitches(root) {
+    if (typeof switchEnabled === "undefined") return;
+
+    let any = false;
+    for (let i = 0; i < switchEnabled.length; i++) {
+      if (switchEnabled[i] != 0 && switch_description[i + 1] != null) { any = true; break; }
+    }
+    if (!any) return;
+
+    const { section, grid } = makeSection(typeof str_Input !== "undefined" ? str_Input : "Input", "", "myio.section.switches");
+    for (let i = 0; i < switchEnabled.length; i++) {
+      if (switchEnabled[i] != 0 && switch_description[i + 1] != null) {
+        const id = `switch:${i + 1}`;
+        const makeFn = () => {
+          if (!switch_description[i + 1]) switch_description[i + 1] = "-";
+          const c = card(switch_description[i + 1], "myio-off", id);
+          const btns = [];
+          if (switchEnabled[i] >= 10) btns.push({ label: (typeof str_Hit !== "undefined" ? str_Hit : "Hit"), name: "s_hit", value: (i + 1) });
+          if (switchEnabled[i] - 10 == 1 || switchEnabled[i] == 1) btns.push({ label: (typeof str_Press !== "undefined" ? str_Press : "Press"), name: "s_press", value: (i + 1) });
+          if (btns.length) addButtons(c, btns);
+          return c;
+        };
+        registerCardFactory(id, makeFn);
+        grid.append(makeFn());
+      }
+    }
+    root.append(section);
+  }
+
+  // --- PCA ---
+  function renderPCA(root) {
+    if (typeof PCA === "undefined") return;
+
+    const PCARead = [], PCAWrite = [], PCAVal = [];
+    let any = false;
+
+    for (let i = 0; i < PCA.length; i++) {
+      const d = decodeRW(PCA[i]);
+      PCARead[i] = d.read; PCAWrite[i] = d.write; PCAVal[i] = d.val;
+      if ((PCARead[i] || PCAWrite[i]) && PCA_description[i + 1] != null && PCA_thermoActivator[i] == 0) any = true;
+    }
+    if (!any) return;
+
+    const { section, grid } = makeSection(typeof str_PCA_Output !== "undefined" ? str_PCA_Output : "PCA Output", "", "myio.section.pca");
+
+    for (let i = 0; i < PCA.length; i++) {
+      if (!((PCARead[i] || PCAWrite[i]) && PCA_description[i + 1] != null && PCA_thermoActivator[i] == 0)) continue;
+
+      const id = `pca:${i + 1}`;
+      const makeFn = () => {
+        if (!PCA_description[i + 1]) PCA_description[i + 1] = "-";
+        const val255 = PCAVal[i];
+        const isOn = (val255 > 0 && PCARead[i] == 1);
+        const c = card(PCA_description[i + 1], isOn ? "myio-on" : "myio-off", id);
+
+        if (PCAWrite[i]) {
+          setCardHeaderWithInvAndToggle(c, PCA_description[i + 1], "PCA_INV", "PCA_ON", "PCA_OFF", i + 1, isOn, id);
+
+          let showSlider = 1;
+          if (typeof PCA_PWM !== "undefined") showSlider = !!PCA_PWM[i];
+
+          if (showSlider) {
+            const pct = Math.round(val255 / 2.55);
+            const minPct = Math.round((typeof PCAMIN !== "undefined" ? PCAMIN[i] : 0) / 2.55);
+            const maxPct = Math.round((typeof PCAMAX !== "undefined" ? PCAMAX[i] : 255) / 2.55);
+
+            const row = el("div", { class: "myio-pcaRow" });
+            const range = el("input", { type: "range", min: String(minPct), max: String(maxPct), value: String(pct), name: "PCA*" + (i + 1) });
+            range.onchange = (e) => { try { changed(e.target); } catch { } };
+
+            const num = el("input", { type: "number", min: String(minPct), max: String(maxPct), value: String(pct), name: "PCA*" + (i + 1) });
+            num.onchange = (e) => { try { changed(e.target); } catch { } };
+
+            range.oninput = () => { num.value = range.value; };
+            num.oninput = () => { range.value = num.value; };
+
+            row.append(range, el("div", { class: "myio-pcaValue" }, [num]));
+            c.append(row);
+          }
+        } else {
+          c.append(el("div", { class: "myio-sub", text: String(Math.round(val255 / 2.55)) }));
+        }
+        return c;
+      };
+      registerCardFactory(id, makeFn);
+      grid.append(makeFn());
+    }
+    root.append(section);
+  }
+
+  // --- FET ---
+  function renderFET(root) {
+    if (typeof fet === "undefined") return;
+
+    const FETRead = [], FETWrite = [], FETVal = [];
+    let any = false;
+
+    for (let i = 0; i < fet.length; i++) {
+      const d = decodeRW(fet[i]);
+      FETRead[i] = d.read; FETWrite[i] = d.write; FETVal[i] = d.val;
+      if ((FETRead[i] || FETWrite[i]) && fet_description && fet_description[i + 1] != null) any = true;
+    }
+    if (!any) return;
+
+    const { section, grid } = makeSection(typeof str_PWM !== "undefined" ? str_PWM : "PWM", "", "myio.section.fet");
+
+    for (let i = 0; i < fet.length; i++) {
+      if (!((FETRead[i] || FETWrite[i]) && fet_description && fet_description[i + 1] != null)) continue;
+
+      const id = `fet:${i + 1}`;
+      const makeFn = () => {
+        if (!fet_description[i + 1]) fet_description[i + 1] = "-";
+        const val255 = FETVal[i];
+        const isOn = (val255 > 0 && FETRead[i] == 1);
+        const c = card(fet_description[i + 1], isOn ? "myio-on" : "myio-off", id);
+
+        if (FETWrite[i]) {
+          setCardHeaderWithInvAndToggle(c, fet_description[i + 1], "f_INV", "f_ON", "f_OFF", i + 1, isOn, id);
+
+          const minPct = Math.round((typeof fetMIN !== "undefined" ? fetMIN[i] : 0) / 2.55);
+          const maxPct = Math.round((typeof fetMAX !== "undefined" ? fetMAX[i] : 255) / 2.55);
+          const pct = Math.round(val255 / 2.55);
+
+          const row = el("div", { class: "myio-pcaRow" });
+          const range = el("input", { type: "range", min: String(minPct), max: String(maxPct), value: String(pct), name: "fet*" + (i + 1) });
+          range.onchange = (e) => { try { changed(e.target, e.target.name, 1, true); } catch { } };
+
+          const num = el("input", { type: "number", min: String(minPct), max: String(maxPct), value: String(pct), name: "fet*" + (i + 1) });
+          num.onchange = (e) => { try { changed(e.target, e.target.name, 1, true); } catch { } };
+
+          range.oninput = () => { num.value = range.value; };
+          num.oninput = () => { range.value = num.value; };
+
+          row.append(range, el("div", { class: "myio-pcaValue" }, [num]));
+          c.append(row);
+        } else {
+          c.append(el("div", { class: "myio-sub", text: String(Math.round(val255 / 2.55)) }));
+        }
+        return c;
+      };
+      registerCardFactory(id, makeFn);
+      grid.append(makeFn());
+    }
+    root.append(section);
+  }
+
+  // --- Relays ---
+  function renderRelays(root) {
+    if (typeof relays === "undefined") return;
+
+    let any = false;
+    for (let i = 0; i < relays.length; i++) {
+      if (relays[i] != 0 && relay_description[i + 1] != null && thermoActivator[i] == 0) { any = true; break; }
+    }
+    if (!any) return;
+
+    const { section, grid } = makeSection(typeof str_Output !== "undefined" ? str_Output : "Output", "", "myio.section.relays");
+    for (let i = 0; i < relays.length; i++) {
+      if (relays[i] != 0 && thermoActivator[i] == 0 && relay_description[i + 1] != null) {
+        const id = `relay:${i + 1}`;
+        const makeFn = () => {
+          const isOn = (relays[i] == 101 || relays[i] == 111 || relays[i] == 11);
+          if (!relay_description[i + 1]) relay_description[i + 1] = "-";
+          const writable = (parseInt(relays[i] / 10) == 1 || parseInt(relays[i] / 10) == 11);
+          const c = writable
+            ? cardWithInvTitle(relay_description[i + 1], isOn ? "myio-on" : "myio-off", "r_INV", (i + 1), id)
+            : card(relay_description[i + 1], isOn ? "myio-on" : "myio-off", id);
+
+          if (writable) {
+            setCardHeaderWithInvAndToggle(c, relay_description[i + 1], "r_INV", "r_ON", "r_OFF", i + 1, isOn, id);
+          }
+          return c;
+        };
+        registerCardFactory(id, makeFn);
+        grid.append(makeFn());
+      }
+    }
+    root.append(section);
+  }
+
+  // --- Favorites ---
+  function renderFavorites(root) {
+    const favs = loadFavs();
+    if (!favs.length) return;
+
+    const existing = favs.filter(id => hasCardFactory(id));
+    if (!existing.length) return;
+
+    const title = (typeof str_Favorites !== "undefined" && str_Favorites) ? str_Favorites : "Favorites";
+    const { section, grid } = makeSection(title, "", FAV_SECTION_KEY, false);
+
+    for (const id of existing) {
+      try { grid.append(getCardFactory(id)()); } catch (e) { console.error(e); }
+    }
+
+    if (grid.childNodes.length > 0) root.append(section);
+  }
+
+  // Export
+  window.myioRenderers = {
+    renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites
+  };
+})();
