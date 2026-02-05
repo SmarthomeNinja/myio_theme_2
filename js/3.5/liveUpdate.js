@@ -310,7 +310,17 @@ const MyIOLive = (function() {
           }
         });
       } else {
-        renderThermo(); // Próbáljuk meg hívni közvetlenül, ha elérhető
+        if (typeof window.rendelThermo === 'function') {
+          requestAnimationFrame(() => {
+            try {
+              window.rendelThermo();
+            } catch (e) {
+              console.warn('[MyIOLive] rendelThermo error:', e);
+            }
+          });
+        } else {
+          log('rendelThermo() not available');
+        }
         log('renderThermo() not available');
       }
     }
