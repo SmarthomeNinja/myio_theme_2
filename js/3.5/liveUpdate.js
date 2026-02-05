@@ -185,8 +185,8 @@ const MyIOLive = (function() {
         if (typeof min_temp_ON !== 'undefined') {
            min_temp_ON[idx] = relay.sensorON || 0;
         }
-        if (typeof relay_max_temp_OFF !== 'undefined') {
-          max_temp_OFF[idx] = relay.sensorOFF || 0;
+        if (typeof max_temp_OFF !== 'undefined') {
+          max_temp_OFF[idx] = Number.isFinite(Number(relay.sensorOFF)) ? Number(relay.sensorOFF) : 0;
         }
       }
     }
@@ -322,25 +322,38 @@ const MyIOLive = (function() {
         log(`Relay ${relayId} thermo: sensor=${relay.sensor}, ON=${relay.sensorON}, OFF=${relay.sensorOFF}, cards=${cards.length}`);
 
         cards.forEach((card, ci) => {
+          // Normalize thermo values
+          const sensorId = Number(relay.sensor) || 0;
+          const onRaw = Number(relay.sensorON);
+          const offRaw = Number(relay.sensorOFF);
+          const hasOn = Number.isFinite(onRaw);
+          const hasOff = Number.isFinite(offRaw);
+          const onC = hasOn ? onRaw : 0;
+          const offC = hasOff ? offRaw : 0;
+
           // ON/OFF threshold inputs (in 0.1°C units -> show as X.Y)
           const onInput = card.querySelector('input[name^="min_temp_ON"]') || card.querySelector('input[name^="relay_min_temp_ON"]');
           const offInput = card.querySelector('input[name^="max_temp_OFF"]') || card.querySelector('input[name^="relay_max_temp_OFF"]');
 
           if (onInput) {
-            const onVal = (relay.sensorON / 10).toFixed(1);
+            const onVal = (onC / 10).toFixed(1);
             if (onInput.value !== onVal) {
-          log(`Relay ${relayId} card#${ci}: set ON threshold ${onInput.value} -> ${onVal}`);
-          onInput.value = onVal;
+              log(`Relay ${relayId} card#${ci}: set ON threshold ${onInput.value} -> ${onVal}`);
+              onInput.value = onVal;
+              onInput.dispatchEvent(new Event('input', { bubbles: true }));
+              onInput.dispatchEvent(new Event('change', { bubbles: true }));
             }
           } else {
             log(`Relay ${relayId} card#${ci}: ON input not found`);
           }
 
           if (offInput) {
-            const offVal = (relay.sensorOFF / 10).toFixed(1);
+            const offVal = (offC / 10).toFixed(1);
             if (offInput.value !== offVal) {
-          log(`Relay ${relayId} card#${ci}: set OFF threshold ${offInput.value} -> ${offVal}`);
-          offInput.value = offVal;
+              log(`Relay ${relayId} card#${ci}: set OFF threshold ${offInput.value} -> ${offVal}`);
+              offInput.value = offVal;
+              offInput.dispatchEvent(new Event('input', { bubbles: true }));
+              offInput.dispatchEvent(new Event('change', { bubbles: true }));
             }
           } else {
             log(`Relay ${relayId} card#${ci}: OFF input not found`);
@@ -350,10 +363,10 @@ const MyIOLive = (function() {
           const sensorIdEl = card.querySelector('[data-sensor-id]');
           if (sensorIdEl) {
             const prev = sensorIdEl.textContent;
-            const next = String(relay.sensor);
+            const next = String(sensorId);
             if (prev !== next) {
-          log(`Relay ${relayId} card#${ci}: sensor id ${prev} -> ${next}`);
-          sensorIdEl.textContent = next;
+              log(`Relay ${relayId} card#${ci}: sensor id ${prev} -> ${next}`);
+              sensorIdEl.textContent = next;
             }
           } else {
             log(`Relay ${relayId} card#${ci}: sensor id element not found`);
@@ -364,9 +377,9 @@ const MyIOLive = (function() {
           const wasCool = card.classList.contains('myio-cool');
           card.classList.remove('myio-heat', 'myio-cool');
 
-          if (relay.sensorON < relay.sensorOFF) {
+          if (hasOn && hasOff && onC < offC) {
             card.classList.add('myio-heat');
-          } else if (relay.sensorOFF < relay.sensorON) {
+          } else if (hasOn && hasOff && offC < onC) {
             card.classList.add('myio-cool');
           }
 
