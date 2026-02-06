@@ -119,7 +119,7 @@
     // === Export
     // ============================================================
   
-    window.myioRendererHelpers = {
+    window.myioRendererHelper = {
       g, str, to100, hexToRgba, getCSSVar,
       buildSunIcons,
       createPWMSliderRow
