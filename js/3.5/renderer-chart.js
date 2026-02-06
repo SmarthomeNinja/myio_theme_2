@@ -760,6 +760,7 @@
               mode: 'x',            
               onZoomComplete: () => {
                 state.userZoomed = chart.getZoomLevel() !== 1;
+                console.log('Zoom állapot:', isZoomed);
               }
             },
             pan: {
