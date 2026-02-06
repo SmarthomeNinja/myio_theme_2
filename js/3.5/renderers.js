@@ -22,8 +22,6 @@
   const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
 
   // --- Dygraph betöltése dinamikusan ---
-  const BASE_PATH = host;
-  
   console.log('📊 Chart.js ellenőrzés...');
   if (!window.Chart) {
     
@@ -67,7 +65,7 @@
     if (!document.querySelector(`link[href*="${href}"]`)) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
-      link.href = BASE_PATH + href;
+      link.href = host + href;
       document.head.appendChild(link);
     }
   }
