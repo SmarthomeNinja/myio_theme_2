@@ -848,9 +848,17 @@
       const usedDates = state.overlays
         .filter(ov => ov.sensorId === selectedSid)
         .map(ov => ov.dateStr);
-      let candidateDate = new Date();
-      candidateDate.setDate(candidateDate.getDate() - 1);  // Tegnap
       
+      // Ha nincs mai napi adat betöltve, akkor mai nappal kezdjünk
+      let candidateDate = new Date();
+      const todayStr = candidateDate.toISOString().split('T')[0];
+      
+      // Ha már van mai napi adat, akkor tegnappal kezdjük
+      if (usedDates.includes(todayStr)) {
+        candidateDate.setDate(candidateDate.getDate() - 1);
+      }
+      
+      // Keressünk szabad napot
       while (usedDates.includes(candidateDate.toISOString().split('T')[0])) {
         candidateDate.setDate(candidateDate.getDate() - 1);
       }
