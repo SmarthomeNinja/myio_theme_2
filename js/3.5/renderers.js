@@ -687,8 +687,12 @@
         animation: false,  // Animáció kikapcsolva
         elements:
         {
-          pointRadius: 2,
-          pointHoverRadius: 15,
+          point:
+          {
+            radius: 0,  // Pontok alapból nem látszanak
+            hoverRadius: 6,
+            hitRadius: 10
+          }
         },
         responsive: true,
         maintainAspectRatio: false,
