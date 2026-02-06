@@ -1,7 +1,7 @@
 /* renderers.js – Szekciók renderelése */
 (function() {
-  const base = window.myioHost || (document.currentScript?.src?.replace(/[^/]*$/, '') || '/js/3.5/');
-  const urls = [base + 'renderer-helper.js', base + 'renderer-chart.js'];
+  
+  const urls = [host + 'renderer-helper.js', host + 'renderer-chart.js'];
 
   for (const src of urls) {
     if (!document.querySelector(`script[src="${src}"]`)) {
