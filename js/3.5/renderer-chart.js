@@ -759,8 +759,7 @@
               },
               mode: 'x',            
               onZoomComplete: () => {
-                state.userZoomed = state.chart.getZoomLevel() !== 1;
-                console.log('Zoom állapot:', isZoomed);
+                state.userZoomed = true;
               }
             },
             pan: {
