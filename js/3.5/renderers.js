@@ -627,9 +627,9 @@
         data: ov.data.map(([d, v]) => ({ x: d, y: v })),
         borderColor: ov.color,
         backgroundColor: 'transparent',
-        borderWidth: 1.5,
+        borderWidth: 2,
         borderDash: [],  // Folytonos vonal (nem szaggatott)
-        pointRadius: 1,
+        pointRadius: 0.5,
         pointHoverRadius: 3,
         fill: false,
         tension: 0.1
