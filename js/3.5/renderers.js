@@ -492,7 +492,7 @@
 
     // --- Historikus adatok szekció ---
     const historicalSection = el("div", { class: "myio-chart-historical" });
-    const historicalTitle = el("h3", { text: "Összehasonlítás" });
+    const historicalTitle = el("h3", { text: "Betöltés" });
     const historicalTable = el("table", { class: "myio-chart-table" });
     const histTbody = el("tbody");
     historicalTable.appendChild(histTbody);
@@ -731,8 +731,7 @@
             },
             pan: {
               enabled: true,
-              mode: 'x',
-              modifierKey: null  // Nincs szükség Shift-re, direkt pan-olható
+              mode: 'x'
             },
             limits: {
               x: { min: 'original', max: 'original' }
@@ -832,16 +831,24 @@
     const dateInput = el("input", { type: "date" });
     dateInput.style.width = '100%';
     
-    // Legnagyobb dátum ami még nincs az overlay-ekben
-    const usedDates = state.overlays.map(ov => ov.dateStr);
-    let candidateDate = new Date();
-    candidateDate.setDate(candidateDate.getDate() - 1);  // Tegnap
+    // Szenzor-specifikus legnagyobb szabad dátum kiszámítása
+    const updateSuggestedDate = () => {
+      const selectedSid = parseInt(sensorSelect.value);
+      const usedDates = state.overlays
+        .filter(ov => ov.sensorId === selectedSid)
+        .map(ov => ov.dateStr);
+      let candidateDate = new Date();
+      candidateDate.setDate(candidateDate.getDate() - 1);  // Tegnap
+      
+      while (usedDates.includes(candidateDate.toISOString().split('T')[0])) {
+        candidateDate.setDate(candidateDate.getDate() - 1);
+      }
+      
+      dateInput.value = candidateDate.toISOString().split('T')[0];
+    };
     
-    while (usedDates.includes(candidateDate.toISOString().split('T')[0])) {
-      candidateDate.setDate(candidateDate.getDate() - 1);  // Egy nappal korábbi
-    }
-    
-    dateInput.value = candidateDate.toISOString().split('T')[0];
+    // Kezdeti dátum beállítása
+    updateSuggestedDate();
     
     const pointsLabel = el("span", { text: '' });
     pointsLabel.style.fontSize = '11px';
@@ -849,6 +856,9 @@
     pointsLabel.style.textAlign = 'center';
     
     dateCell.append(dateInput, pointsLabel);
+    
+    // Szenzor változáskor frissítsük az ajánlott dátumot is
+    sensorSelect.addEventListener('change', updateSuggestedDate);
     
     // Betöltés gomb
     const actionCell = el("td");
@@ -887,6 +897,7 @@
       
       const overlay = {
         id: Date.now(),
+        sensorId: sid,
         label: overlayLabel,
       dateStr: overlayDate,
         color: hexToRgba(color, 0.3),  // Halványított háttérszín
@@ -908,6 +919,9 @@
 
       // Szín frissítés - updateColor() hívása
       updateColor();
+      
+      // Ajánlott dátum frissítése betöltés után
+      updateSuggestedDate();
     };
     actionCell.appendChild(addBtn);
     
@@ -1507,3 +1521,4 @@
     renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites
   };
 })();
+
