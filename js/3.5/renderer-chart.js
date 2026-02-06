@@ -759,7 +759,7 @@
               },
               mode: 'x',            
               onZoomComplete: () => {
-                state.userZoomed = true;
+                state.userZoomed = chart.getZoomLevel() !== 1;
               }
             },
             pan: {
