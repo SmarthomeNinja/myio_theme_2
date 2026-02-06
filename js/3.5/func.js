@@ -166,11 +166,13 @@ function changedPair(obj1, name1 = obj1.name,obj2, name2 = obj2.name, multiplier
 		} else {
 			sendXMLHttp(name1 + "=" + value1 + "&" + name2 + "=" +value2);
 		}
+		/*
 		if (obj1.parentNode.parentNode.getAttribute("name1") != null) {
 			visibleItem(obj1.parentNode.parentNode.getAttribute("name1"), obj2.parentNode.parentNode.getAttribute("name2"));
 		} else if (obj1.getAttribute("name1") != null) {
 			visibleItem(obj1.getAttribute("name1"), obj2.getAttribute("name2"));
 		}
+		*/
 	}
 }
 function changedSens(obj){
