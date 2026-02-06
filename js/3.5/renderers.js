@@ -10,10 +10,26 @@
   // --- Dygraph betöltése dinamikusan ---
   const BASE_PATH = document.currentScript?.src?.replace(/[^/]*$/, '') || '/js/3.5/';
   
-  if (!window.Dygraph) {
-    const script = document.createElement('script');
-    script.src = BASE_PATH + 'dygraph-combined.js';
-    document.head.appendChild(script);
+  if (!window.Chart) {
+    // Chart.js core
+    const chartScript = document.createElement('script');
+    chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js';
+    document.head.appendChild(chartScript);
+    
+    // Date adapter
+    const adapterScript = document.createElement('script');
+    adapterScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js';
+    document.head.appendChild(adapterScript);
+    
+    // Zoom plugin
+    const zoomScript = document.createElement('script');
+    zoomScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js';
+    document.head.appendChild(zoomScript);
+    
+    // Annotation plugin (vízszintes vonalakhoz)
+    const annotationScript = document.createElement('script');
+    annotationScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js';
+    document.head.appendChild(annotationScript);
   }
 
   // --- CSS betöltés ---
@@ -26,7 +42,7 @@
     }
   }
   loadCSS('chart-modal.css');
-  loadCSS('dygraph.css');
+  // Chart.js nem igényel külön CSS;
 
   // --- Sunrise/Sunset SVG ikonok ---
   const SVG_NS = "http://www.w3.org/2000/svg";
@@ -419,145 +435,167 @@
       return;
     }
 
-    rebuildGraph(graphDiv, state);
+    rebuildChart(graphDiv, state);
 
-    // Auto-refresh 5 mp-enként ha ma van
+    // Auto-refresh 5 mp-enként
     state.refreshInterval = setInterval(() => refreshMainData(graphDiv, state, sensorId), 5000);
   }
 
   /** Dygraph-ot (újra)építi az összes adatból */
-  function rebuildGraph(graphDiv, state) {
-    // Összesítjük az oszlopokat: Time, Main, overlay1, overlay2, ...
-    const labels = ['Idő', getSensorLabel(state.sensorId)];
-    const seriesOpts = {};
-    const colors = ['#4a9eff'];
-
-    // Overlay sorozatok
-    for (const ov of state.overlays) {
-      if (ov.visible === false) continue;  // Csak láthatóak
-      labels.push(ov.label);
-      colors.push(ov.color);
-      seriesOpts[ov.label] = {
-        strokePattern: ov.dashStyle || Dygraph.DASHED_LINE,
-        strokeWidth: 1.5
+    /** Chart.js-sel újraépíti a grafikont */
+  function rebuildChart(graphDiv, state) {
+    const sensorLabel = getSensorLabel(state.sensorId);
+    
+    // Datasets összeállítása
+    const datasets = [];
+    
+    // 1. Main dataset
+    if (state.mainData.length > 0) {
+      datasets.push({
+        label: sensorLabel,
+        data: state.mainData.map(([d, v]) => ({ x: d, y: v })),
+        borderColor: '#4a9eff',
+        backgroundColor: 'rgba(74, 158, 255, 0.1)',
+        borderWidth: 2,
+        pointRadius: 1.5,
+        pointHoverRadius: 4,
+        fill: false,
+        tension: 0.1
+      });
+    }
+    
+    // 2. Overlay datasets (csak láthatóak)
+    const visibleOverlays = state.overlays.filter(ov => ov.visible !== false);
+    for (const ov of visibleOverlays) {
+      datasets.push({
+        label: ov.label,
+        data: ov.data.map(([d, v]) => ({ x: d, y: v })),
+        borderColor: ov.color,
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderDash: [10, 4],  // Szaggatott vonal
+        pointRadius: 1,
+        pointHoverRadius: 3,
+        fill: false,
+        tension: 0.1
+      });
+    }
+    
+    // 3. Annotation objektum (vízszintes vonalak output értékekhez)
+    const annotations = {};
+    const visibleOutputs = state.outputLines ? state.outputLines.filter(o => o.visible) : [];
+    
+    for (let i = 0; i < visibleOutputs.length; i++) {
+      const output = visibleOutputs[i];
+      annotations[`output_${i}`] = {
+        type: 'line',
+        yMin: output.yVal,
+        yMax: output.yVal,
+        borderColor: output.color,
+        borderWidth: 2,
+        borderDash: output.mode === 'on' ? [10, 4] : [3, 3],
+        label: {
+          display: true,
+          content: output.label,
+          position: 'end',
+          backgroundColor: output.color,
+          color: '#1f2937',
+          font: { size: 10 }
+        }
       };
     }
-
-    // Output vízszintes vonalak
-    for (const ol of state.outputLines) {
-      if (ol.visible) {
-        labels.push(ol.label);
-        colors.push(ol.color);
-        seriesOpts[ol.label] = {
-          strokePattern: ol.dashStyle,
-          strokeWidth: 2,
-          drawPoints: false
-        };
-      }
-    }
-
-    // Megkeressük az összes időpontot egy közös tengelyre
-    const allTimes = new Map(); // timestamp -> row values
     
-    // Main adatok
-    for (const [d, v] of state.mainData) {
-      const t = d.getTime();
-      if (!allTimes.has(t)) allTimes.set(t, new Array(labels.length).fill(null));
-      allTimes.get(t)[0] = d;
-      allTimes.get(t)[1] = v;
+    // Canvas létrehozása vagy újrafelhasználása
+    let canvas = graphDiv.querySelector('canvas');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      graphDiv.innerHTML = '';
+      graphDiv.appendChild(canvas);
     }
-
-    // Overlay adatok
-    const visibleOverlays = state.overlays.filter(ov => ov.visible !== false);
-    for (let oi = 0; oi < visibleOverlays.length; oi++) {
-      const colIdx = 2 + oi;
-      for (const [d, v] of visibleOverlays[oi].data) {
-        const t = d.getTime();
-        if (!allTimes.has(t)) {
-          const row = new Array(labels.length).fill(null);
-          row[0] = d;
-          allTimes.set(t, row);
-        }
-        allTimes.get(t)[colIdx] = v;
-      }
+    
+    // Régi chart törlése
+    if (state.chart) {
+      state.chart.destroy();
     }
-
-    // Output vonalak: ugyanolyan értékű vízszintes vonal a teljes időtartamra
-    const visibleOutputs = state.outputLines.filter(o => o.visible);
-    if (visibleOutputs.length > 0 && allTimes.size > 0) {
-      const times = [...allTimes.keys()].sort((a, b) => a - b);
-      const firstTime = times[0];
-      const lastTime = times[times.length - 1];
-      
-      for (let vi = 0; vi < visibleOutputs.length; vi++) {
-        const colIdx = 2 + state.overlays.length + vi;
-        const yVal = visibleOutputs[vi].yVal;
-        
-        // Eleje és vége pont
-        // Minden időponthoz hozzáadjuk (teljes vonal)
-      for (const t of times) {
-          if (!allTimes.has(t)) {
-            const row = new Array(labels.length).fill(null);
-            row[0] = new Date(t);
-            allTimes.set(t, row);
-          }
-          allTimes.get(t)[colIdx] = yVal;
-        }
-      }
-    }
-
-    // Rendezés idő szerint
-    const sortedData = [...allTimes.values()].sort((a, b) => a[0] - b[0]);
-
-    // Mentjük a zoom pozíciót
-    const prevDateWindow = state.graph ? state.graph.xAxisRange() : null;
-    const wasZoomed = state.userZoomed;
-
-    if (state.graph) {
-      state.graph.destroy();
-    }
-
-    state.graph = new Dygraph(graphDiv, sortedData, {
-      labels: labels,
-      colors: colors,
-      series: seriesOpts,
-      drawPoints: true,
-      pointSize: 1.5,
-      highlightCircleSize: 4,
-      strokeWidth: 2,
-      fillGraph: false,
-      animatedZooms: true,
-      legend: 'never',  // Tooltip kikapcsolva
-      labelsSeparateLines: true,
-      highlightSeriesOpts: {
-        strokeWidth: 2.5,
-        highlightCircleSize: 5
-      },
-      axes: {
-        x: {
-          axisLabelFormatter: function(d) {
-            const hh = String(d.getHours()).padStart(2, '0');
-            const mm = String(d.getMinutes()).padStart(2, '0');
-            return hh + ':' + mm;
+    
+    // Új Chart.js példány
+    const ctx = canvas.getContext('2d');
+    state.chart = new Chart(ctx, {
+      type: 'line',
+      data: { datasets: datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        scales: {
+          x: {
+            type: 'time',
+            time: {
+              unit: 'hour',
+              displayFormats: {
+                hour: 'HH:mm',
+                minute: 'HH:mm'
+              }
+            },
+            ticks: {
+              color: getComputedStyle(document.documentElement).getPropertyValue('--myio-text-secondary') || '#9ca3af',
+              maxRotation: 0,
+              autoSkipPadding: 10
+            },
+            grid: {
+              color: getComputedStyle(document.documentElement).getPropertyValue('--myio-border') || 'rgba(75, 85, 99, 0.2)'
+            }
+          },
+          y: {
+            ticks: {
+              color: getComputedStyle(document.documentElement).getPropertyValue('--myio-text-secondary') || '#9ca3af'
+            },
+            grid: {
+              color: getComputedStyle(document.documentElement).getPropertyValue('--myio-border') || 'rgba(75, 85, 99, 0.2)'
+            }
           }
         },
-        y: { }
-      },
-      zoomCallback: function(minDate, maxDate, yRanges) {
-        state.userZoomed = true;
-        state.lastDateWindow = [minDate, maxDate];
-      },
-      // dygraph.css override dark theme
-      axisLabelColor: getComputedStyle(document.documentElement).getPropertyValue('--myio-text-secondary') || '#aaa',
-      axisLineColor: getComputedStyle(document.documentElement).getPropertyValue('--myio-border') || '#444',
-      gridLineColor: getComputedStyle(document.documentElement).getPropertyValue('--myio-border') || '#333'
+        plugins: {
+          legend: {
+            display: false  // Nincs tooltip/legend
+          },
+          tooltip: {
+            enabled: false  // Tooltip kikapcsolva
+          },
+          zoom: {
+            zoom: {
+              wheel: {
+                enabled: true,
+                speed: 0.1
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'x',
+              onZoomComplete: () => {
+                state.userZoomed = true;
+              }
+            },
+            pan: {
+              enabled: true,
+              mode: 'x'
+            },
+            limits: {
+              x: { min: 'original', max: 'original' }
+            }
+          },
+          annotation: {
+            annotations: annotations
+          }
+        }
+      }
     });
-
-    // Ha be volt zoomolva, visszaállítjuk
-    if (wasZoomed && prevDateWindow) {
-      state.graph.updateOptions({ dateWindow: prevDateWindow });
-    }
   }
+
+
 
   /** Frissíti a fő adatokat (5 mp-enként) */
   async function refreshMainData(graphDiv, state, sensorId) {
@@ -570,36 +608,18 @@
     const oldLen = state.mainData.length;
     state.mainData = newData;
 
-    if (!state.graph) {
-      rebuildGraph(graphDiv, state);
+    if (!state.chart) {
+      rebuildChart(graphDiv, state);
       return;
     }
 
-    // Ha a felhasználó zoomolt és a jobb szélén van, követjük az új adatokat
-    let dateWindow = null;
-    if (state.userZoomed && state.lastDateWindow) {
-      const [minX, maxX] = state.lastDateWindow;
-      const windowWidth = maxX - minX;
-      
-      // Ha a zoom vége az utolsó adat közelében van (5 percen belül) -> follow
-      const lastOldTime = oldLen > 0 ? state.mainData[Math.min(oldLen - 1, newData.length - 1)]?.[0]?.getTime() : 0;
-      const lastNewTime = newData[newData.length - 1][0].getTime();
-      
-      if (maxX >= lastOldTime - 300000) {
-        // Követjük a végét
-        dateWindow = [lastNewTime - windowWidth, lastNewTime];
-        state.lastDateWindow = dateWindow;
-      } else {
-        dateWindow = state.lastDateWindow;
-      }
-    }
-
-    rebuildGraph(graphDiv, state);
-
-    if (dateWindow && state.graph) {
-      state.graph.updateOptions({ dateWindow: dateWindow });
-      state.userZoomed = true;
-      state.lastDateWindow = dateWindow;
+    // Ha zoom-olva van és a végén vagyunk, követjük az új adatokat
+    if (state.userZoomed) {
+      // Chart.js-ben a zoom követése
+      rebuildChart(graphDiv, state);
+    } else {
+      // Egyszerűen újraépítjük
+      rebuildChart(graphDiv, state);
     }
   }
 
@@ -676,7 +696,7 @@
         label: overlayLabel,
         color: hexToRgba(color, 0.3),  // Halványított háttérszín
         data: data,
-        dashStyle: Dygraph.DASHED_LINE,
+        borderDash: [10, 4],
         daysDiff: daysDiff,
         visible: true  // Alapértelmezett láthatóság
       };
@@ -685,7 +705,7 @@
 
       // Chart újraépítés
       const graphDiv = document.getElementById('myio-dygraph-div');
-      if (graphDiv) rebuildGraph(graphDiv, state);
+      if (graphDiv) rebuildChart(graphDiv, state);
 
       // Betöltött sor hozzáadása a táblázatba
       const dataRow = createComparisonDataRow(tbody, state, overlay);
@@ -716,7 +736,7 @@
     toggleInput.onchange = () => {
       overlay.visible = toggleInput.checked;
       const graphDiv = document.getElementById('myio-dygraph-div');
-      if (graphDiv) rebuildGraph(graphDiv, state);
+      if (graphDiv) rebuildChart(graphDiv, state);
     };
 
     
@@ -745,7 +765,7 @@
       if (idx > -1) {
         state.overlays.splice(idx, 1);
         const graphDiv = document.getElementById('myio-dygraph-div');
-        if (graphDiv) rebuildGraph(graphDiv, state);
+        if (graphDiv) rebuildChart(graphDiv, state);
         row.remove();
       }
     };
@@ -793,7 +813,7 @@
               color: color,
               yVal: onY,
               visible: false,
-              dashStyle: DASH_ON,
+              borderDash: DASH_ON,
               type: 'relay',
               index: i,
               mode: 'on'
@@ -807,7 +827,7 @@
               color: color,
               yVal: offY,
               visible: false,
-              dashStyle: DASH_OFF,
+              borderDash: DASH_OFF,
               type: 'relay',
               index: i,
               mode: 'off'
@@ -835,7 +855,7 @@
               color: color,
               yVal: onY,
               visible: false,
-              dashStyle: DASH_ON,
+              borderDash: DASH_ON,
               type: 'pca',
               index: i,
               mode: 'on'
@@ -849,7 +869,7 @@
               color: color,
               yVal: offY,
               visible: false,
-              dashStyle: DASH_OFF,
+              borderDash: DASH_OFF,
               type: 'pca',
               index: i,
               mode: 'off'
@@ -877,7 +897,7 @@
               color: color,
               yVal: onY,
               visible: false,
-              dashStyle: DASH_ON,
+              borderDash: DASH_ON,
               type: 'fet',
               index: i,
               mode: 'on'
@@ -891,7 +911,7 @@
               color: color,
               yVal: offY,
               visible: false,
-              dashStyle: DASH_OFF,
+              borderDash: DASH_OFF,
               type: 'fet',
               index: i,
               mode: 'off'
@@ -954,7 +974,7 @@
         output.visible = toggleInput.checked;
         saveOutputToggles(sensorId, state.outputLines);
         const graphDiv = document.getElementById('myio-dygraph-div');
-        if (graphDiv) rebuildGraph(graphDiv, state);
+        if (graphDiv) rebuildChart(graphDiv, state);
       };
 
       row.append(colorCell, nameCell, valCell, toggleCell);
