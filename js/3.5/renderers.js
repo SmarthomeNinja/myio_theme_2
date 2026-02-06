@@ -22,7 +22,6 @@
   const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
 
   // --- Dygraph betöltése dinamikusan ---
-  console.log('📊 Chart.js ellenőrzés...');
   if (!window.Chart) {
     
     // Chart.js core ELŐSZÖR
