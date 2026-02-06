@@ -849,7 +849,7 @@
         .filter(ov => ov.sensorId === selectedSid)
         .map(ov => ov.dateStr);
       let candidateDate = new Date();
-      candidateDate.setDate(candidateDate.getDate() );  // Tegnap
+      candidateDate.setDate(candidateDate.getDate() - 1);  // Tegnap
       
       while (usedDates.includes(candidateDate.toISOString().split('T')[0])) {
         candidateDate.setDate(candidateDate.getDate() - 1);
