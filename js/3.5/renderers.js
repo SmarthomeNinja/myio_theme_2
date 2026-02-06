@@ -494,7 +494,7 @@
         borderColor: ov.color,
         backgroundColor: 'transparent',
         borderWidth: 1.5,
-        borderDash: [10, 4],  // Szaggatott vonal
+        borderDash: [],  // Folytonos vonal (nem szaggatott)
         pointRadius: 1,
         pointHoverRadius: 3,
         fill: false,
@@ -550,6 +550,7 @@
       type: 'line',
       data: { datasets: datasets },
       options: {
+        animation: false,  // Animáció kikapcsolva
         responsive: true,
         maintainAspectRatio: false,
         aspectRatio: 2,
@@ -587,10 +588,28 @@
         },
         plugins: {
           legend: {
-            display: false  // Nincs tooltip/legend
+            display: false
           },
           tooltip: {
-            enabled: false  // Tooltip kikapcsolva
+            enabled: true,  // Tooltip bekapcsolva
+            mode: 'index',
+            intersect: false,
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#fff',
+            bodyColor: '#fff',
+            borderColor: '#4a9eff',
+            borderWidth: 1,
+            displayColors: true,
+            callbacks: {
+              label: function(context) {
+                let label = context.dataset.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                label += context.parsed.y.toFixed(2);
+                return label;
+              }
+            }
           },
           zoom: {
             zoom: {
@@ -751,14 +770,28 @@
   function createComparisonDataRow(tbody, state, overlay) {
     const row = el("tr");
     
-    // Toggle button (bal oldalon, kuka előtt)
+    // Toggle gomb törlés funkcióval
     const toggleCell = el("td");
     const toggleLabel = el("label", { class: "myio-chart-toggle" });
     const toggleInput = el("input", { type: "checkbox" });
     toggleInput.checked = overlay.visible !== false;
     const toggleTrack = el("span", { class: "myio-chart-toggle-track" });
+    
+    // Kuka ikon hozzáadása a toggle után
+    const deleteIcon = el("span", { text: "🗑", style: "margin-left: 8px; cursor: pointer; opacity: 0.6;" });
+    deleteIcon.title = "Törlés";
+    deleteIcon.onclick = () => {
+      const idx = state.overlays.indexOf(overlay);
+      if (idx > -1) {
+        state.overlays.splice(idx, 1);
+        const graphDiv = document.getElementById('myio-chart-div');
+        if (graphDiv) rebuildChart(graphDiv, state);
+        row.remove();
+      }
+    };
+    
     toggleLabel.append(toggleInput, toggleTrack);
-    toggleCell.appendChild(toggleLabel);
+    toggleCell.append(toggleLabel, deleteIcon);
     
     toggleInput.onchange = () => {
       overlay.visible = toggleInput.checked;
@@ -782,23 +815,9 @@
     infoCell.style.fontSize = '12px';
     infoCell.style.opacity = '0.6';
     
-    // Törlés gomb
-    const actionCell = el("td");
-    const deleteBtn = el("button", { text: "🗑", title: "Törlés" });
-    deleteBtn.style.background = 'transparent';
-    deleteBtn.style.color = '#ff6384';
-    deleteBtn.onclick = () => {
-      const idx = state.overlays.indexOf(overlay);
-      if (idx > -1) {
-        state.overlays.splice(idx, 1);
-        const graphDiv = document.getElementById('myio-chart-div');
-        if (graphDiv) rebuildChart(graphDiv, state);
-        row.remove();
-      }
-    };
-    actionCell.appendChild(deleteBtn);
     
-    row.append(toggleCell, colorCell, labelCell, infoCell, actionCell);
+    
+    row.append(colorCell, labelCell, infoCell, toggleCell);  // Toggle a kuka helyén
     return row;
   }
 
