@@ -7,12 +7,26 @@
   const { makeSection } = window.myioSections;
   const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
 
-  // --- Chart.js betöltése dinamikusan ---
-  if (!window.Chart) {
+  // --- Dygraph betöltése dinamikusan ---
+  const BASE_PATH = document.currentScript?.src?.replace(/[^/]*$/, '') || '/js/3.5/';
+  
+  if (!window.Dygraph) {
     const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js';
+    script.src = BASE_PATH + 'dygraph-combined.js';
     document.head.appendChild(script);
   }
+
+  // --- CSS betöltés ---
+  function loadCSS(href) {
+    if (!document.querySelector(`link[href*="${href}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = BASE_PATH + href;
+      document.head.appendChild(link);
+    }
+  }
+  loadCSS('chart-modal.css');
+  loadCSS('dygraph.css');
 
   // --- Sunrise/Sunset SVG ikonok ---
   const SVG_NS = "http://www.w3.org/2000/svg";
@@ -133,7 +147,9 @@
     return container.children.length > 0 ? container : null;
   }
 
-  // === CHART MODAL FUNKCIÓK ===
+  // ============================================================
+  // === CHART MODAL – Dygraph-alapú interaktív szenzor chart ===
+  // ============================================================
   
   function generateCSVPath(sensorId, date) {
     let string = "";
@@ -163,254 +179,6 @@
     return yy + mm + dd;
   }
 
-  async function loadCSVData(csvPath) {
-    try {
-      const response = await fetch(csvPath);
-      if (!response.ok) return null;
-      const text = await response.text();
-      const lines = text.trim().split('\n');
-      const data = lines.map(line => {
-        const [time, value] = line.split(',');
-        return { time: time.trim(), value: parseFloat(value) };
-      });
-      return data;
-    } catch (error) {
-      console.error('CSV betöltési hiba:', error);
-      return null;
-    }
-  }
-
-  function getColorForDataset(index, opacity = 1) {
-    const colors = [
-      `rgba(255, 99, 132, ${opacity})`,   // piros
-      `rgba(54, 162, 235, ${opacity})`,   // kék
-      `rgba(75, 192, 192, ${opacity})`,   // zöld
-      `rgba(255, 206, 86, ${opacity})`,   // sárga
-      `rgba(153, 102, 255, ${opacity})`,  // lila
-      `rgba(255, 159, 64, ${opacity})`,   // narancs
-    ];
-    return colors[index % colors.length];
-  }
-
-  function createChartModal(sensorId, sensorName) {
-    const modal = el("div", { class: "myio-chart-modal" });
-    const modalContent = el("div", { class: "myio-chart-modal-content" });
-    
-    const header = el("div", { class: "myio-chart-modal-header" });
-    const title = el("h2", { text: sensorName });
-    const closeBtn = el("button", { class: "myio-chart-close", text: "×" });
-    closeBtn.onclick = () => modal.remove();
-    header.append(title, closeBtn);
-    
-    const canvasContainer = el("div", { class: "myio-chart-container" });
-    const canvas = el("canvas", { id: "sensorChart" });
-    canvasContainer.appendChild(canvas);
-    
-    const historicalSection = el("div", { class: "myio-chart-historical" });
-    const historicalTitle = el("h3", { text: "Történeti adatok" });
-    const historicalTable = el("table", { class: "myio-chart-table" });
-    const tbody = el("tbody");
-    historicalTable.appendChild(tbody);
-    historicalSection.append(historicalTitle, historicalTable);
-    
-    const outputSection = el("div", { class: "myio-chart-outputs" });
-    const outputTitle = el("h3", { text: "Kimenetek" });
-    const outputTable = el("table", { class: "myio-chart-table" });
-    const outputTbody = el("tbody");
-    outputTable.appendChild(outputTbody);
-    outputSection.append(outputTitle, outputTable);
-    
-    modalContent.append(header, canvasContainer, historicalSection, outputSection);
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
-    
-    const chartState = {
-      chart: null,
-      datasets: [],
-      refreshInterval: null,
-      currentZoom: null
-    };
-    
-    initializeChart(canvas, chartState, sensorId);
-    loadCurrentDayData(chartState, sensorId);
-    addEmptyHistoricalRow(tbody, chartState, sensorId);
-    loadOutputs(outputTbody, sensorId, chartState);
-    
-    if (isToday(new Date())) {
-      chartState.refreshInterval = setInterval(() => {
-        refreshCurrentData(chartState, sensorId);
-      }, 5000);
-    }
-    
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.remove();
-    });
-    
-    window.addEventListener('beforeunload', () => {
-      if (chartState.refreshInterval) clearInterval(chartState.refreshInterval);
-    });
-  }
-
-  function initializeChart(canvas, chartState, sensorId) {
-    const ctx = canvas.getContext('2d');
-    chartState.chart = new Chart(ctx, {
-      type: 'line',
-      data: { datasets: [] },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          zoom: {
-            pan: { enabled: true, mode: 'x' },
-            zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
-          },
-          legend: { display: true }
-        },
-        scales: {
-          x: { type: 'time', time: { unit: 'hour' } },
-          y: { beginAtZero: false }
-        }
-      }
-    });
-  }
-
-  async function loadCurrentDayData(chartState, sensorId) {
-    const today = formatDateToYYMMDD(new Date());
-    const csvPath = generateCSVPath(sensorId, today);
-    const data = await loadCSVData(csvPath);
-    
-    if (data) {
-      const dataset = {
-        label: 'Aktuális',
-        data: data.map(d => ({ x: new Date(d.time), y: d.value })),
-        borderColor: getColorForDataset(0),
-        backgroundColor: getColorForDataset(0, 0.1),
-        borderWidth: 2
-      };
-      chartState.datasets.push(dataset);
-      chartState.chart.data.datasets = chartState.datasets;
-      chartState.chart.update();
-    }
-  }
-
-  async function refreshCurrentData(chartState, sensorId) {
-    const today = formatDateToYYMMDD(new Date());
-    const csvPath = generateCSVPath(sensorId, today);
-    const data = await loadCSVData(csvPath);
-    
-    if (data && chartState.datasets.length > 0) {
-      const currentDataset = chartState.datasets[0];
-      const oldLength = currentDataset.data.length;
-      currentDataset.data = data.map(d => ({ x: new Date(d.time), y: d.value }));
-      
-      const chart = chartState.chart;
-      if (oldLength > 0 && data.length > oldLength) {
-        const xScale = chart.scales.x;
-        const isAtEnd = xScale.max >= currentDataset.data[oldLength - 1].x;
-        if (isAtEnd) {
-          chart.update('none');
-          xScale.options.max = currentDataset.data[data.length - 1].x;
-        }
-      }
-      
-      chart.update('none');
-    }
-  }
-
-  function addEmptyHistoricalRow(tbody, chartState, defaultSensorId) {
-    const row = el("tr");
-    
-    const colorCell = el("td");
-    const colorInput = el("input", { type: "color", value: getColorForDataset(chartState.datasets.length) });
-    colorCell.appendChild(colorInput);
-    
-    const sensorCell = el("td");
-    const sensorInput = el("input", { type: "number", value: String(defaultSensorId), placeholder: "Sensor ID" });
-    sensorCell.appendChild(sensorInput);
-    
-    const dateCell = el("td");
-    const dateInput = el("input", { type: "date", value: new Date().toISOString().split('T')[0] });
-    dateCell.appendChild(dateInput);
-    
-    const actionCell = el("td");
-    const addBtn = el("button", { text: "+" });
-    addBtn.onclick = async () => {
-      const sid = parseInt(sensorInput.value);
-      const dateStr = dateInput.value;
-      const color = colorInput.value;
-      
-      if (!sid || !dateStr) return;
-      
-      const date = new Date(dateStr);
-      const csvDate = formatDateToYYMMDD(date);
-      const csvPath = generateCSVPath(sid, csvDate);
-      const data = await loadCSVData(csvPath);
-      
-      if (data) {
-        const opacity = isRecent(date) ? 1 : 0.5;
-        const dataset = {
-          label: `Sensor ${sid} (${dateStr})`,
-          data: data.map(d => ({ x: new Date(d.time), y: d.value })),
-          borderColor: color,
-          backgroundColor: hexToRgba(color, 0.1),
-          borderWidth: 2,
-          borderDash: [5, 5]
-        };
-        
-        chartState.datasets.push(dataset);
-        chartState.chart.data.datasets = chartState.datasets;
-        chartState.chart.update();
-        
-        const newRow = createHistoricalDataRow(chartState, dataset, color, sid, dateStr);
-        tbody.insertBefore(newRow, row);
-        
-        sensorInput.value = '';
-        dateInput.value = new Date().toISOString().split('T')[0];
-      }
-    };
-    actionCell.appendChild(addBtn);
-    
-    row.append(colorCell, sensorCell, dateCell, actionCell);
-    tbody.appendChild(row);
-  }
-
-  function createHistoricalDataRow(chartState, dataset, color, sensorId, dateStr) {
-    const row = el("tr");
-    
-    const colorCell = el("td");
-    const colorBox = el("div", { style: `width:20px; height:20px; background:${color}; border:1px solid #ccc;` });
-    colorCell.appendChild(colorBox);
-    
-    const sensorCell = el("td", { text: `Sensor ${sensorId}` });
-    const dateCell = el("td", { text: dateStr });
-    
-    const actionCell = el("td");
-    const deleteBtn = el("button", { text: "🗑" });
-    deleteBtn.onclick = () => {
-      const idx = chartState.datasets.indexOf(dataset);
-      if (idx > -1) {
-        chartState.datasets.splice(idx, 1);
-        chartState.chart.data.datasets = chartState.datasets;
-        chartState.chart.update();
-        row.remove();
-      }
-    };
-    actionCell.appendChild(deleteBtn);
-    
-    row.append(colorCell, sensorCell, dateCell, actionCell);
-    return row;
-  }
-
-  function loadOutputs(outputTbody, sensorId, chartState) {
-    // TODO: Itt kell betölteni azokat a kimeneteket (relay, PCA), 
-    // amelyeket az adott szenzor vezérel
-    // Egyelőre placeholder
-    const note = el("tr");
-    const td = el("td", { colspan: "4", text: "Kimenetek betöltése fejlesztés alatt..." });
-    note.appendChild(td);
-    outputTbody.appendChild(note);
-  }
-
   function isToday(date) {
     const today = new Date();
     return date.getDate() === today.getDate() &&
@@ -418,11 +186,52 @@
            date.getFullYear() === today.getFullYear();
   }
 
-  function isRecent(date) {
-    const now = new Date();
-    const diff = Math.abs(now - date);
-    const days = diff / (1000 * 60 * 60 * 24);
-    return days <= 7;
+  async function fetchCSVText(csvPath) {
+    try {
+      const response = await fetch(csvPath);
+      if (!response.ok) return null;
+      return await response.text();
+    } catch (error) {
+      console.error('CSV betöltési hiba:', error);
+      return null;
+    }
+  }
+
+  /** CSV szövegből Dygraph-kompatibilis 2D tömböt készít: [[Date, value], ...] */
+  function parseCSVToArray(csvText) {
+    if (!csvText) return [];
+    const lines = csvText.trim().split('\n');
+    const data = [];
+    for (const line of lines) {
+      const parts = line.split(',');
+      if (parts.length < 2) continue;
+      const d = new Date(parts[0].trim());
+      const v = parseFloat(parts[1].trim());
+      if (!isNaN(d.getTime()) && !isNaN(v)) {
+        data.push([d, v]);
+      }
+    }
+    return data;
+  }
+
+  /** Szín paletta historikus és kimenet vonalakhoz */
+  const CHART_COLORS = [
+    '#ff6384', '#36a2eb', '#4bc0c0', '#ffce56',
+    '#9966ff', '#ff9f40', '#e7e9ed', '#66ff66',
+    '#ff66b2', '#66b2ff', '#b2ff66', '#ffb266'
+  ];
+
+  function getChartColor(index) {
+    return CHART_COLORS[index % CHART_COLORS.length];
+  }
+
+  /** Szín halványítása dátum távolság alapján */
+  function fadeColor(hexColor, daysDiff) {
+    const fade = Math.max(0.25, 1 - (daysDiff / 60));
+    const r = parseInt(hexColor.slice(1, 3), 16);
+    const g = parseInt(hexColor.slice(3, 5), 16);
+    const b = parseInt(hexColor.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${fade})`;
   }
 
   function hexToRgba(hex, alpha) {
@@ -432,7 +241,666 @@
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
-  // === SENSORS RENDERER (MÓDOSÍTOTT) ===
+  /** Dátum távolsága napokban */
+  function daysDifference(d1, d2) {
+    return Math.abs(Math.round((d1 - d2) / (1000 * 60 * 60 * 24)));
+  }
+
+  /**
+   * Szenzor-neveket feloldó segéd (sensorId → leírás)
+   */
+  function getSensorLabel(sensorId) {
+    if (sensorId == 0) return typeof str_Consump !== "undefined" ? str_Consump : "Consumption";
+    if (sensorId < 100 && typeof thermo_description !== "undefined" && thermo_description[sensorId]) {
+      return thermo_description[sensorId];
+    }
+    if (sensorId >= 101 && sensorId < 200 && typeof hum_description !== "undefined") {
+      return hum_description[sensorId - 101] || ("Humidity " + (sensorId - 101));
+    }
+    return "Sensor " + sensorId;
+  }
+
+  /** Szenzor ID-k listája a szelekthez */
+  function getAvailableSensorOptions() {
+    const options = [];
+    if (typeof consumption !== "undefined" && consumption != 0) {
+      options.push({ id: 0, label: typeof str_Consump !== "undefined" ? str_Consump : "Consumption" });
+    }
+    if (typeof thermo_eepromIndex !== "undefined") {
+      for (let i = 0; i < thermo_eepromIndex.length; i++) {
+        if (thermo_eepromIndex[i] != 0) {
+          const idx = thermo_eepromIndex[i];
+          const desc = (typeof thermo_description !== "undefined" && thermo_description[idx]) ? thermo_description[idx] : ("Thermo " + idx);
+          options.push({ id: idx, label: desc });
+        }
+      }
+    }
+    if (typeof humidity !== "undefined") {
+      for (let i = 0; i < humidity.length; i++) {
+        if (humidity[i] != 0) {
+          const desc = (typeof hum_description !== "undefined" && hum_description[i]) ? hum_description[i] : ("Humidity " + i);
+          options.push({ id: 101 + i, label: desc });
+        }
+      }
+    }
+    return options;
+  }
+
+  // ========================
+  // Chart Modal létrehozás
+  // ========================
+
+  function createChartModal(sensorId, sensorName) {
+    // Ha a Dygraph még nem töltődött be, várunk
+    if (!window.Dygraph) {
+      setTimeout(() => createChartModal(sensorId, sensorName), 200);
+      return;
+    }
+
+    const modal = el("div", { class: "myio-chart-modal" });
+    const modalContent = el("div", { class: "myio-chart-modal-content" });
+    
+    // --- Fejléc ---
+    const header = el("div", { class: "myio-chart-modal-header" });
+    const title = el("h2", { text: sensorName });
+    const closeBtn = el("button", { class: "myio-chart-close", text: "×" });
+    header.append(title, closeBtn);
+    
+    // --- Chart konténer ---
+    const chartContainer = el("div", { class: "myio-chart-container" });
+    const graphDiv = el("div", { id: "myio-dygraph-div" });
+    graphDiv.style.width = '100%';
+    graphDiv.style.height = '100%';
+    chartContainer.appendChild(graphDiv);
+
+    // --- Historikus adatok szekció ---
+    const historicalSection = el("div", { class: "myio-chart-historical" });
+    const historicalTitle = el("h3", { text: "Összehasonlítás" });
+    const historicalTable = el("table", { class: "myio-chart-table" });
+    const histTbody = el("tbody");
+    historicalTable.appendChild(histTbody);
+    historicalSection.append(historicalTitle, historicalTable);
+
+    // --- Kimenetek szekció ---
+    const outputSection = el("div", { class: "myio-chart-outputs" });
+    const outputTitle = el("h3", { text: "Kimenetek" });
+    const outputTable = el("table", { class: "myio-chart-table" });
+    const outTbody = el("tbody");
+    outputTable.appendChild(outTbody);
+    outputSection.append(outputTitle, outputTable);
+
+    modalContent.append(header, chartContainer, historicalSection, outputSection);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    // --- Állapot ---
+    const state = {
+      graph: null,
+      sensorId: sensorId,
+      mainData: [],        // [[Date, val], ...]
+      overlays: [],        // [{ id, label, color, data:[[Date,val]], dashStyle }]
+      outputLines: [],     // [{ id, label, color, yVal, visible, dashStyle }]
+      refreshInterval: null,
+      userZoomed: false,
+      lastDateWindow: null
+    };
+
+    // --- Chart inicializálás ---
+    initChart(graphDiv, state, sensorId);
+
+    // --- Historikus üres sor ---
+    addEmptyComparisonRow(histTbody, state);
+
+    // --- Kimenetek betöltése ---
+    loadRelatedOutputs(outTbody, sensorId, state);
+
+    // --- Bezárás ---
+    const cleanup = () => {
+      if (state.refreshInterval) clearInterval(state.refreshInterval);
+      modal.remove();
+    };
+    closeBtn.onclick = cleanup;
+    modal.addEventListener('click', (e) => { if (e.target === modal) cleanup(); });
+    document.addEventListener('keydown', function escHandler(e) {
+      if (e.key === 'Escape') { cleanup(); document.removeEventListener('keydown', escHandler); }
+    });
+  }
+
+  // ======================
+  // Dygraph inicializálás
+  // ======================
+
+  async function initChart(graphDiv, state, sensorId) {
+    const today = formatDateToYYMMDD(new Date());
+    const csvPath = generateCSVPath(sensorId, today);
+    const csvText = await fetchCSVText(csvPath);
+    state.mainData = parseCSVToArray(csvText);
+
+    if (state.mainData.length === 0) {
+      graphDiv.innerHTML = '<p style="color:var(--myio-text-secondary,#aaa);text-align:center;padding:40px;">Nincs adat a mai napra.</p>';
+      return;
+    }
+
+    rebuildGraph(graphDiv, state);
+
+    // Auto-refresh 5 mp-enként ha ma van
+    state.refreshInterval = setInterval(() => refreshMainData(graphDiv, state, sensorId), 5000);
+  }
+
+  /** Dygraph-ot (újra)építi az összes adatból */
+  function rebuildGraph(graphDiv, state) {
+    // Összesítjük az oszlopokat: Time, Main, overlay1, overlay2, ...
+    const labels = ['Idő', getSensorLabel(state.sensorId)];
+    const seriesOpts = {};
+    const colors = ['#4a9eff'];
+
+    // Overlay sorozatok
+    for (const ov of state.overlays) {
+      labels.push(ov.label);
+      colors.push(ov.color);
+      seriesOpts[ov.label] = {
+        strokePattern: ov.dashStyle || Dygraph.DASHED_LINE,
+        strokeWidth: 1.5
+      };
+    }
+
+    // Output vízszintes vonalak
+    for (const ol of state.outputLines) {
+      if (ol.visible) {
+        labels.push(ol.label);
+        colors.push(ol.color);
+        seriesOpts[ol.label] = {
+          strokePattern: ol.dashStyle,
+          strokeWidth: 2,
+          drawPoints: false
+        };
+      }
+    }
+
+    // Megkeressük az összes időpontot egy közös tengelyre
+    const allTimes = new Map(); // timestamp -> row values
+    
+    // Main adatok
+    for (const [d, v] of state.mainData) {
+      const t = d.getTime();
+      if (!allTimes.has(t)) allTimes.set(t, new Array(labels.length).fill(null));
+      allTimes.get(t)[0] = d;
+      allTimes.get(t)[1] = v;
+    }
+
+    // Overlay adatok
+    for (let oi = 0; oi < state.overlays.length; oi++) {
+      const colIdx = 2 + oi;
+      for (const [d, v] of state.overlays[oi].data) {
+        const t = d.getTime();
+        if (!allTimes.has(t)) {
+          const row = new Array(labels.length).fill(null);
+          row[0] = d;
+          allTimes.set(t, row);
+        }
+        allTimes.get(t)[colIdx] = v;
+      }
+    }
+
+    // Output vonalak: ugyanolyan értékű vízszintes vonal a teljes időtartamra
+    const visibleOutputs = state.outputLines.filter(o => o.visible);
+    if (visibleOutputs.length > 0 && allTimes.size > 0) {
+      const times = [...allTimes.keys()].sort((a, b) => a - b);
+      const firstTime = times[0];
+      const lastTime = times[times.length - 1];
+      
+      for (let vi = 0; vi < visibleOutputs.length; vi++) {
+        const colIdx = 2 + state.overlays.length + vi;
+        const yVal = visibleOutputs[vi].yVal;
+        
+        // Eleje és vége pont
+        for (const t of [firstTime, lastTime]) {
+          if (!allTimes.has(t)) {
+            const row = new Array(labels.length).fill(null);
+            row[0] = new Date(t);
+            allTimes.set(t, row);
+          }
+          allTimes.get(t)[colIdx] = yVal;
+        }
+      }
+    }
+
+    // Rendezés idő szerint
+    const sortedData = [...allTimes.values()].sort((a, b) => a[0] - b[0]);
+
+    // Mentjük a zoom pozíciót
+    const prevDateWindow = state.graph ? state.graph.xAxisRange() : null;
+    const wasZoomed = state.userZoomed;
+
+    if (state.graph) {
+      state.graph.destroy();
+    }
+
+    state.graph = new Dygraph(graphDiv, sortedData, {
+      labels: labels,
+      colors: colors,
+      series: seriesOpts,
+      drawPoints: true,
+      pointSize: 1.5,
+      highlightCircleSize: 4,
+      strokeWidth: 2,
+      fillGraph: false,
+      animatedZooms: true,
+      legend: 'follow',
+      labelsSeparateLines: true,
+      highlightSeriesOpts: {
+        strokeWidth: 2.5,
+        highlightCircleSize: 5
+      },
+      axes: {
+        x: {
+          axisLabelFormatter: function(d) {
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            return hh + ':' + mm;
+          }
+        },
+        y: { }
+      },
+      zoomCallback: function(minDate, maxDate, yRanges) {
+        state.userZoomed = true;
+        state.lastDateWindow = [minDate, maxDate];
+      },
+      // dygraph.css override dark theme
+      axisLabelColor: getComputedStyle(document.documentElement).getPropertyValue('--myio-text-secondary') || '#aaa',
+      axisLineColor: getComputedStyle(document.documentElement).getPropertyValue('--myio-border') || '#444',
+      gridLineColor: getComputedStyle(document.documentElement).getPropertyValue('--myio-border') || '#333'
+    });
+
+    // Ha be volt zoomolva, visszaállítjuk
+    if (wasZoomed && prevDateWindow) {
+      state.graph.updateOptions({ dateWindow: prevDateWindow });
+    }
+  }
+
+  /** Frissíti a fő adatokat (5 mp-enként) */
+  async function refreshMainData(graphDiv, state, sensorId) {
+    const today = formatDateToYYMMDD(new Date());
+    const csvPath = generateCSVPath(sensorId, today);
+    const csvText = await fetchCSVText(csvPath);
+    const newData = parseCSVToArray(csvText);
+    if (!newData || newData.length === 0) return;
+
+    const oldLen = state.mainData.length;
+    state.mainData = newData;
+
+    if (!state.graph) {
+      rebuildGraph(graphDiv, state);
+      return;
+    }
+
+    // Ha a felhasználó zoomolt és a jobb szélén van, követjük az új adatokat
+    let dateWindow = null;
+    if (state.userZoomed && state.lastDateWindow) {
+      const [minX, maxX] = state.lastDateWindow;
+      const windowWidth = maxX - minX;
+      
+      // Ha a zoom vége az utolsó adat közelében van (5 percen belül) -> follow
+      const lastOldTime = oldLen > 0 ? state.mainData[Math.min(oldLen - 1, newData.length - 1)]?.[0]?.getTime() : 0;
+      const lastNewTime = newData[newData.length - 1][0].getTime();
+      
+      if (maxX >= lastOldTime - 300000) {
+        // Követjük a végét
+        dateWindow = [lastNewTime - windowWidth, lastNewTime];
+        state.lastDateWindow = dateWindow;
+      } else {
+        dateWindow = state.lastDateWindow;
+      }
+    }
+
+    rebuildGraph(graphDiv, state);
+
+    if (dateWindow && state.graph) {
+      state.graph.updateOptions({ dateWindow: dateWindow });
+      state.userZoomed = true;
+      state.lastDateWindow = dateWindow;
+    }
+  }
+
+  // =============================
+  // Összehasonlítás táblázat
+  // =============================
+
+  function addEmptyComparisonRow(tbody, state) {
+    const row = el("tr", { class: "myio-chart-empty-row" });
+    
+    // Szín választó
+    const colorCell = el("td");
+    const colorIdx = 1 + state.overlays.length;
+    const defaultColor = getChartColor(colorIdx);
+    const colorInput = el("input", { type: "color", value: defaultColor });
+    colorCell.appendChild(colorInput);
+    
+    // Szenzor választó
+    const sensorCell = el("td");
+    const sensorSelect = document.createElement("select");
+    sensorSelect.className = "myio-chart-select";
+    const sensors = getAvailableSensorOptions();
+    // Alapértelmezetten az aktuális szenzor
+    for (const s of sensors) {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = s.label;
+      if (s.id === state.sensorId) opt.selected = true;
+      sensorSelect.appendChild(opt);
+    }
+    sensorCell.appendChild(sensorSelect);
+    
+    // Dátum választó
+    const dateCell = el("td");
+    const dateInput = el("input", { type: "date" });
+    // Tegnap alapértelmezés
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    dateInput.value = yesterday.toISOString().split('T')[0];
+    dateCell.appendChild(dateInput);
+    
+    // Betöltés gomb
+    const actionCell = el("td");
+    const addBtn = el("button", { text: "+", title: "Betöltés" });
+    addBtn.style.minWidth = "36px";
+    addBtn.onclick = async () => {
+      const sid = parseInt(sensorSelect.value);
+      const dateStr = dateInput.value;
+      const color = colorInput.value;
+      if (isNaN(sid) || !dateStr) return;
+
+      const date = new Date(dateStr);
+      const csvDate = formatDateToYYMMDD(date);
+      const csvPath = generateCSVPath(sid, csvDate);
+      
+      addBtn.textContent = '⏳';
+      const csvText = await fetchCSVText(csvPath);
+      addBtn.textContent = '+';
+      
+      if (!csvText) {
+        addBtn.textContent = '✗';
+        setTimeout(() => { addBtn.textContent = '+'; }, 1500);
+        return;
+      }
+
+      const data = parseCSVToArray(csvText);
+      if (data.length === 0) return;
+
+      const daysDiff = daysDifference(date, new Date());
+      const overlayLabel = getSensorLabel(sid) + ' (' + dateStr + ')';
+      
+      const overlay = {
+        id: Date.now(),
+        label: overlayLabel,
+        color: color,
+        data: data,
+        dashStyle: Dygraph.DASHED_LINE,
+        daysDiff: daysDiff
+      };
+
+      state.overlays.push(overlay);
+
+      // Chart újraépítés
+      const graphDiv = document.getElementById('myio-dygraph-div');
+      if (graphDiv) rebuildGraph(graphDiv, state);
+
+      // Betöltött sor hozzáadása a táblázatba
+      const dataRow = createComparisonDataRow(tbody, state, overlay);
+      tbody.insertBefore(dataRow, row);
+
+      // Szín frissítés a következő üres sorhoz
+      const nextColor = getChartColor(1 + state.overlays.length);
+      colorInput.value = nextColor;
+    };
+    actionCell.appendChild(addBtn);
+    
+    row.append(colorCell, sensorCell, dateCell, actionCell);
+    tbody.appendChild(row);
+  }
+
+  function createComparisonDataRow(tbody, state, overlay) {
+    const row = el("tr");
+    
+    // Szín jelző
+    const colorCell = el("td");
+    const colorBox = el("div");
+    colorBox.style.cssText = `width:24px;height:24px;border-radius:4px;background:${overlay.color};border:1px solid rgba(255,255,255,0.2);`;
+    colorCell.appendChild(colorBox);
+    
+    // Label
+    const labelCell = el("td", { text: overlay.label });
+    labelCell.style.fontSize = '13px';
+    
+    // Adatpontok száma
+    const infoCell = el("td", { text: overlay.data.length + ' pont' });
+    infoCell.style.fontSize = '12px';
+    infoCell.style.opacity = '0.6';
+    
+    // Törlés gomb
+    const actionCell = el("td");
+    const deleteBtn = el("button", { text: "🗑", title: "Törlés" });
+    deleteBtn.style.background = 'transparent';
+    deleteBtn.style.color = '#ff6384';
+    deleteBtn.onclick = () => {
+      const idx = state.overlays.indexOf(overlay);
+      if (idx > -1) {
+        state.overlays.splice(idx, 1);
+        const graphDiv = document.getElementById('myio-dygraph-div');
+        if (graphDiv) rebuildGraph(graphDiv, state);
+        row.remove();
+      }
+    };
+    actionCell.appendChild(deleteBtn);
+    
+    row.append(colorCell, labelCell, infoCell, actionCell);
+    return row;
+  }
+
+  // ===========================
+  // Kimenetek (relay, PCA)
+  // ===========================
+
+  /**
+   * Megkeresi a szenzorhoz kapcsolt reléket és PCA kimeneteket
+   * thermoActivator[i] === sensorId  → relay i+1
+   * PCA_thermoActivator[i] === sensorId  → PCA i+1
+   */
+  function loadRelatedOutputs(outTbody, sensorId, state) {
+    const outputs = [];
+    let colorIdx = 0;
+
+    // ON/OFF dash stílusok
+    const DASH_ON  = [10, 4];     // hosszú szaggatott
+    const DASH_OFF = [3, 3];      // rövid szaggatott
+
+    // Relék
+    if (typeof relays !== "undefined" && typeof thermoActivator !== "undefined") {
+      for (let i = 0; i < thermoActivator.length; i++) {
+        if (thermoActivator[i] === sensorId) {
+          const relayName = (typeof relay_description !== "undefined" && relay_description[i + 1])
+            ? relay_description[i + 1] : ("Relay " + (i + 1));
+          const isOn = (relays[i] == 101 || relays[i] == 111 || relays[i] == 11);
+          
+          // ON vonal
+          const onY = (typeof min_temp_ON !== "undefined" && min_temp_ON[i] !== undefined) ? (min_temp_ON[i] / 100) : null;
+          // OFF vonal
+          const offY = (typeof max_temp_OFF !== "undefined" && max_temp_OFF[i] !== undefined) ? (max_temp_OFF[i] / 100) : null;
+
+          if (onY !== null) {
+            const color = getChartColor(colorIdx++);
+            outputs.push({
+              id: `relay_on_${i}`,
+              label: relayName + ' ON',
+              color: color,
+              yVal: onY,
+              visible: false,
+              dashStyle: DASH_ON,
+              type: 'relay',
+              index: i,
+              mode: 'on'
+            });
+          }
+          if (offY !== null) {
+            const color = getChartColor(colorIdx++);
+            outputs.push({
+              id: `relay_off_${i}`,
+              label: relayName + ' OFF',
+              color: color,
+              yVal: offY,
+              visible: false,
+              dashStyle: DASH_OFF,
+              type: 'relay',
+              index: i,
+              mode: 'off'
+            });
+          }
+        }
+      }
+    }
+
+    // PCA kimenetek
+    if (typeof PCA !== "undefined" && typeof PCA_thermoActivator !== "undefined") {
+      for (let i = 0; i < PCA_thermoActivator.length; i++) {
+        if (PCA_thermoActivator[i] === sensorId) {
+          const pcaName = (typeof PCA_description !== "undefined" && PCA_description[i + 1])
+            ? PCA_description[i + 1] : ("PCA " + (i + 1));
+
+          const onY = (typeof PCA_min_temp_ON !== "undefined" && PCA_min_temp_ON[i] !== undefined) ? (PCA_min_temp_ON[i] / 100) : null;
+          const offY = (typeof PCA_max_temp_OFF !== "undefined" && PCA_max_temp_OFF[i] !== undefined) ? (PCA_max_temp_OFF[i] / 100) : null;
+
+          if (onY !== null) {
+            const color = getChartColor(colorIdx++);
+            outputs.push({
+              id: `pca_on_${i}`,
+              label: pcaName + ' ON',
+              color: color,
+              yVal: onY,
+              visible: false,
+              dashStyle: DASH_ON,
+              type: 'pca',
+              index: i,
+              mode: 'on'
+            });
+          }
+          if (offY !== null) {
+            const color = getChartColor(colorIdx++);
+            outputs.push({
+              id: `pca_off_${i}`,
+              label: pcaName + ' OFF',
+              color: color,
+              yVal: offY,
+              visible: false,
+              dashStyle: DASH_OFF,
+              type: 'pca',
+              index: i,
+              mode: 'off'
+            });
+          }
+        }
+      }
+    }
+
+    // FET kimenetek
+    if (typeof fet !== "undefined" && typeof fet_thermoActivator !== "undefined") {
+      for (let i = 0; i < fet_thermoActivator.length; i++) {
+        if (fet_thermoActivator[i] === sensorId) {
+          const fetName = (typeof fet_description !== "undefined" && fet_description[i + 1])
+            ? fet_description[i + 1] : ("FET " + (i + 1));
+
+          const onY = (typeof fet_min_temp_ON !== "undefined" && fet_min_temp_ON[i] !== undefined) ? (fet_min_temp_ON[i] / 100) : null;
+          const offY = (typeof fet_max_temp_OFF !== "undefined" && fet_max_temp_OFF[i] !== undefined) ? (fet_max_temp_OFF[i] / 100) : null;
+
+          if (onY !== null) {
+            const color = getChartColor(colorIdx++);
+            outputs.push({
+              id: `fet_on_${i}`,
+              label: fetName + ' ON',
+              color: color,
+              yVal: onY,
+              visible: false,
+              dashStyle: DASH_ON,
+              type: 'fet',
+              index: i,
+              mode: 'on'
+            });
+          }
+          if (offY !== null) {
+            const color = getChartColor(colorIdx++);
+            outputs.push({
+              id: `fet_off_${i}`,
+              label: fetName + ' OFF',
+              color: color,
+              yVal: offY,
+              visible: false,
+              dashStyle: DASH_OFF,
+              type: 'fet',
+              index: i,
+              mode: 'off'
+            });
+          }
+        }
+      }
+    }
+
+    state.outputLines = outputs;
+
+    if (outputs.length === 0) {
+      const emptyRow = el("tr");
+      const td = el("td", { text: "Nincs ehhez a szenzorhoz rendelt kimenet." });
+      td.colSpan = 4;
+      td.style.opacity = '0.5';
+      td.style.textAlign = 'center';
+      emptyRow.appendChild(td);
+      outTbody.appendChild(emptyRow);
+      return;
+    }
+
+    // Sorok generálása: szín | név | érték | ON/OFF toggle
+    for (const output of outputs) {
+      const row = el("tr");
+
+      // Szín
+      const colorCell = el("td");
+      const colorBox = el("div");
+      const dashInfo = output.dashStyle === DASH_ON ? '━ ━' : '┄ ┄';
+      colorBox.style.cssText = `display:flex;align-items:center;gap:6px;`;
+      const colorDot = el("div");
+      colorDot.style.cssText = `width:20px;height:20px;border-radius:4px;background:${output.color};border:1px solid rgba(255,255,255,0.2);`;
+      const dashLabel = el("span", { text: dashInfo });
+      dashLabel.style.cssText = `color:${output.color};font-size:16px;font-weight:bold;`;
+      colorBox.append(colorDot, dashLabel);
+      colorCell.appendChild(colorBox);
+
+      // Név + érték
+      const nameCell = el("td", { text: output.label });
+      nameCell.style.fontSize = '13px';
+      
+      const valCell = el("td", { text: String(output.yVal) + (output.mode === 'on' ? ' ▲' : ' ▼') });
+      valCell.style.fontSize = '13px';
+      valCell.style.opacity = '0.7';
+
+      // Toggle
+      const toggleCell = el("td");
+      const toggleLabel = el("label", { class: "myio-chart-toggle" });
+      const toggleInput = el("input", { type: "checkbox" });
+      toggleInput.checked = output.visible;
+      const toggleTrack = el("span", { class: "myio-chart-toggle-track" });
+      toggleLabel.append(toggleInput, toggleTrack);
+      toggleCell.appendChild(toggleLabel);
+
+      toggleInput.onchange = () => {
+        output.visible = toggleInput.checked;
+        const graphDiv = document.getElementById('myio-dygraph-div');
+        if (graphDiv) rebuildGraph(graphDiv, state);
+      };
+
+      row.append(colorCell, nameCell, valCell, toggleCell);
+      outTbody.appendChild(row);
+    }
+  }
+
+  // === SENSORS RENDERER ===
   
   function renderSensors(root) {
     const { section, grid } = makeSection(typeof str_Sensors !== "undefined" ? str_Sensors : "Sensors", "", "myio.section.sensors");
@@ -444,11 +912,14 @@
         const c = card(typeof str_Consump !== "undefined" ? str_Consump : "Consumption", "myio-sensor", id);
         addValue(c, (consumption / 1000) + " " + safe(typeof consumptionUnit !== "undefined" ? consumptionUnit : "", ""));
         
-        // Névre kattintás -> modal megnyitása
-        const cardHeader = c.querySelector('.myio-card-name');
-        if (cardHeader) {
-          cardHeader.style.cursor = 'pointer';
-          cardHeader.onclick = () => createChartModal(0, typeof str_Consump !== "undefined" ? str_Consump : "Consumption");
+        const cardTitle = c.querySelector('.myio-cardTitle');
+        if (cardTitle) {
+          cardTitle.style.cursor = 'pointer';
+          cardTitle.addEventListener('click', (e) => {
+            // Nem nyitunk modált, ha a fav ikonra kattintottak
+            if (e.target.closest('.myio-fav-wrapper')) return;
+            createChartModal(0, typeof str_Consump !== "undefined" ? str_Consump : "Consumption");
+          });
         }
         
         return c;
@@ -467,11 +938,13 @@
             const c = card(thermo_description[idx], "myio-sensor", id);
             addValue(c, (thermo_temps[i] / 100) + " °C");
             
-            // Névré kattintás -> modal megnyitása
-            const cardHeader = c.querySelector('.myio-card-name');
-            if (cardHeader) {
-              cardHeader.style.cursor = 'pointer';
-              cardHeader.onclick = () => createChartModal(idx, thermo_description[idx]);
+            const cardTitle = c.querySelector('.myio-cardTitle');
+            if (cardTitle) {
+              cardTitle.style.cursor = 'pointer';
+              cardTitle.addEventListener('click', (e) => {
+                if (e.target.closest('.myio-fav-wrapper')) return;
+                createChartModal(idx, thermo_description[idx]);
+              });
             }
             
             return c;
@@ -491,11 +964,13 @@
             const c = card(hum_description[i], "myio-sensor", id);
             addValue(c, (humidity[i] / 10) + " %");
             
-            // Névré kattintás -> modal megnyitása
-            const cardHeader = c.querySelector('.myio-card-name');
-            if (cardHeader) {
-              cardHeader.style.cursor = 'pointer';
-              cardHeader.onclick = () => createChartModal(101 + i, hum_description[i]);
+            const cardTitle = c.querySelector('.myio-cardTitle');
+            if (cardTitle) {
+              cardTitle.style.cursor = 'pointer';
+              cardTitle.addEventListener('click', (e) => {
+                if (e.target.closest('.myio-fav-wrapper')) return;
+                createChartModal(101 + i, hum_description[i]);
+              });
             }
             
             return c;
