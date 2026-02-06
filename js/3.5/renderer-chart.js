@@ -800,7 +800,7 @@
     }
 
     // Ha zoom-olva van és a végén vagyunk, követjük az új adatokat
-    if (chart.getZoomLevel() && state.chart) {
+    if (state.userZoomed && state.chart) {
 
       // Zoom megőrzése - csak az adatok frissítése
       const mainDataset = state.chart.data.datasets[0];
