@@ -118,7 +118,9 @@ function changed(obj, name = obj.name, multiplier = 1, forceRefresh = getCookie(
 		}
 	}
 }
-function changedPair(obj1, name1 = obj1.name,obj2, name2 = obj2.name, multiplier = 1, forceRefresh = getCookie("AutoRefresh"),areYouSure=false) {
+function changedPair(obj1,obj2, multiplier = 1, forceRefresh = getCookie("AutoRefresh"),areYouSure=false) {
+	var name1 = obj1.name;
+	var name2 = obj2.name;
 	var _confirmed = true;
 	if (areYouSure) {
 		if (!confirm(str_AreYouSure)) {
