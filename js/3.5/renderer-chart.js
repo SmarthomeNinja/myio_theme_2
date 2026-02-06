@@ -757,9 +757,9 @@
               pinch: {
                 enabled: true
               },
-              mode: 'x',
+              mode: 'x',            
               onZoomComplete: () => {
-                state.userZoomed = true;
+                state.userZoomed = chart.getZoomLevel() !== 1;
               }
             },
             pan: {
@@ -800,7 +800,7 @@
     }
 
     // Ha zoom-olva van és a végén vagyunk, követjük az új adatokat
-    if (state.userZoomed && state.chart) {
+    if (chart.getZoomLevel() && state.chart) {
 
       // Zoom megőrzése - csak az adatok frissítése
       const mainDataset = state.chart.data.datasets[0];
