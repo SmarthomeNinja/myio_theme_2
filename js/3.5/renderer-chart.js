@@ -794,7 +794,6 @@
     state.mainData = newData;
 
     if (!state.chart) {
-      console.log('frissít')
       rebuildChart(graphDiv, state);
       return;
     }
@@ -807,11 +806,9 @@
       if (mainDataset) {
         mainDataset.data = newData.map(([d, v]) => ({ x: d, y: v }));
         state.chart.update('none');  // Nincs animáció
-        console.log('nem frissít')
       }
     } else {
       // Teljes újraépítés ha nincs zoom
-      console.log('frissít')
       rebuildChart(graphDiv, state);
     }
   }
