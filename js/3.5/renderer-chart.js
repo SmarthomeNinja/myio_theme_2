@@ -8,7 +8,7 @@
     const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
   
     const { g, str, to100, buildSunIcons, createPWMSliderRow } = window.myioRendererHelpers;
-    const { createChartModal } = window.myioChart;
+    const { createChartModal } ={};
   
     // ============================================================
     // === Szenzor kártya → chart modal kattintás
