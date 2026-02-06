@@ -340,7 +340,7 @@
     const header = el("div", { class: "myio-chart-modal-header" });
     const title = el("h2", { text: sensorName });
     // Fejléc styling: középre, háttér nélkül, világos kék
-    title.style.cssText = \'text-align: center; background: none; color: #4a9eff; flex: 1;\';
+    title.style.cssText = 'text-align: center; background: none; color: #4a9eff; flex: 1;';
     const closeBtn = el("button", { class: "myio-chart-close", text: "×" });
     header.append(title, closeBtn);
     
