@@ -607,6 +607,7 @@
     // 1. Main dataset
     if (state.mainData.length > 0) {
       datasets.push({
+        cubicInterpolationMode: 'monotone',
         label: sensorLabel,
         data: state.mainData.map(([d, v]) => ({ x: d, y: v })),
         borderColor: '#4a9eff',
@@ -623,6 +624,7 @@
     const visibleOverlays = state.overlays.filter(ov => ov.visible !== false);
     for (const ov of visibleOverlays) {
       datasets.push({
+        cubicInterpolationMode: 'monotone',
         label: ov.label,
         data: ov.data.map(([d, v]) => ({ x: d, y: v })),
         borderColor: ov.color,
