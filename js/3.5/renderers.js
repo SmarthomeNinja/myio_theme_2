@@ -900,9 +900,8 @@
       const dataRow = createComparisonDataRow(tbody, state, overlay);
       tbody.insertBefore(dataRow, row);
 
-      // Szín frissítés a következő üres sorhoz
-      const nextColor = getChartColor(1 + state.overlays.length);
-      colorInput.value = nextColor;
+      // Szín frissítés - updateColor() hívása
+      updateColor();
     };
     actionCell.appendChild(addBtn);
     
