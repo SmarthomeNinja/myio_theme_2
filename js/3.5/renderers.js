@@ -736,7 +736,6 @@
           tooltip: {
             enabled: true,  // Tooltip bekapcsolva
             mode: 'point',  // Csak legközelebbi pont
-            pointRadius: 14,
             intersect: false,
             axis: 'x',  // X tengely mentén
             backgroundColor: 'rgba(0, 0, 0, 0.8)',
