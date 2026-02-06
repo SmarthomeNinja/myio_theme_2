@@ -22,7 +22,7 @@
   const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
 
   // --- Dygraph betöltése dinamikusan ---
-  const BASE_PATH = document.currentScript?.src?.replace(/[^/]*$/, '') || '/js/3.5/';
+  const BASE_PATH = host;
   
   console.log('📊 Chart.js ellenőrzés...');
   if (!window.Chart) {
