@@ -35,7 +35,13 @@
       // Annotation plugin
       const annotationScript = document.createElement('script');
       annotationScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js';
-      annotationScript.onload = () => console.log('✓ Annotation plugin betöltve');
+      annotationScript.onload = () => {
+        // Pluginek regisztrálása Chart.js-ben (KÖTELEZŐ Chart.js 4.x-ben!)
+        if (window.Chart && window.Chart.register) {
+          if (window.ChartZoom) Chart.register(window.ChartZoom);
+          if (window.ChartAnnotation) Chart.register(window.ChartAnnotation);
+        }
+      };
       document.head.appendChild(annotationScript);
     };
     
