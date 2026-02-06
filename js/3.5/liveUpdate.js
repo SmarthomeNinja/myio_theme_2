@@ -268,7 +268,7 @@ const MyIOLive = (function() {
           for (let i = 0; i < thermo_eepromIndex.length; i++) {
             if (thermo_eepromIndex[i] === sensorId) {
               thermo_temps[i] = sensorsData[key].temp;
-              log(`Thermo sensor ${sensorId} updated: ${sensorsData[key].temp / 100}°C`);
+              console.log(`Thermo sensor ${sensorId} updated: ${sensorsData[key].temp / 100}°C`);
               
               // Frissítsük a szenzor kártyát is
               const cards = document.querySelectorAll(`[data-cardid="sensors:thermo:${sensorId}"]`);
