@@ -612,7 +612,7 @@
         borderColor: '#4a9eff',
         backgroundColor: 'rgba(74, 158, 255, 0.1)',
         borderWidth: 2,
-        pointRadius: 1.5,
+        pointRadius: 0.5,
         pointHoverRadius: 4,
         fill: false,
         tension: 0.1
