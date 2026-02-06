@@ -10,7 +10,9 @@
   // --- Dygraph betöltése dinamikusan ---
   const BASE_PATH = document.currentScript?.src?.replace(/[^/]*$/, '') || '/js/3.5/';
   
+  console.log('📊 Chart.js ellenőrzés...');
   if (!window.Chart) {
+    console.log('⚠️ Chart.js betöltése...');
     // Chart.js core
     const chartScript = document.createElement('script');
     chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js';
@@ -343,6 +345,7 @@
   // ========================
 
   function createChartModal(sensorId, sensorName) {
+    console.log('🔵 createChartModal hívva:', sensorId, sensorName);
     // Ha a Dygraph még nem töltődött be, várunk
     if (!window.Dygraph) {
       setTimeout(() => createChartModal(sensorId, sensorName), 200);
@@ -425,6 +428,7 @@
   // ======================
 
   async function initChart(graphDiv, state, sensorId) {
+    console.log('🔵 initChart hívva:', sensorId);
     const today = formatDateToYYMMDD(new Date());
     const csvPath = generateCSVPath(sensorId, today);
     const csvText = await fetchCSVText(csvPath);
@@ -444,6 +448,7 @@
   /** Dygraph-ot (újra)építi az összes adatból */
     /** Chart.js-sel újraépíti a grafikont */
   function rebuildChart(graphDiv, state) {
+    console.log('🔵 rebuildChart hívva, datasets:', state.mainData?.length || 0);
     const sensorLabel = getSensorLabel(state.sensorId);
     
     // Datasets összeállítása
@@ -520,6 +525,7 @@
     
     // Új Chart.js példány
     const ctx = canvas.getContext('2d');
+    console.log('📊 Chart.js példány létrehozása...');
     state.chart = new Chart(ctx, {
       type: 'line',
       data: { datasets: datasets },
