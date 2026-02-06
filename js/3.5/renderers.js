@@ -357,18 +357,13 @@
   function createChartModal(sensorId, sensorName) {
     console.log('🔵 createChartModal hívva:', sensorId, sensorName);
     
-    // Várjunk amíg a Chart.js betöltődik
+    // Chart.js már betöltődött az oldal indulásakor
     if (!window.Chart) {
-      console.log('⏳ Várunk a Chart.js betöltésére...');
-      setTimeout(() => createChartModal(sensorId, sensorName), 500);
+      console.error('❌ Chart.js nem elérhető! Ellenőrizd a hálózati kapcsolatot.');
       return;
     }
     console.log('✓ Chart.js elérhető, folytatás...');
-    // Ha a Dygraph még nem töltődött be, várunk
-    if (!window.Dygraph) {
-      setTimeout(() => createChartModal(sensorId, sensorName), 200);
-      return;
-    }
+    
 
     const modal = el("div", { class: "myio-chart-modal" });
     const modalContent = el("div", { class: "myio-chart-modal-content" });
