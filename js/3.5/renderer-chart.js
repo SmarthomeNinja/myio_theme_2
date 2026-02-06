@@ -790,6 +790,8 @@
 
   /** Frissíti a fő adatokat (5 mp-enként) */
   async function refreshMainData(graphDiv, state, sensorId) {
+    rebuildChart(graphDiv, state);
+/*
     const today = formatDateToYYMMDD(new Date());
     const csvPath = generateCSVPath(sensorId, today);
     const csvText = await fetchCSVText(csvPath);
@@ -816,6 +818,7 @@
       // Teljes újraépítés ha nincs zoom
       rebuildChart(graphDiv, state);
     }
+    */
   }
 
   // =============================
