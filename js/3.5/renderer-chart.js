@@ -576,7 +576,7 @@
     }
 
     rebuildChart(graphDiv, state);
-    console.log('↻ refreselőtt');
+    console.log('↻ refres előtt');
     // Auto-refresh 5 mp-enként
     state.refreshInterval = setInterval(() => {
       console.log('↻ refreshMainData fut:', { sensorId, time: new Date().toISOString() });
