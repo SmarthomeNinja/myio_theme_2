@@ -12,26 +12,36 @@
   
   console.log('📊 Chart.js ellenőrzés...');
   if (!window.Chart) {
-    console.log('⚠️ Chart.js betöltése...');
-    // Chart.js core
+    console.log('⚠️ Chart.js betöltése (szekvenciálisan)...');
+    
+    // Chart.js core ELŐSZÖR
     const chartScript = document.createElement('script');
     chartScript.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js';
+    
+    // Plugineket csak a core betöltése UTÁN
+    chartScript.onload = () => {
+      console.log('✓ Chart.js core betöltve');
+      
+      // Date adapter
+      const adapterScript = document.createElement('script');
+      adapterScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js';
+      adapterScript.onload = () => console.log('✓ Date adapter betöltve');
+      document.head.appendChild(adapterScript);
+      
+      // Zoom plugin
+      const zoomScript = document.createElement('script');
+      zoomScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js';
+      zoomScript.onload = () => console.log('✓ Zoom plugin betöltve');
+      document.head.appendChild(zoomScript);
+      
+      // Annotation plugin
+      const annotationScript = document.createElement('script');
+      annotationScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js';
+      annotationScript.onload = () => console.log('✓ Annotation plugin betöltve');
+      document.head.appendChild(annotationScript);
+    };
+    
     document.head.appendChild(chartScript);
-    
-    // Date adapter
-    const adapterScript = document.createElement('script');
-    adapterScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js';
-    document.head.appendChild(adapterScript);
-    
-    // Zoom plugin
-    const zoomScript = document.createElement('script');
-    zoomScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js';
-    document.head.appendChild(zoomScript);
-    
-    // Annotation plugin (vízszintes vonalakhoz)
-    const annotationScript = document.createElement('script');
-    annotationScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js';
-    document.head.appendChild(annotationScript);
   }
 
   // --- CSS betöltés ---
@@ -346,6 +356,14 @@
 
   function createChartModal(sensorId, sensorName) {
     console.log('🔵 createChartModal hívva:', sensorId, sensorName);
+    
+    // Várjunk amíg a Chart.js betöltődik
+    if (!window.Chart) {
+      console.log('⏳ Várunk a Chart.js betöltésére...');
+      setTimeout(() => createChartModal(sensorId, sensorName), 500);
+      return;
+    }
+    console.log('✓ Chart.js elérhető, folytatás...');
     // Ha a Dygraph még nem töltődött be, várunk
     if (!window.Dygraph) {
       setTimeout(() => createChartModal(sensorId, sensorName), 200);
