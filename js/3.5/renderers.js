@@ -496,13 +496,17 @@
     // Fejléc styling: középre, háttér nélkül, világos kék
     title.style.cssText = 'text-align: center; background: none; color: #4a9eff; flex: 1;';
     const closeBtn = el("button", { class: "myio-chart-close", text: "×" });
-    header.append(title, closeBtn);
+    const resetZoomBtn = el("button", { class: "myio-chart-close", text: "⟲" });
+    resetZoomBtn.title = "Reset zoom";
+    resetZoomBtn.style.cssText = 'font-size:18px;margin-right:8px;opacity:0.6;';
+    header.append(title, resetZoomBtn, closeBtn);
     
     // --- Chart konténer ---
     const chartContainer = el("div", { class: "myio-chart-container" });
     chartContainer.style.height = '400px';
     chartContainer.style.width = '100%';
     chartContainer.style.position = 'relative';
+    chartContainer.style.touchAction = 'none';
     const graphDiv = el("div", { id: "myio-chart-div" });
     graphDiv.style.width = '100%';
     graphDiv.style.height = '100%';
@@ -542,6 +546,14 @@
 
     // --- Chart inicializálás ---
     initChart(graphDiv, state, sensorId);
+
+    // --- Reset zoom gomb ---
+    resetZoomBtn.onclick = () => {
+      if (state.chart) {
+        state.chart.resetZoom();
+        state.userZoomed = false;
+      }
+    };
 
     // --- Historikus üres sor ---
     addEmptyComparisonRow(histTbody, state);
@@ -656,6 +668,7 @@
     let canvas = graphDiv.querySelector('canvas');
     if (!canvas) {
       canvas = document.createElement('canvas');
+      canvas.style.touchAction = 'none';
       graphDiv.innerHTML = '';
       graphDiv.appendChild(canvas);
     }
@@ -1556,5 +1569,6 @@
     renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites
   };
 })();
+
 
 
