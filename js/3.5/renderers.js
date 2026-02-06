@@ -685,6 +685,11 @@
       data: { datasets: datasets },
       options: {
         animation: false,  // Animáció kikapcsolva
+        elements:
+        {
+          pointRadius: 2,
+          pointHoverRadius: 15,
+        },
         responsive: true,
         maintainAspectRatio: false,
         aspectRatio: 2,
