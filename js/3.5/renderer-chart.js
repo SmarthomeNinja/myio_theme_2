@@ -671,7 +671,7 @@
       type: 'line',
       data: { datasets: datasets },
       options: {
-        animation: true,  // Animáció kikapcsolva
+      //  animation: true,  // Animáció kikapcsolva
         animations: {
           tension: {
             duration: 1000,
