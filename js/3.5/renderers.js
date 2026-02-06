@@ -284,7 +284,12 @@
   // Szín memória szenzor ID alapján
   const sensorColorMap = new Map();
   
-  function getSensorColor(sensorId) {
+  function getSensorColor(sensorId, isOriginal) {
+    // Eredeti szenzor mindig kék
+    if (isOriginal) {
+      return '#4a9eff';
+    }
+    
     if (!sensorColorMap.has(sensorId)) {
       const colorIndex = sensorColorMap.size;
       sensorColorMap.set(sensorId, getChartColor(colorIndex));
@@ -804,7 +809,8 @@
     addBtn.onclick = async () => {
       const sid = parseInt(sensorSelect.value);
       const dateStr = dateInput.value;
-      const color = getSensorColor(sid);  // Automatikus szín szenzor alapján
+      const isOriginal = (sid === state.sensorId);
+      const color = getSensorColor(sid, isOriginal);  // Eredeti = #4a9eff
       if (isNaN(sid) || !dateStr) return;
 
       const date = new Date(dateStr);
