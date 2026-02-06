@@ -794,20 +794,24 @@
     state.mainData = newData;
 
     if (!state.chart) {
+      console.log('frissít')
       rebuildChart(graphDiv, state);
       return;
     }
 
     // Ha zoom-olva van és a végén vagyunk, követjük az új adatokat
     if (state.userZoomed && state.chart) {
+
       // Zoom megőrzése - csak az adatok frissítése
       const mainDataset = state.chart.data.datasets[0];
       if (mainDataset) {
         mainDataset.data = newData.map(([d, v]) => ({ x: d, y: v }));
         state.chart.update('none');  // Nincs animáció
+        console.log('nem frissít')
       }
     } else {
       // Teljes újraépítés ha nincs zoom
+      console.log('frissít')
       rebuildChart(graphDiv, state);
     }
   }
