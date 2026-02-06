@@ -498,7 +498,7 @@
     const closeBtn = el("button", { class: "myio-chart-close", text: "×" });
     const resetZoomBtn = el("button", { class: "myio-chart-close", text: "⟲" });
     resetZoomBtn.title = "Reset zoom";
-    resetZoomBtn.style.cssText = 'margin-right:8px;opacity:0.6;';
+    resetZoomBtn.style.cssText = 'margin-right:8px;';
     header.append(title, resetZoomBtn, closeBtn);
     
     // --- Chart konténer ---
