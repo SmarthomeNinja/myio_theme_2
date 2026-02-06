@@ -726,7 +726,7 @@
           },
           tooltip: {
             enabled: true,  // Tooltip bekapcsolva
-            mode: 'nearest',  // Csak legközelebbi pont
+            mode: 'point',  // Csak legközelebbi pont
             intersect: false,
             axis: 'x',  // X tengely mentén
             backgroundColor: 'rgba(0, 0, 0, 0.8)',
