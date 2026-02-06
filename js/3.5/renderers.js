@@ -383,7 +383,10 @@
     
     // --- Chart konténer ---
     const chartContainer = el("div", { class: "myio-chart-container" });
-    const graphDiv = el("div", { id: "myio-dygraph-div" });
+    chartContainer.style.height = '400px';
+    chartContainer.style.width = '100%';
+    chartContainer.style.position = 'relative';
+    const graphDiv = el("div", { id: "myio-chart-div" });
     graphDiv.style.width = '100%';
     graphDiv.style.height = '100%';
     chartContainer.appendChild(graphDiv);
@@ -529,6 +532,10 @@
     }
     
     // Canvas létrehozása vagy újrafelhasználása
+    // Canvas méret beállítása
+    graphDiv.style.height = '400px';
+    graphDiv.style.width = '100%';
+    
     let canvas = graphDiv.querySelector('canvas');
     if (!canvas) {
       canvas = document.createElement('canvas');
@@ -550,6 +557,7 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        aspectRatio: 2,
         interaction: {
           mode: 'index',
           intersect: false
@@ -728,7 +736,7 @@
       state.overlays.push(overlay);
 
       // Chart újraépítés
-      const graphDiv = document.getElementById('myio-dygraph-div');
+      const graphDiv = document.getElementById('myio-chart-div');
       if (graphDiv) rebuildChart(graphDiv, state);
 
       // Betöltött sor hozzáadása a táblázatba
@@ -759,7 +767,7 @@
     
     toggleInput.onchange = () => {
       overlay.visible = toggleInput.checked;
-      const graphDiv = document.getElementById('myio-dygraph-div');
+      const graphDiv = document.getElementById('myio-chart-div');
       if (graphDiv) rebuildChart(graphDiv, state);
     };
 
@@ -788,7 +796,7 @@
       const idx = state.overlays.indexOf(overlay);
       if (idx > -1) {
         state.overlays.splice(idx, 1);
-        const graphDiv = document.getElementById('myio-dygraph-div');
+        const graphDiv = document.getElementById('myio-chart-div');
         if (graphDiv) rebuildChart(graphDiv, state);
         row.remove();
       }
@@ -997,7 +1005,7 @@
       toggleInput.onchange = () => {
         output.visible = toggleInput.checked;
         saveOutputToggles(sensorId, state.outputLines);
-        const graphDiv = document.getElementById('myio-dygraph-div');
+        const graphDiv = document.getElementById('myio-chart-div');
         if (graphDiv) rebuildChart(graphDiv, state);
       };
 
