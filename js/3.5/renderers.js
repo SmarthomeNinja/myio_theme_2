@@ -616,7 +616,7 @@
         pointRadius: 0.5,
         pointHoverRadius: 4,
         fill: false,
-        tension: 0.1
+        tension: 10
       });
     }
     
