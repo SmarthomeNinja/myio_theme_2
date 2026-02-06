@@ -190,7 +190,22 @@
     
     valueSpan.style.cursor = 'ns-resize';
     valueSpan.style.userSelect = 'none';
-    valueSpan.title = 'Húzd fel/le az érték módosításához';
+    valueSpan.style.padding = '4px 8px';
+    valueSpan.style.background = 'rgba(74, 158, 255, 0.1)';
+    valueSpan.style.borderRadius = '4px';
+    valueSpan.style.display = 'inline-block';
+    valueSpan.title = '↕️ Húzd fel/le az érték módosításához';
+    
+    
+    valueSpan.onmouseenter = () => {
+      valueSpan.style.background = 'rgba(74, 158, 255, 0.2)';
+    };
+    
+    valueSpan.onmouseleave = () => {
+      if (!isDragging) {
+        valueSpan.style.background = 'rgba(74, 158, 255, 0.1)';
+      }
+    };
     
     valueSpan.onmousedown = (e) => {
       isDragging = true;
@@ -710,7 +725,8 @@
             },
             pan: {
               enabled: true,
-              mode: 'x'
+              mode: 'x',
+              modifierKey: null  // Nincs szükség Shift-re, direkt pan-olható
             },
             limits: {
               x: { min: 'original', max: 'original' }
@@ -743,11 +759,15 @@
     }
 
     // Ha zoom-olva van és a végén vagyunk, követjük az új adatokat
-    if (state.userZoomed) {
-      // Chart.js-ben a zoom követése
-      rebuildChart(graphDiv, state);
+    if (state.userZoomed && state.chart) {
+      // Zoom megőrzése - csak az adatok frissítése
+      const mainDataset = state.chart.data.datasets[0];
+      if (mainDataset) {
+        mainDataset.data = newData.map(([d, v]) => ({ x: d, y: v }));
+        state.chart.update('none');  // Nincs animáció
+      }
     } else {
-      // Egyszerűen újraépítjük
+      // Teljes újraépítés ha nincs zoom
       rebuildChart(graphDiv, state);
     }
   }
@@ -789,9 +809,17 @@
     
     const dateInput = el("input", { type: "date" });
     dateInput.style.width = '100%';
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    dateInput.value = yesterday.toISOString().split('T')[0];
+    
+    // Legnagyobb dátum ami még nincs az overlay-ekben
+    const usedDates = state.overlays.map(ov => ov.dateStr);
+    let candidateDate = new Date();
+    candidateDate.setDate(candidateDate.getDate() - 1);  // Tegnap
+    
+    while (usedDates.includes(candidateDate.toISOString().split('T')[0])) {
+      candidateDate.setDate(candidateDate.getDate() - 1);  // Egy nappal korábbi
+    }
+    
+    dateInput.value = candidateDate.toISOString().split('T')[0];
     
     const pointsLabel = el("span", { text: '' });
     pointsLabel.style.fontSize = '11px';
