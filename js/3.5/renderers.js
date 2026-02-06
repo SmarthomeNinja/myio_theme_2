@@ -12,7 +12,6 @@
   
   console.log('📊 Chart.js ellenőrzés...');
   if (!window.Chart) {
-    console.log('⚠️ Chart.js betöltése (szekvenciálisan)...');
     
     // Chart.js core ELŐSZÖR
     const chartScript = document.createElement('script');
@@ -20,8 +19,7 @@
     
     // Plugineket csak a core betöltése UTÁN
     chartScript.onload = () => {
-      console.log('✓ Chart.js core betöltve');
-      
+        
       // Date adapter
       const adapterScript = document.createElement('script');
       adapterScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js';
@@ -359,10 +357,8 @@
     
     // Chart.js már betöltődött az oldal indulásakor
     if (!window.Chart) {
-      console.error('❌ Chart.js nem elérhető! Ellenőrizd a hálózati kapcsolatot.');
       return;
     }
-    console.log('✓ Chart.js elérhető, folytatás...');
     
 
     const modal = el("div", { class: "myio-chart-modal" });
@@ -545,7 +541,6 @@
     
     // Új Chart.js példány
     const ctx = canvas.getContext('2d');
-    console.log('📊 Chart.js példány létrehozása...');
     state.chart = new Chart(ctx, {
       type: 'line',
       data: { datasets: datasets },
@@ -555,7 +550,7 @@
         maintainAspectRatio: false,
         aspectRatio: 2,
         interaction: {
-          mode: 'index',
+          mode: 'nearest',  // Csak legközelebbi pont
           intersect: false
         },
         scales: {
@@ -592,8 +587,9 @@
           },
           tooltip: {
             enabled: true,  // Tooltip bekapcsolva
-            mode: 'index',
+            mode: 'nearest',  // Csak legközelebbi pont
             intersect: false,
+            axis: 'x',  // X tengely mentén
             backgroundColor: 'rgba(0, 0, 0, 0.8)',
             titleColor: '#fff',
             bodyColor: '#fff',
@@ -735,11 +731,13 @@
       if (data.length === 0) return;
 
       const daysDiff = daysDifference(date, new Date());
-      const overlayLabel = getSensorLabel(sid) + ' (' + dateStr + ')';
+      const overlayLabel = getSensorLabel(sid);
+      const overlayDate = dateStr;
       
       const overlay = {
         id: Date.now(),
         label: overlayLabel,
+      dateStr: overlayDate,
         color: hexToRgba(color, 0.3),  // Halványított háttérszín
         data: data,
         borderDash: [10, 4],
@@ -806,9 +804,14 @@
     colorBox.style.cssText = `width:24px;height:24px;border-radius:4px;background:${overlay.color};border:1px solid rgba(255,255,255,0.2);`;
     colorCell.appendChild(colorBox);
     
-    // Label
+    // Label (név)
     const labelCell = el("td", { text: overlay.label });
     labelCell.style.fontSize = '13px';
+    
+    // Dátum (külön oszlop)
+    const dateCell = el("td", { text: overlay.dateStr || '' });
+    dateCell.style.fontSize = '12px';
+    dateCell.style.opacity = '0.7';
     
     // Adatpontok száma
     const infoCell = el("td", { text: overlay.data.length + ' pont' });
@@ -817,7 +820,7 @@
     
     
     
-    row.append(colorCell, labelCell, infoCell, toggleCell);  // Toggle a kuka helyén
+    row.append(colorCell, labelCell, dateCell, infoCell, toggleCell);  // Toggle a kuka helyén
     return row;
   }
 
