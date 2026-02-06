@@ -628,9 +628,8 @@
         borderColor: ov.color,
         backgroundColor: 'transparent',
         borderWidth: 2,
-        borderDash: [],  // Folytonos vonal (nem szaggatott)
         pointRadius: 0.5,
-        pointHoverRadius: 3,
+        pointHoverRadius: 4,
         fill: false,
         tension: 0.1
       });
