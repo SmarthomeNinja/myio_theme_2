@@ -849,13 +849,18 @@
         .filter(ov => ov.sensorId === selectedSid)
         .map(ov => ov.dateStr);
       
-      // Ha nincs mai napi adat betöltve, akkor mai nappal kezdjünk
       let candidateDate = new Date();
       const todayStr = candidateDate.toISOString().split('T')[0];
       
-      // Ha már van mai napi adat, akkor tegnappal kezdjük
-      if (usedDates.includes(todayStr)) {
+      // Ha az aktuális szenzort választottuk, akkor a main dataset mai napja is foglalt
+      if (selectedSid === state.sensorId) {
+        // Aktuális szenzornál tegnappal kezdjük (mai már betöltve van a main dataset-ben)
         candidateDate.setDate(candidateDate.getDate() - 1);
+      } else {
+        // Más szenzornál: ha már van mai napi adat az overlays-ben, akkor tegnappal kezdjük
+        if (usedDates.includes(todayStr)) {
+          candidateDate.setDate(candidateDate.getDate() - 1);
+        }
       }
       
       // Keressünk szabad napot
