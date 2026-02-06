@@ -147,6 +147,42 @@
     return container.children.length > 0 ? container : null;
   }
 
+
+  /** Hex színkód átváltása RGBA-ra alpha csatornával */
+  function hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+
+  // localStorage kulcsok és függvények
+  const OUTPUT_TOGGLE_STORAGE_KEY = 'myio-output-toggles';
+
+  function saveOutputToggles(sensorId, outputLines) {
+    const toggles = {};
+    for (const ol of outputLines) {
+      toggles[ol.id] = ol.visible;
+    }
+    localStorage.setItem(`${OUTPUT_TOGGLE_STORAGE_KEY}-${sensorId}`, JSON.stringify(toggles));
+  }
+
+  function loadOutputToggles(sensorId, outputLines) {
+    const stored = localStorage.getItem(`${OUTPUT_TOGGLE_STORAGE_KEY}-${sensorId}`);
+    if (stored) {
+      try {
+        const toggles = JSON.parse(stored);
+        for (const ol of outputLines) {
+          if (toggles[ol.id] !== undefined) {
+            ol.visible = toggles[ol.id];
+          }
+        }
+      } catch (e) {}
+    }
+  }
+
+
   // ============================================================
   // === CHART MODAL – Dygraph-alapú interaktív szenzor chart ===
   // ============================================================
@@ -303,6 +339,8 @@
     // --- Fejléc ---
     const header = el("div", { class: "myio-chart-modal-header" });
     const title = el("h2", { text: sensorName });
+    // Fejléc styling: középre, háttér nélkül, világos kék
+    title.style.cssText = \'text-align: center; background: none; color: #4a9eff; flex: 1;\';
     const closeBtn = el("button", { class: "myio-chart-close", text: "×" });
     header.append(title, closeBtn);
     
@@ -396,6 +434,7 @@
 
     // Overlay sorozatok
     for (const ov of state.overlays) {
+      if (ov.visible === false) continue;  // Csak láthatóak
       labels.push(ov.label);
       colors.push(ov.color);
       seriesOpts[ov.label] = {
@@ -429,9 +468,10 @@
     }
 
     // Overlay adatok
-    for (let oi = 0; oi < state.overlays.length; oi++) {
+    const visibleOverlays = state.overlays.filter(ov => ov.visible !== false);
+    for (let oi = 0; oi < visibleOverlays.length; oi++) {
       const colIdx = 2 + oi;
-      for (const [d, v] of state.overlays[oi].data) {
+      for (const [d, v] of visibleOverlays[oi].data) {
         const t = d.getTime();
         if (!allTimes.has(t)) {
           const row = new Array(labels.length).fill(null);
@@ -454,7 +494,8 @@
         const yVal = visibleOutputs[vi].yVal;
         
         // Eleje és vége pont
-        for (const t of [firstTime, lastTime]) {
+        // Minden időponthoz hozzáadjuk (teljes vonal)
+      for (const t of times) {
           if (!allTimes.has(t)) {
             const row = new Array(labels.length).fill(null);
             row[0] = new Date(t);
@@ -486,7 +527,7 @@
       strokeWidth: 2,
       fillGraph: false,
       animatedZooms: true,
-      legend: 'follow',
+      legend: 'never',  // Tooltip kikapcsolva
       labelsSeparateLines: true,
       highlightSeriesOpts: {
         strokeWidth: 2.5,
@@ -633,10 +674,11 @@
       const overlay = {
         id: Date.now(),
         label: overlayLabel,
-        color: color,
+        color: hexToRgba(color, 0.3),  // Halványított háttérszín
         data: data,
         dashStyle: Dygraph.DASHED_LINE,
-        daysDiff: daysDiff
+        daysDiff: daysDiff,
+        visible: true  // Alapértelmezett láthatóság
       };
 
       state.overlays.push(overlay);
@@ -661,6 +703,22 @@
 
   function createComparisonDataRow(tbody, state, overlay) {
     const row = el("tr");
+    
+    // Toggle button (bal oldalon, kuka előtt)
+    const toggleCell = el("td");
+    const toggleLabel = el("label", { class: "myio-chart-toggle" });
+    const toggleInput = el("input", { type: "checkbox" });
+    toggleInput.checked = overlay.visible !== false;
+    const toggleTrack = el("span", { class: "myio-chart-toggle-track" });
+    toggleLabel.append(toggleInput, toggleTrack);
+    toggleCell.appendChild(toggleLabel);
+    
+    toggleInput.onchange = () => {
+      overlay.visible = toggleInput.checked;
+      const graphDiv = document.getElementById('myio-dygraph-div');
+      if (graphDiv) rebuildGraph(graphDiv, state);
+    };
+
     
     // Szín jelző
     const colorCell = el("td");
@@ -693,7 +751,7 @@
     };
     actionCell.appendChild(deleteBtn);
     
-    row.append(colorCell, labelCell, infoCell, actionCell);
+    row.append(toggleCell, colorCell, labelCell, infoCell, actionCell);
     return row;
   }
 
@@ -723,9 +781,9 @@
           const isOn = (relays[i] == 101 || relays[i] == 111 || relays[i] == 11);
           
           // ON vonal
-          const onY = (typeof min_temp_ON !== "undefined" && min_temp_ON[i] !== undefined) ? (min_temp_ON[i] / 100) : null;
+          const onY = (typeof min_temp_ON !== "undefined" && min_temp_ON[i] !== undefined) ? (min_temp_ON[i] / 10) : null;
           // OFF vonal
-          const offY = (typeof max_temp_OFF !== "undefined" && max_temp_OFF[i] !== undefined) ? (max_temp_OFF[i] / 100) : null;
+          const offY = (typeof max_temp_OFF !== "undefined" && max_temp_OFF[i] !== undefined) ? (max_temp_OFF[i] / 10) : null;
 
           if (onY !== null) {
             const color = getChartColor(colorIdx++);
@@ -766,8 +824,8 @@
           const pcaName = (typeof PCA_description !== "undefined" && PCA_description[i + 1])
             ? PCA_description[i + 1] : ("PCA " + (i + 1));
 
-          const onY = (typeof PCA_min_temp_ON !== "undefined" && PCA_min_temp_ON[i] !== undefined) ? (PCA_min_temp_ON[i] / 100) : null;
-          const offY = (typeof PCA_max_temp_OFF !== "undefined" && PCA_max_temp_OFF[i] !== undefined) ? (PCA_max_temp_OFF[i] / 100) : null;
+          const onY = (typeof PCA_min_temp_ON !== "undefined" && PCA_min_temp_ON[i] !== undefined) ? (PCA_min_temp_ON[i] / 10) : null;
+          const offY = (typeof PCA_max_temp_OFF !== "undefined" && PCA_max_temp_OFF[i] !== undefined) ? (PCA_max_temp_OFF[i] / 10) : null;
 
           if (onY !== null) {
             const color = getChartColor(colorIdx++);
@@ -808,8 +866,8 @@
           const fetName = (typeof fet_description !== "undefined" && fet_description[i + 1])
             ? fet_description[i + 1] : ("FET " + (i + 1));
 
-          const onY = (typeof fet_min_temp_ON !== "undefined" && fet_min_temp_ON[i] !== undefined) ? (fet_min_temp_ON[i] / 100) : null;
-          const offY = (typeof fet_max_temp_OFF !== "undefined" && fet_max_temp_OFF[i] !== undefined) ? (fet_max_temp_OFF[i] / 100) : null;
+          const onY = (typeof fet_min_temp_ON !== "undefined" && fet_min_temp_ON[i] !== undefined) ? (fet_min_temp_ON[i] / 10) : null;
+          const offY = (typeof fet_max_temp_OFF !== "undefined" && fet_max_temp_OFF[i] !== undefined) ? (fet_max_temp_OFF[i] / 10) : null;
 
           if (onY !== null) {
             const color = getChartColor(colorIdx++);
@@ -844,6 +902,9 @@
     }
 
     state.outputLines = outputs;
+    
+    // Betöltjük a mentett toggle állapotokat
+    loadOutputToggles(sensorId, state.outputLines);
 
     if (outputs.length === 0) {
       const emptyRow = el("tr");
@@ -891,6 +952,7 @@
 
       toggleInput.onchange = () => {
         output.visible = toggleInput.checked;
+        saveOutputToggles(sensorId, state.outputLines);
         const graphDiv = document.getElementById('myio-dygraph-div');
         if (graphDiv) rebuildGraph(graphDiv, state);
       };
