@@ -581,6 +581,14 @@
       console.log('↻ refreshMainData fut:', { sensorId, time: new Date().toISOString() });
       refreshMainData(graphDiv, state, sensorId);
     }, 5000);
+    state.refreshInterval = setInterval(async () => {
+      try {
+        console.log('↻ refreshMainData fut:', { sensorId, time: new Date().toISOString() });
+        refreshMainData(graphDiv, state, sensorId);
+      } catch (e) {
+        console.warn('refresh not runing: ', e);
+      }
+    }, ms);
   }
 
   /** Dygraph-ot (újra)építi az összes adatból */
