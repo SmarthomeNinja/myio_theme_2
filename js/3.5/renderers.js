@@ -779,12 +779,22 @@
   function addEmptyComparisonRow(tbody, state) {
     const row = el("tr", { class: "myio-chart-empty-row" });
     
-    // Szín választó
+    // Szín (automatikus, szenzor alapján)
     const colorCell = el("td");
-    const colorIdx = 1 + state.overlays.length;
-    const defaultColor = getChartColor(colorIdx);
-    const colorInput = el("input", { type: "color", value: defaultColor });
-    colorCell.appendChild(colorInput);
+    colorCell.style.textAlign = 'center';
+    colorCell.style.verticalAlign = 'middle';
+    
+    const colorPreview = el("div");
+    colorPreview.style.cssText = 'width:24px;height:24px;border-radius:4px;border:1px solid rgba(255,255,255,0.2);margin:auto;';
+    colorCell.appendChild(colorPreview);
+    
+    // Szín frissítése amikor szenzor változik
+    const updateColor = () => {
+      const selectedId = parseInt(sensorSelect.value);
+      const isOrig = (selectedId === state.sensorId);
+      const previewColor = getSensorColor(selectedId, isOrig);
+      colorPreview.style.background = previewColor;
+    };
     
     // Szenzor választó
     const sensorCell = el("td");
@@ -800,6 +810,12 @@
       sensorSelect.appendChild(opt);
     }
     sensorCell.appendChild(sensorSelect);
+    
+    // Szenzor változáskor frissítsük a színt
+    sensorSelect.onchange = updateColor;
+    
+    // Kezdeti szín beállítása
+    setTimeout(updateColor, 0);
     
     // Dátum választó + adatpontok szám
     const dateCell = el("td");
@@ -836,6 +852,7 @@
     addBtn.style.minWidth = "36px";
     addBtn.onclick = async () => {
       const sid = parseInt(sensorSelect.value);
+      updateColor();  // Szín frissítés a gombnyomáskor
       const dateStr = dateInput.value;
       const isOriginal = (sid === state.sensorId);
       const color = getSensorColor(sid, isOriginal);  // Eredeti = #4a9eff
