@@ -1,0 +1,143 @@
+/* Chart Modal Styles */
+.myio-chart-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  backdrop-filter: blur(5px);
+}
+
+.myio-chart-modal-content {
+  background: var(--myio-bg-card, #1e1e1e);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.myio-chart-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--myio-border, #333);
+}
+
+.myio-chart-modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--myio-text, #fff);
+}
+
+.myio-chart-close {
+  background: transparent;
+  border: none;
+  font-size: 32px;
+  color: var(--myio-text-secondary, #aaa);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.myio-chart-close:hover {
+  background: var(--myio-hover, rgba(255, 255, 255, 0.1));
+  color: var(--myio-text, #fff);
+}
+
+.myio-chart-container {
+  height: 400px;
+  margin-bottom: 30px;
+  background: var(--myio-bg-secondary, #252525);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.myio-chart-historical,
+.myio-chart-outputs {
+  margin-top: 30px;
+}
+
+.myio-chart-historical h3,
+.myio-chart-outputs h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: var(--myio-text, #fff);
+}
+
+.myio-chart-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--myio-bg-secondary, #252525);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.myio-chart-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--myio-border, #333);
+  color: var(--myio-text, #fff);
+}
+
+.myio-chart-table tr:last-child td {
+  border-bottom: none;
+}
+
+.myio-chart-table input[type="color"] {
+  width: 40px;
+  height: 30px;
+  border: 1px solid var(--myio-border, #333);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.myio-chart-table input[type="number"],
+.myio-chart-table input[type="date"] {
+  background: var(--myio-bg-input, #1a1a1a);
+  border: 1px solid var(--myio-border, #333);
+  border-radius: 4px;
+  padding: 6px 10px;
+  color: var(--myio-text, #fff);
+  font-size: 14px;
+  width: 100%;
+}
+
+.myio-chart-table button {
+  background: var(--myio-btn-primary, #4a9eff);
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s;
+}
+
+.myio-chart-table button:hover {
+  background: var(--myio-btn-primary-hover, #3a8eef);
+  transform: scale(1.05);
+}
+
+/* Card name clickable style */
+.myio-card-name[style*="cursor: pointer"] {
+  transition: color 0.2s;
+}
+
+.myio-card-name[style*="cursor: pointer"]:hover {
+  color: var(--myio-accent, #4a9eff) !important;
+  text-decoration: underline;
+}
