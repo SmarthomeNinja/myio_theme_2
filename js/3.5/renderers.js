@@ -182,6 +182,77 @@
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
+  /** Output érték drag-to-adjust és szerver küldés */
+  function makeOutputDraggable(valueSpan, output, state, sensorId) {
+    let isDragging = false;
+    let startY = 0;
+    let startValue = 0;
+    
+    valueSpan.style.cursor = 'ns-resize';
+    valueSpan.style.userSelect = 'none';
+    valueSpan.title = 'Húzd fel/le az érték módosításához';
+    
+    valueSpan.onmousedown = (e) => {
+      isDragging = true;
+      startY = e.clientY;
+      startValue = output.yVal;
+      e.preventDefault();
+    };
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      
+      const deltaY = startY - e.clientY;  // Fordított (fel = növel)
+      const step = 0.1;  // 0.1°C lépésköz
+      const newValue = startValue + (deltaY * step);
+      
+      // Frissítés
+      output.yVal = Math.round(newValue * 10) / 10;
+      valueSpan.textContent = output.yVal.toFixed(1) + '°C';
+      
+      // Chart frissítés
+      const graphDiv = document.getElementById('myio-chart-div');
+      if (graphDiv) rebuildChart(graphDiv, state);
+    });
+    
+    document.addEventListener('mouseup', () => {
+      if (isDragging) {
+        isDragging = false;
+        // Szerver küldés
+        sendOutputValueToServer(sensorId, output);
+      }
+    });
+  }
+  
+  /** Kimenet érték küldése a szervernek */
+  async function sendOutputValueToServer(sensorId, output) {
+    try {
+      // Érték konvertálása vissza 10x-re (szerver 10x-os értéket vár)
+      const serverValue = Math.round(output.yVal * 10);
+      
+      // API endpoint - példa, módosítsd a valódi API-hoz
+      const url = `/api/sensor/${sensorId}/output/${output.id}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: output.type,  // 'relay', 'pca', 'fet'
+          mode: output.mode,  // 'on' vagy 'off'
+          value: serverValue
+        })
+      });
+      
+      if (response.ok) {
+        console.log(`✓ Output érték elküldve: ${output.label} = ${output.yVal}°C`);
+      } else {
+        console.error('Hiba az output érték küldésekor:', response.status);
+      }
+    } catch (err) {
+      console.error('Output érték küldési hiba:', err);
+    }
+  }
+
+
 
   // localStorage kulcsok és függvények
   const OUTPUT_TOGGLE_STORAGE_KEY = 'myio-output-toggles';
@@ -209,6 +280,17 @@
   }
 
 
+
+  // Szín memória szenzor ID alapján
+  const sensorColorMap = new Map();
+  
+  function getSensorColor(sensorId) {
+    if (!sensorColorMap.has(sensorId)) {
+      const colorIndex = sensorColorMap.size;
+      sensorColorMap.set(sensorId, getChartColor(colorIndex));
+    }
+    return sensorColorMap.get(sensorId);
+  }
   // ============================================================
   // === CHART MODAL – Dygraph-alapú interaktív szenzor chart ===
   // ============================================================
@@ -694,23 +776,35 @@
     }
     sensorCell.appendChild(sensorSelect);
     
-    // Dátum választó
+    // Dátum választó + adatpontok szám
     const dateCell = el("td");
+    dateCell.style.display = 'flex';
+    dateCell.style.flexDirection = 'column';
+    dateCell.style.gap = '4px';
+    
     const dateInput = el("input", { type: "date" });
-    // Tegnap alapértelmezés
+    dateInput.style.width = '100%';
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     dateInput.value = yesterday.toISOString().split('T')[0];
-    dateCell.appendChild(dateInput);
+    
+    const pointsLabel = el("span", { text: '' });
+    pointsLabel.style.fontSize = '11px';
+    pointsLabel.style.opacity = '0.6';
+    pointsLabel.style.textAlign = 'center';
+    
+    dateCell.append(dateInput, pointsLabel);
     
     // Betöltés gomb
     const actionCell = el("td");
+    actionCell.style.textAlign = 'center';
+    actionCell.style.verticalAlign = 'middle';
     const addBtn = el("button", { text: "+", title: "Betöltés" });
     addBtn.style.minWidth = "36px";
     addBtn.onclick = async () => {
       const sid = parseInt(sensorSelect.value);
       const dateStr = dateInput.value;
-      const color = colorInput.value;
+      const color = getSensorColor(sid);  // Automatikus szín szenzor alapján
       if (isNaN(sid) || !dateStr) return;
 
       const date = new Date(dateStr);
@@ -770,6 +864,8 @@
     
     // Toggle gomb törlés funkcióval
     const toggleCell = el("td");
+    toggleCell.style.textAlign = 'center';
+    toggleCell.style.verticalAlign = 'middle';
     const toggleLabel = el("label", { class: "myio-chart-toggle" });
     const toggleInput = el("input", { type: "checkbox" });
     toggleInput.checked = overlay.visible !== false;
@@ -789,6 +885,8 @@
     };
     
     toggleLabel.append(toggleInput, toggleTrack);
+    toggleCell.style.textAlign = 'center';
+    toggleCell.style.verticalAlign = 'middle';
     toggleCell.append(toggleLabel, deleteIcon);
     
     toggleInput.onchange = () => {
@@ -802,25 +900,34 @@
     const colorCell = el("td");
     const colorBox = el("div");
     colorBox.style.cssText = `width:24px;height:24px;border-radius:4px;background:${overlay.color};border:1px solid rgba(255,255,255,0.2);`;
+    colorCell.style.textAlign = 'center';
+    colorCell.style.verticalAlign = 'middle';
     colorCell.appendChild(colorBox);
     
     // Label (név)
     const labelCell = el("td", { text: overlay.label });
     labelCell.style.fontSize = '13px';
     
-    // Dátum (külön oszlop)
-    const dateCell = el("td", { text: overlay.dateStr || '' });
-    dateCell.style.fontSize = '12px';
-    dateCell.style.opacity = '0.7';
+    // Dátum + pontok egy cellában
+    const dateCell = el("td");
+    dateCell.style.display = 'flex';
+    dateCell.style.flexDirection = 'column';
+    dateCell.style.gap = '2px';
     
-    // Adatpontok száma
-    const infoCell = el("td", { text: overlay.data.length + ' pont' });
-    infoCell.style.fontSize = '12px';
-    infoCell.style.opacity = '0.6';
+    const dateSpan = el("span", { text: overlay.dateStr || '' });
+    dateSpan.style.fontSize = '12px';
+    
+    const pointsSpan = el("span", { text: overlay.data.length + ' pont' });
+    pointsSpan.style.fontSize = '11px';
+    pointsSpan.style.opacity = '0.6';
+    
+    dateCell.append(dateSpan, pointsSpan);
     
     
     
-    row.append(colorCell, labelCell, dateCell, infoCell, toggleCell);  // Toggle a kuka helyén
+    
+    
+    row.append(colorCell, labelCell, dateCell, toggleCell);  // Toggle a kuka helyén
     return row;
   }
 
