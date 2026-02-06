@@ -65,6 +65,13 @@
   background: var(--myio-bg-secondary, #252525);
   border-radius: 8px;
   padding: 12px;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.myio-chart-container canvas {
+  touch-action: none;
 }
 
 .myio-chart-historical,
@@ -267,3 +274,4 @@
     font-size: 13px;
   }
 }
+
