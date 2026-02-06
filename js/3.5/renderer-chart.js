@@ -792,12 +792,12 @@
 
     const oldLen = state.mainData.length;
     state.mainData = newData;
-
+/*
     if (!state.chart) {
       rebuildChart(graphDiv, state);
       return;
     }
-
+*/
     // Ha zoom-olva van és a végén vagyunk, követjük az új adatokat
     if (state.userZoomed && state.chart) {
       // Zoom megőrzése - csak az adatok frissítése
