@@ -1034,11 +1034,7 @@
     pointsSpan.style.opacity = '0.6';
     
     dateCell.append(dateSpan, pointsSpan);
-    
-    
-    
-    
-    
+        
     row.append(colorCell, labelCell, dateCell, toggleCell);  // Toggle a kuka helyén
     return row;
   }
