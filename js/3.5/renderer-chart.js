@@ -362,7 +362,9 @@
 
   async function fetchCSVText(csvPath) {
     try {
-      const response = await fetch(csvPath);
+      // Cache-bypass param és no-store, hogy 5 mp-enként tényleg frissüljön
+      const url = `${csvPath}${csvPath.includes('?') ? '&' : '?'}_=${Date.now()}`;
+      const response = await fetch(url, { cache: 'no-store' });
       if (!response.ok) return null;
       return await response.text();
     } catch (error) {
@@ -787,8 +789,6 @@
   }
 
 
-
-  /** Frissíti a fő adatokat (5 mp-enként) */
   async function refreshMainData(graphDiv, state, sensorId) {
     const today = formatDateToYYMMDD(new Date());
     const csvPath = generateCSVPath(sensorId, today);
@@ -796,7 +796,6 @@
     const newData = parseCSVToArray(csvText);
     if (!newData || newData.length === 0) return;
 
-    const oldLen = state.mainData.length;
     state.mainData = newData;
 
     if (!state.chart) {
@@ -815,6 +814,8 @@
     } else {
       // Teljes újraépítés ha nincs zoom
       rebuildChart(graphDiv, state);
+    }
+  }
     }
   }
 
