@@ -262,7 +262,8 @@ const MyIOLive = (function() {
     // Hőmérséklet szenzorok (1-99)
     if (typeof thermo_temps !== 'undefined' && typeof thermo_eepromIndex !== 'undefined') {
       for (const key in sensorsData) {
-        const sensorId = parseInt(key);
+
+        const sensorId = key.id;
         if (sensorId >= 1 && sensorId <= 99 && sensorsData[key].temp !== undefined) {
           // Keressük meg a thermo_eepromIndex-ben ezt az ID-t
           for (let i = 0; i < thermo_eepromIndex.length; i++) {
@@ -282,6 +283,7 @@ const MyIOLive = (function() {
             }
           }
         }
+
       }
     }
   }
