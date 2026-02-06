@@ -37,11 +37,18 @@
       adapterScript.onload = () => console.log('✓ Date adapter betöltve');
       document.head.appendChild(adapterScript);
       
-      // Zoom plugin
-      const zoomScript = document.createElement('script');
-      zoomScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js';
-      zoomScript.onload = () => console.log('✓ Zoom plugin betöltve');
-      document.head.appendChild(zoomScript);
+      // Hammer.js (KÖTELEZŐ a touch pan/pinch-hez mobiltelefonon!)
+      const hammerScript = document.createElement('script');
+      hammerScript.src = 'https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js';
+      hammerScript.onload = () => {
+        console.log('✓ Hammer.js betöltve');
+        // Zoom plugin CSAK a Hammer.js UTÁN töltődik be
+        const zoomScript = document.createElement('script');
+        zoomScript.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js';
+        zoomScript.onload = () => console.log('✓ Zoom plugin betöltve');
+        document.head.appendChild(zoomScript);
+      };
+      document.head.appendChild(hammerScript);
       
       // Annotation plugin
       const annotationScript = document.createElement('script');
@@ -735,10 +742,6 @@
               pinch: {
                 enabled: true
               },
-              drag: {
-                enabled: true,
-                modifierKey: 'ctrl'
-              },
               mode: 'x',
               onZoomComplete: () => {
                 state.userZoomed = true;
@@ -747,7 +750,7 @@
             pan: {
               enabled: true,
               mode: 'x',
-              modifierKey: null
+              threshold: 5
             },
             limits: {
               x: { min: 'original', max: 'original' }
@@ -1545,9 +1548,13 @@
     if (grid.childNodes.length > 0) root.append(section);
   }
 
+  // Export chart modal – renderer-chart.js használja
+  window.myioChart = { createChartModal };
+
   // Export
   window.myioRenderers = {
     renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites
   };
 })();
+
 
