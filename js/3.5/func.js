@@ -150,29 +150,14 @@ function changedPair(obj1,obj2, multiplier = 1, forceRefresh = getCookie("AutoRe
 		if (isIndexPage && typeof MyIOLive !== 'undefined') {
 			// AJAX GET parancsküldés - nem tölti újra az oldalt!
 			MyIOLive.sendCommand(name1 + "=" + value1 + "&" + name2 + "=" +value2, true);
-		} else if (getCookie("AutoRefresh") == "1"
-			|| forceRefresh == "1"
-			|| forceRefresh == 1
-			|| name1 == "ReInit"
-			|| window.location.pathname == "/"
-			|| window.location.pathname == "/index"
-			|| window.location.pathname == "/chart"
-			|| window.location.pathname == "/log"
-			|| window.location.pathname == "/users"
-			|| window.location.pathname == "/config"
-			|| window.location.pathname == "/timer"
-		) {
-			document.getElementById("sending").name = name1;
-			document.getElementById("sending").value = value1;
-			sendForm();
-		} else {
-			sendXMLHttp(name1 + "=" + value1 + "&" + name2 + "=" +value2);
-		}
+		} 
+		/*
 		if (obj1.parentNode.parentNode.getAttribute("name1") != null) {
 			visibleItem(obj1.parentNode.parentNode.getAttribute("name1"), obj2.parentNode.parentNode.getAttribute("name2"));
 		} else if (obj1.getAttribute("name1") != null) {
 			visibleItem(obj1.getAttribute("name1"), obj2.getAttribute("name2"));
 		}
+		*/
 	}
 }
 function changedSens(obj){
