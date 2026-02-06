@@ -735,6 +735,10 @@
               pinch: {
                 enabled: true
               },
+              drag: {
+                enabled: true,
+                modifierKey: 'ctrl'
+              },
               mode: 'x',
               onZoomComplete: () => {
                 state.userZoomed = true;
@@ -742,7 +746,8 @@
             },
             pan: {
               enabled: true,
-              mode: 'x'
+              mode: 'x',
+              modifierKey: null
             },
             limits: {
               x: { min: 'original', max: 'original' }
@@ -1545,4 +1550,5 @@
     renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites
   };
 })();
+
 
