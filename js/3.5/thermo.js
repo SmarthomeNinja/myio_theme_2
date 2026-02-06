@@ -243,7 +243,7 @@
           onInput.name = onName; onInput.value = String(Math.round(currentOnVal * 10));
           const offInput = document.createElement("input");
           offInput.name = offName; offInput.value = String(Math.round(currentOffVal * 10));
-          changedPair(onInput, onInput.name, offInput, offInput.name);
+          changedPair(onInput, offInput);
         } catch (err) { console.error("Thermostat update error:", err); }
       };
 
