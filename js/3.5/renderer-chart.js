@@ -585,7 +585,6 @@
     */
     state.refreshInterval = setInterval(async () => {
       try {
-        console.log('↻ refreshMainData fut:', { sensorId, time: new Date().toISOString() });
         refreshMainData(graphDiv, state, sensorId);
       } catch (e) {
         console.warn('refresh not runing: ', e);
