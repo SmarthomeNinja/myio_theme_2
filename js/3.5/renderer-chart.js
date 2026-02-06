@@ -576,9 +576,12 @@
     }
 
     rebuildChart(graphDiv, state);
-
+    console.log('↻ refreselőtt');
     // Auto-refresh 5 mp-enként
-    state.refreshInterval = setInterval(() => refreshMainData(graphDiv, state, sensorId), 5000);
+    state.refreshInterval = setInterval(() => {
+      console.log('↻ refreshMainData fut:', { sensorId, time: new Date().toISOString() });
+      refreshMainData(graphDiv, state, sensorId);
+    }, 5000);
   }
 
   /** Dygraph-ot (újra)építi az összes adatból */
