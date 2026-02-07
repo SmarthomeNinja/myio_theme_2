@@ -1,19 +1,5 @@
 /* renderers.js – Szekciók renderelése (főmodul) */
-(function() {
-  
-  const urls = [host + 'renderer-helper.js', host + 'renderer-chart.js'];
 
-  for (const src of urls) {
-    if (!document.querySelector(`script[src="${src}"]`)) {
-      const s = document.createElement('script');
-      s.src = src;
-      s.defer = true;
-      s.onload = () => console.log('✓ Betöltve:', src);
-      s.onerror = () => console.warn('✗ Nem sikerült betölteni:', src);
-      document.head.appendChild(s);
-    }
-  }
-})();
 (function () {
     const { el, decodeRW, safe } = window.myioUtils;
     const { loadFavs } = window.myioStorage;
