@@ -1,31 +1,45 @@
 /* renderers.js – Szekciók renderelése (főmodul) */
 
 (function () {
-    // Ellenőrizzük a függőségeket
-    if (!window.myioRendererHelpers || !window.myioChart) {
-        console.warn('renderers.js: Várakozás a függőségekre...');
-        // Újra futtatjuk később
-        if (!window._myioRenderersRetryCount) window._myioRenderersRetryCount = 0;
-        if (window._myioRenderersRetryCount < 50) { // Max 5 másodperc
-            window._myioRenderersRetryCount++;
-            setTimeout(arguments.callee, 100);
-        } else {
-            console.error('renderers.js: Timeout - függőségek nem töltődtek be!');
-        }
-        return;
+    // Helper függvények - közvetlenül hivatkozunk az objektumokra
+    function g(name, fallback) {
+      return window.myioRendererHelpers ? window.myioRendererHelpers.g(name, fallback) : fallback;
     }
     
-    // Függőségek OK
-    delete window._myioRenderersRetryCount;
+    function str(name, fallback) {
+      return window.myioRendererHelpers ? window.myioRendererHelpers.str(name, fallback) : fallback;
+    }
+    
+    function to100(val) {
+      return window.myioRendererHelpers ? window.myioRendererHelpers.to100(val) : Math.round(val / 2.55);
+    }
+    
+    function buildSunIcons(onVal, offVal) {
+      return window.myioRendererHelpers ? window.myioRendererHelpers.buildSunIcons(onVal, offVal) : null;
+    }
+    
+    function createPWMSliderRow(val255, minRaw, maxRaw, inputName) {
+      return window.myioRendererHelpers ? window.myioRendererHelpers.createPWMSliderRow(val255, minRaw, maxRaw, inputName) : null;
+    }
+    
+    function createChartModal(sensorId, sensorName) {
+      if (window.myioChart) window.myioChart.createChartModal(sensorId, sensorName);
+    }
 
-    const { el, decodeRW, safe } = window.myioUtils;
-    const { loadFavs } = window.myioStorage;
-    const { card, cardWithInvTitle, addValue, addButtons, setCardHeaderWithInvAndToggle, registerCardFactory, getCardFactory, hasCardFactory } = window.myioCards;
-    const { makeSection } = window.myioSections;
+    const el = (...args) => window.myioUtils.el(...args);
+    const decodeRW = (...args) => window.myioUtils.decodeRW(...args);
+    const safe = (...args) => window.myioUtils.safe(...args);
+    const loadFavs = (...args) => window.myioStorage.loadFavs(...args);
+    const card = (...args) => window.myioCards.card(...args);
+    const cardWithInvTitle = (...args) => window.myioCards.cardWithInvTitle(...args);
+    const addValue = (...args) => window.myioCards.addValue(...args);
+    const addButtons = (...args) => window.myioCards.addButtons(...args);
+    const setCardHeaderWithInvAndToggle = (...args) => window.myioCards.setCardHeaderWithInvAndToggle(...args);
+    const registerCardFactory = (...args) => window.myioCards.registerCardFactory(...args);
+    const getCardFactory = (...args) => window.myioCards.getCardFactory(...args);
+    const hasCardFactory = (...args) => window.myioCards.hasCardFactory(...args);
+    const makeSection = (...args) => window.myioSections.makeSection(...args);
     const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
-  
-    const { g, str, to100, buildSunIcons, createPWMSliderRow } = window.myioRendererHelpers;
-    const { createChartModal } = window.myioChart;
   
     // ============================================================
     // === Szenzor kártya → chart modal kattintás
@@ -178,10 +192,13 @@
             setCardHeaderWithInvAndToggle(c, pcaDesc[i + 1], "PCA_INV", "PCA_ON", "PCA_OFF", i + 1, isOn, id);
             const showSlider = pcaPWM ? !!pcaPWM[i] : true;
             if (showSlider) {
-              const { row, range, num } = createPWMSliderRow(val255, pcaMin[i] || 0, pcaMax[i] || 255, "PCA*" + (i + 1));
-              range.onchange = (e) => { try { changed(e.target); } catch { } };
-              num.onchange = (e) => { try { changed(e.target); } catch { } };
-              c.append(row);
+              const pwmRow = createPWMSliderRow(val255, pcaMin[i] || 0, pcaMax[i] || 255, "PCA*" + (i + 1));
+              if (pwmRow) {
+                const { row, range, num } = pwmRow;
+                range.onchange = (e) => { try { changed(e.target); } catch { } };
+                num.onchange = (e) => { try { changed(e.target); } catch { } };
+                c.append(row);
+              }
             }
           } else {
             c.append(el("div", { class: "myio-sub", text: String(to100(val255)) }));
@@ -231,10 +248,13 @@
   
           if (d.write) {
             setCardHeaderWithInvAndToggle(c, fetDesc[i + 1], "f_INV", "f_ON", "f_OFF", i + 1, isOn, id);
-            const { row, range, num } = createPWMSliderRow(val255, fetMin[i] || 0, fetMax[i] || 255, "fet*" + (i + 1));
-            range.onchange = (e) => { try { changed(e.target, e.target.name, 1, true); } catch { } };
-            num.onchange = (e) => { try { changed(e.target, e.target.name, 1, true); } catch { } };
-            c.append(row);
+            const pwmRow = createPWMSliderRow(val255, fetMin[i] || 0, fetMax[i] || 255, "fet*" + (i + 1));
+            if (pwmRow) {
+              const { row, range, num } = pwmRow;
+              range.onchange = (e) => { try { changed(e.target, e.target.name, 1, true); } catch { } };
+              num.onchange = (e) => { try { changed(e.target, e.target.name, 1, true); } catch { } };
+              c.append(row);
+            }
           } else {
             c.append(el("div", { class: "myio-sub", text: String(to100(val255)) }));
           }
