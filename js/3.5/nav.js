@@ -518,7 +518,7 @@ function buildHeader() {
 		zoomRow.className = "myio-menuRow";
 	  
 		const zoomLabel = document.createElement("label");
-		zoomLabel.textContent = "Zoom";
+		zoomLabel.textContent = (typeof str_Zoom !== "undefined" ? str_Zoom : "Zoom");
 	  
 		const zoomVal = document.createElement("div");
 		zoomVal.style.color = "rgba(255,255,255,.85)";
