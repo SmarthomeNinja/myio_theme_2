@@ -108,8 +108,8 @@ let isDraggingCard = false;
       if (typeof window.myioApplySavedCardOrder === "function") window.myioApplySavedCardOrder();
 
       if (!root.children.length && window.myioSections && window.myioCards) {
-        const { section, grid } = window.myioSections.makeSection("Nincs megjeleníthető adat", "Ellenőrizd a szerver változókat");
-        const c = window.myioCards.card("Tippek", "myio-off", "tips:0");
+        const { section, grid } = window.myioSections.makeSection((typeof str_NoDataToDisplay !== "undefined" ? str_NoDataToDisplay : "Nincs megjeleníthető adat"), (typeof str_CheckServerVars !== "undefined" ? str_CheckServerVars : "Ellenőrizd a szerver változókat"));
+        const c = window.myioCards.card((typeof str_Tips !== "undefined" ? str_Tips : "Tippek"), "myio-off", "tips:0");
         window.myioCards.addValue(c, "—");
         grid.append(c);
         root.append(section);
