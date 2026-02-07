@@ -1,4 +1,4 @@
-document.write('<meta name="viewport" content="width=device-width, minimumscale=1.0, maximum-scale=1.0" />');
+//document.write('<meta name="viewport" content="width=device-width, minimumscale=1.0, maximum-scale=1.0" />');
 document.write('<meta http-equiv="content-type" content="text/html; charset=windows-1252">');
 document.write('<body><div id="overlay"></div><div class="header">');
 document.write('<form method="POST" id="form">');
