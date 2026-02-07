@@ -1,6 +1,18 @@
 /* renderers.js – Szekciók renderelése (főmodul) */
 
 (function () {
+    // Várunk a függőségekre
+    if (!window.myioRendererHelpers || !window.myioChart) {
+        console.warn('renderers.js: Várakozás a függőségekre...');
+        setTimeout(() => {
+            // Újra futtatjuk a szkriptet
+            const script = document.createElement('script');
+            script.textContent = document.currentScript.textContent;
+            document.head.appendChild(script);
+        }, 100);
+        return;
+    }
+
     const { el, decodeRW, safe } = window.myioUtils;
     const { loadFavs } = window.myioStorage;
     const { card, cardWithInvTitle, addValue, addButtons, setCardHeaderWithInvAndToggle, registerCardFactory, getCardFactory, hasCardFactory } = window.myioCards;
@@ -311,4 +323,4 @@
     window.myioRenderers = {
       renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites
     };
-  })();
+})();
