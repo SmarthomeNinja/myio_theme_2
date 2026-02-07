@@ -154,11 +154,11 @@ function buildHeader() {
 		btnMenu.type = "button";
 		btnMenu.className = "myio-menuBtn";
 		btnMenu.textContent = "";
-		btnMenu.title = "Menu";
+		btnMenu.title = (typeof str_Menu !== "undefined" ? str_Menu : "Menu");
 		// cím
 		const t = document.createElement("div");
 		t.className = "myio-menuTitle";
-		t.textContent = "Menu";
+		t.textContent = (typeof str_Menu !== "undefined" ? str_Menu : "Menu");
 		menuPanel.appendChild(t);
   
 		  const btnChartMenu = document.createElement("button");
