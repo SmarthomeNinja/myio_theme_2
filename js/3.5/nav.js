@@ -208,7 +208,7 @@ function buildHeader() {
 		  hostInput.maxLength = 200;
 		  hostInput.name = "Host";
 		  hostInput.value = (typeof Host !== "undefined" ? Host : "");
-		  hostInput.placeholder = "Host";
+		  hostInput.placeholder = (typeof str_Host !== "undefined" ? str_Host : "Host");
 		  hostInput.onchange = () => {
 		  try { setCookie("Host", hostInput.value); } catch(e){}
 		  };
