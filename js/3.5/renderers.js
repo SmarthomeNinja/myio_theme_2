@@ -1,6 +1,6 @@
 /* renderers.js – Szekciók renderelése (főmodul) */
 
-
+(function () {
     const { el, decodeRW, safe } = window.myioUtils;
     const { loadFavs } = window.myioStorage;
     const { card, cardWithInvTitle, addValue, addButtons, setCardHeaderWithInvAndToggle, registerCardFactory, getCardFactory, hasCardFactory } = window.myioCards;
@@ -311,3 +311,4 @@
     window.myioRenderers = {
       renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites
     };
+  })();
