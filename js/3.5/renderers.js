@@ -18,7 +18,9 @@
       const num = { onchange: null, name };
       return { row, range, num };
     });
-    const { createChartModal } = window.myioChart;
+    const createChartModal = (window.myioChart && typeof window.myioChart.createChartModal === 'function')
+      ? window.myioChart.createChartModal
+      : function () {};
   
     // ============================================================
     // === Szenzor kártya → chart modal kattintás
