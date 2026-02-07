@@ -1,29 +1,5 @@
 /* renderers.js – Szekciók renderelése (főmodul) */
-(function() {
-  // Synchronous load to ensure the rest of the file only runs after these are loaded
-  const urls = [host + 'renderer-helper.js', host + 'renderer-chart.js'];
 
-  for (const src of urls) {
-    // Skip if already present as a script tag or a guard variable set by those scripts
-    if (document.querySelector(`script[src="${src}"]`)) continue;
-
-    try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', src, false); // synchronous request
-      xhr.send(null);
-
-      if (xhr.status >= 200 && xhr.status < 300) {
-        // Execute the script immediately so dependencies are ready
-        (0, eval)(xhr.responseText);
-        console.log('✓ Betöltve (sync):', src);
-      } else {
-        console.warn('✗ Nem sikerült betölteni (HTTP):', src, xhr.status);
-      }
-    } catch (e) {
-      console.warn('✗ Nem sikerült betölteni (XHR):', src, e);
-    }
-  }
-})();
 (function () {
     const { el, decodeRW, safe } = window.myioUtils;
     const { loadFavs } = window.myioStorage;
@@ -31,7 +7,7 @@
     const { makeSection } = window.myioSections;
     const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
   
-    const { g, str, to100, buildSunIcons, createPWMSliderRow } = window.myioRendererHelpers;
+    const { g, str, to100, buildSunIcons, createPWMSliderRow } = window.myioRendererHelper;
     const { createChartModal } = window.myioChart;
   
     // ============================================================
