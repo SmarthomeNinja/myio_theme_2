@@ -8,15 +8,16 @@
     if (document.querySelector(`script[src="${src}"]`)) continue;
 
     try {
-      for (const src of urls) {
-        if (document.querySelector(`script[src="${src}"]`)) continue;
-      
-        const script = document.createElement('script');
-        script.src = src;
-        script.async = false; // Így megmarad a sorrendiség, mint a szinkron kérésnél
-        script.onload = () => console.log('✓ Betöltve (script tag):', src);
-        script.onerror = () => console.warn('✗ Hiba a betöltéskor:', src);
-        document.head.appendChild(script);
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', src, false); // synchronous request
+      xhr.send(null);
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        // Execute the script immediately so dependencies are ready
+        (0, eval)(xhr.responseText);
+        console.log('✓ Betöltve (sync):', src);
+      } else {
+        console.warn('✗ Nem sikerült betölteni (HTTP):', src, xhr.status);
       }
     } catch (e) {
       console.warn('✗ Nem sikerült betölteni (XHR):', src, e);
