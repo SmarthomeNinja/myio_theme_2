@@ -33,7 +33,7 @@ let isDraggingCard = false;
     'renderers.js',
     'thermo.js',
     'reorder.js',
-    'settings-modal.js'
+    'settings-modal.js',
     'renderer-chart.js',
     'renderer-helper.js'
   ];
