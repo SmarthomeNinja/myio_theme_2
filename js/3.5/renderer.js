@@ -1,5 +1,19 @@
 /* renderers.js – Szekciók renderelése (főmodul) */
+(function() {
+  
+  const urls = [host + 'renderer-helper.js', host + 'renderer-chart.js'];
 
+  for (const src of urls) {
+    if (!document.querySelector(`script[src="${src}"]`)) {
+      const s = document.createElement('script');
+      s.src = src;
+      s.defer = true;
+      s.onload = () => console.log('✓ Betöltve:', src);
+      s.onerror = () => console.warn('✗ Nem sikerült betölteni:', src);
+      document.head.appendChild(s);
+    }
+  }
+})();
 (function () {
     const { el, decodeRW, safe } = window.myioUtils;
     const { loadFavs } = window.myioStorage;
@@ -7,20 +21,8 @@
     const { makeSection } = window.myioSections;
     const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
   
-    const helper = window.myioRendererHelper || {};
-    const g = helper.g || (() => undefined);
-    const str = helper.str || ((hu, en) => en);
-    const to100 = helper.to100 || (v => v);
-    const buildSunIcons = helper.buildSunIcons || (() => null);
-    const createPWMSliderRow = helper.createPWMSliderRow || ((val255, min, max, name) => {
-      const row = el("div", { class: "myio-row" });
-      const range = { onchange: null, name };
-      const num = { onchange: null, name };
-      return { row, range, num };
-    });
-    const createChartModal = (window.myioChart && typeof window.myioChart.createChartModal === 'function')
-      ? window.myioChart.createChartModal
-      : function () {};
+    const { g, str, to100, buildSunIcons, createPWMSliderRow } = window.myioRendererHelpers;
+    const { createChartModal } = window.myioChart;
   
     // ============================================================
     // === Szenzor kártya → chart modal kattintás
