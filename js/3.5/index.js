@@ -55,7 +55,7 @@ let isDraggingCard = false;
     });
   }
 
-  async function loadModules() {
+  function loadModules() {
     for (const mod of modules) {
       try {
         await loadScript(mod);
