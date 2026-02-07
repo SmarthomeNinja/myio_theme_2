@@ -34,6 +34,8 @@ let isDraggingCard = false;
     'thermo.js',
     'reorder.js',
     'settings-modal.js'
+    'renderer-chart.js',
+    'renderer-helper.js'
   ];
 
   function loadScript(src) {
