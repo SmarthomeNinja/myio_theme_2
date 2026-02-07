@@ -1,17 +1,22 @@
 /* renderers.js – Szekciók renderelése (főmodul) */
 
 (function () {
-    // Várunk a függőségekre
+    // Ellenőrizzük a függőségeket
     if (!window.myioRendererHelpers || !window.myioChart) {
         console.warn('renderers.js: Várakozás a függőségekre...');
-        setTimeout(() => {
-            // Újra futtatjuk a szkriptet
-            const script = document.createElement('script');
-            script.textContent = document.currentScript.textContent;
-            document.head.appendChild(script);
-        }, 100);
+        // Újra futtatjuk később
+        if (!window._myioRenderersRetryCount) window._myioRenderersRetryCount = 0;
+        if (window._myioRenderersRetryCount < 50) { // Max 5 másodperc
+            window._myioRenderersRetryCount++;
+            setTimeout(arguments.callee, 100);
+        } else {
+            console.error('renderers.js: Timeout - függőségek nem töltődtek be!');
+        }
         return;
     }
+    
+    // Függőségek OK
+    delete window._myioRenderersRetryCount;
 
     const { el, decodeRW, safe } = window.myioUtils;
     const { loadFavs } = window.myioStorage;
