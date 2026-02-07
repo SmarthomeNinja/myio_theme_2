@@ -7,7 +7,17 @@
     const { makeSection } = window.myioSections;
     const FAV_SECTION_KEY = window.myioStorage.FAV_SECTION_KEY;
   
-    const { g, str, to100, buildSunIcons, createPWMSliderRow } = window.myioRendererHelper;
+    const helper = window.myioRendererHelper || {};
+    const g = helper.g || (() => undefined);
+    const str = helper.str || ((hu, en) => en);
+    const to100 = helper.to100 || (v => v);
+    const buildSunIcons = helper.buildSunIcons || (() => null);
+    const createPWMSliderRow = helper.createPWMSliderRow || ((val255, min, max, name) => {
+      const row = el("div", { class: "myio-row" });
+      const range = { onchange: null, name };
+      const num = { onchange: null, name };
+      return { row, range, num };
+    });
     const { createChartModal } = window.myioChart;
   
     // ============================================================
