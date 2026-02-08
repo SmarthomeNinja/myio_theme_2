@@ -24,8 +24,8 @@
     const starBtn = el("button", {
       class: "myio-favInTitle" + (on ? " is-fav" : ""),
       type: "button",
-      title: "Kedvenc",
-      "aria-label": "Kedvenc"
+      title: (typeof str_Favorite !== "undefined" ? str_Favorite : "Kedvenc"),
+      "aria-label": (typeof str_Favorite !== "undefined" ? str_Favorite : "Kedvenc")
     }, [document.createTextNode(on ? "★" : "☆")]);
 
     starBtn.addEventListener("click", (e) => {
