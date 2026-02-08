@@ -102,6 +102,18 @@ function buildHeader() {
 	btnUpdate.style.transform = "rotate(90deg)"; // elforgatva
 	btnUpdate.onclick = () => { try { sendForm(); } catch(e){} };
 	left.append(btnUpdate);
+
+	if (!isHome) {
+		const btnHome = document.createElement("button");
+		btnHome.type = "button";
+		btnHome.className = "myio-iconBtn";
+		btnHome.title = (typeof str_Home !== "undefined" ? str_Home : "Home");
+		btnHome.setAttribute("aria-label", btnHome.title);	
+		btnUpdate.innerHTML = "🏠"; 
+		btnHome.onclick = () => { window.location.href = "/"; };
+		left.append(btnHome);
+	}
+
 	if (!isHome) {
 		left.append(
 		mkNavBtn((str_Home || "Home"), "/")
