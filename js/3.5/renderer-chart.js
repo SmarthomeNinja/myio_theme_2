@@ -1029,7 +1029,7 @@
     const actionCell = el("td");
     actionCell.style.textAlign = 'center';
     actionCell.style.verticalAlign = 'middle';
-    const addBtn = el("button", { text: "+", title: "Betöltés" });
+    const addBtn = el("button", { text: "+", title: (typeof str_Loading !== "undefined" ? str_Loading : "Betöltés") });
     addBtn.style.minWidth = "36px";
     addBtn.onclick = async () => {
       const sid = parseInt(sensorSelect.value);
@@ -1108,7 +1108,7 @@
     
     // Kuka ikon hozzáadása a toggle után
     const deleteIcon = el("span", { text: "🗑", style: "margin-left: 8px; cursor: pointer; opacity: 0.6;" });
-    deleteIcon.title = "Törlés";
+    deleteIcon.title = typeof str_Delete !== "undefined" ? str_Delete : "Törlés";
     deleteIcon.onclick = () => {
       const idx = state.overlays.indexOf(overlay);
       if (idx > -1) {
@@ -1152,7 +1152,7 @@
     const dateSpan = el("span", { text: overlay.dateStr || '' });
     dateSpan.style.fontSize = '12px';
     
-    const pointsSpan = el("span", { text: overlay.data.length + ' pont' });
+    const pointsSpan = el("span", { text: overlay.data.length + (typeof str_Points !== "undefined" ? ' ' + str_Points : ' pont') });
     pointsSpan.style.fontSize = '11px';
     pointsSpan.style.opacity = '0.6';
     
