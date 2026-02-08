@@ -588,6 +588,93 @@
     }, 5000);
   }
 
+  /** Drag-and-drop handler az annotation line-okhoz */
+  function enableAnnotationDrag(canvas, state) {
+    let draggedOutput = null;
+    let isDragging = false;
+
+    canvas.style.cursor = 'default';
+
+    // Segédfüggvény: pixel Y koordináta → chart érték
+    function pixelToValue(pixelY) {
+      if (!state.chart) return 0;
+      const yAxis = state.chart.scales.y;
+      return yAxis.getValueForPixel(pixelY);
+    }
+
+    // Segédfüggvény: chart érték → pixel Y koordináta
+    function valueToPixel(value) {
+      if (!state.chart) return 0;
+      const yAxis = state.chart.scales.y;
+      return yAxis.getPixelForValue(value);
+    }
+
+    // Segédfüggvény: melyik output közelében van a mouse?
+    function findOutputNearMouse(mouseY) {
+      const visibleOutputs = state.outputLines ? state.outputLines.filter(o => o.visible) : [];
+      const threshold = 8; // pixel távolság küszöb
+
+      for (const output of visibleOutputs) {
+        const linePixelY = valueToPixel(output.yVal);
+        if (Math.abs(mouseY - linePixelY) < threshold) {
+          return output;
+        }
+      }
+      return null;
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseY = e.clientY - rect.top;
+      const output = findOutputNearMouse(mouseY);
+
+      if (output) {
+        isDragging = true;
+        draggedOutput = output;
+        canvas.style.cursor = 'ns-resize';
+        e.preventDefault();
+      }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseY = e.clientY - rect.top;
+
+      if (isDragging && draggedOutput) {
+        // Drag alatt frissítjük az értéket
+        const newValue = pixelToValue(mouseY);
+        draggedOutput.yVal = Math.round(newValue * 10) / 10; // 0.1 pontosság
+
+        // Chart frissítés
+        rebuildChart(graphDiv, state);
+      } else {
+        // Cursor frissítés hover alapján
+        const output = findOutputNearMouse(mouseY);
+        canvas.style.cursor = output ? 'ns-resize' : 'default';
+      }
+    });
+
+    const handleMouseUp = () => {
+      if (isDragging && draggedOutput) {
+        // Érték küldése a szervernek
+        sendOutputValueToServer(state.sensorId, draggedOutput);
+        console.log(`Drag befejeződött: ${draggedOutput.label} = ${draggedOutput.yVal}°C`);
+      }
+      isDragging = false;
+      draggedOutput = null;
+      canvas.style.cursor = 'default';
+    };
+
+    canvas.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mouseup', handleMouseUp); // Globális mouseup is kell
+
+    canvas.addEventListener('mouseleave', () => {
+      if (!isDragging) {
+        canvas.style.cursor = 'default';
+      }
+    });
+  }
+
   /** Dygraph-ot (újra)építi az összes adatból */
     /** Chart.js-sel újraépíti a grafikont */
   function rebuildChart(graphDiv, state) {
