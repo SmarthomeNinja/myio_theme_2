@@ -90,8 +90,12 @@
         container.append(wrapper);
       };
   
-      addIcon(onVal, "myio-sun-on", "ON @ Sunrise", "ON @ Sunset");
-      addIcon(offVal, "myio-sun-off", "OFF @ Sunrise", "OFF @ Sunset");
+      addIcon(onVal, "myio-sun-on",
+        (typeof str_OnAtSunrise !== "undefined" ? str_OnAtSunrise : "ON @ Sunrise"),
+        (typeof str_OnAtSunset !== "undefined" ? str_OnAtSunset : "ON @ Sunset"));
+      addIcon(offVal, "myio-sun-off",
+        (typeof str_OffAtSunrise !== "undefined" ? str_OffAtSunrise : "OFF @ Sunrise"),
+        (typeof str_OffAtSunset !== "undefined" ? str_OffAtSunset : "OFF @ Sunset"));
       return container.children.length > 0 ? container : null;
     }
   
