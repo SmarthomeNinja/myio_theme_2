@@ -31,18 +31,18 @@
             <input type="text" class="myio-setting-input myio-card-name-input" value="${escapeHtml(curName)}" placeholder="${typeof str_CardName !== "undefined" ? str_CardName : "Kártya neve"}">
           </div>
           <div class="myio-setting-row">
-            <label class="myio-setting-label">Választott ikon</label>
+            <label class="myio-setting-label">${typeof str_ChosenIcon !== "undefined" ? str_ChosenIcon : "Választott ikon"}</label>
             <div class="myio-selected-icon-display" style="font-size:44px;text-align:center;padding:10px;background:rgba(255,255,255,0.05);border-radius:12px;margin:10px 0;cursor:pointer;">${escapeHtml(curIcon)}</div>
           </div>
           <div class="myio-setting-row myio-icon-picker-row" style="display:none;">
-            <label class="myio-setting-label">Válassz ikont</label>
+            <label class="myio-setting-label">${typeof str_ChooseIcon !== "undefined" ? str_ChooseIcon : "Válassz ikont"}</label>
             <div class="myio-icon-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:10px;margin-top:10px;">
               ${ICONS.map(i => `<button class="myio-icon-option${i===curIcon?' is-selected':''}" data-icon="${i}" style="padding:15px;font-size:28px;background:${i===curIcon?'rgba(3,151,214,0.3)':'rgba(255,255,255,0.08)'};border:2px solid ${i===curIcon?'var(--accent)':'rgba(255,255,255,0.12)'};border-radius:10px;cursor:pointer;">${i}</button>`).join('')}
             </div>
           </div>
           <div class="myio-setting-row">
-            <label class="myio-setting-label">Megjegyzés</label>
-            <textarea class="myio-setting-textarea myio-setting-input" rows="3" placeholder="Írj megjegyzést...">${escapeHtml(curNote)}</textarea>
+            <label class="myio-setting-label">${typeof str_Note !== "undefined" ? str_Note : "Megjegyzés"}</label>
+            <textarea class="myio-setting-textarea myio-setting-input" rows="3" placeholder="${typeof str_WriteNote !== "undefined" ? str_WriteNote : "Írj megjegyzést..."}">${escapeHtml(curNote)}</textarea>
           </div>
         </div>
         <div class="myio-settings-footer">
