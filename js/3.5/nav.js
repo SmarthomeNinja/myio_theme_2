@@ -111,8 +111,8 @@ function buildHeader() {
 		btnHome.type = "button";
 		btnHome.className = "myio-iconBtn";
 		btnHome.title = (typeof str_Home !== "undefined" ? str_Home : "Home");
-		btnHome.setAttribute("aria-label", btnHome.title);	
-		btnUpdate.innerHTML = "🏠"; 
+		btnHome.setAttribute("aria-label", btnHome.title);			
+		btnHome.innerHTML = "🏠"; 
 		btnHome.onclick = () => { window.location.href = "/"; };
 		left.append(btnHome);
 	}
