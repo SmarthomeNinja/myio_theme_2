@@ -204,7 +204,7 @@
     valueSpan.style.background = 'rgba(74, 158, 255, 0.1)';
     valueSpan.style.borderRadius = '4px';
     valueSpan.style.display = 'inline-block';
-    valueSpan.title = '↕️ Húzd fel/le az érték módosításához';
+    valueSpan.title = typeof str_DragToAdjust !== "undefined" ? str_DragToAdjust : '↕️ Húzd fel/le az érték módosításához';
     
     
     valueSpan.onmouseenter = () => {
@@ -485,7 +485,7 @@
     title.style.cssText = 'text-align: center; background: none; color: #4a9eff; flex: 1;';
     const closeBtn = el("button", { class: "myio-chart-close", text: "×" });
     const resetZoomBtn = el("button", { class: "myio-chart-close", text: "⟲" });
-    resetZoomBtn.title = "Reset zoom";
+    resetZoomBtn.title = typeof str_ResetZoom !== "undefined" ? str_ResetZoom : "Reset zoom";
     resetZoomBtn.style.cssText = 'margin-right:8px;';
     header.append(title, resetZoomBtn, closeBtn);
     
