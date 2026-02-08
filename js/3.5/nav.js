@@ -84,6 +84,9 @@ function buildHeader() {
 	const nav = document.createElement("div");
 	nav.className = "myio-nav";
 	hdr.append(nav);
+	const isHome =
+		location.pathname === "/" ||
+		location.pathname === "/index.html";
 
 	const left  = document.createElement("div"); left.className  = "myio-left";
 	const mid   = document.createElement("div"); mid.className   = "myio-mid";
@@ -121,9 +124,7 @@ function buildHeader() {
 	}
 
 
-	const isHome =
-		location.pathname === "/" ||
-		location.pathname === "/index.html";
+	
 	
 
 	// Mid nav buttons
