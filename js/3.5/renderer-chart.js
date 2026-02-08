@@ -168,14 +168,14 @@
 
     if (onVal === 1 || onVal === 2) {
       const wrapper = el("span", { class: "myio-sun-icon myio-sun-on" });
-      wrapper.title = onVal === 1 ? "ON @ Sunrise" : "ON @ Sunset";
+      wrapper.title = onVal === 1 ? (typeof str_OnAtSunrise !== "undefined" ? str_OnAtSunrise : "ON @ Sunrise") : (typeof str_OnAtSunset !== "undefined" ? str_OnAtSunset : "ON @ Sunset");
       wrapper.appendChild(onVal === 1 ? sunriseSVG() : sunsetSVG());
       container.append(wrapper);
     }
 
     if (offVal === 1 || offVal === 2) {
       const wrapper = el("span", { class: "myio-sun-icon myio-sun-off" });
-      wrapper.title = offVal === 1 ? "OFF @ Sunrise" : "OFF @ Sunset";
+      wrapper.title = offVal === 1 ? (typeof str_OffAtSunrise !== "undefined" ? str_OffAtSunrise : "OFF @ Sunrise") : (typeof str_OffAtSunset !== "undefined" ? str_OffAtSunset : "OFF @ Sunset");
       wrapper.appendChild(offVal === 1 ? sunriseSVG() : sunsetSVG());
       container.append(wrapper);
     }
