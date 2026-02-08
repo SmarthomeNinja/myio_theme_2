@@ -64,7 +64,7 @@
     wrapper.appendChild(starBtn);
     
     if (savedIcon && savedIcon !== '☆' && savedIcon !== '★') {
-      wrapper.appendChild(el("span", { class: "myio-card-icon", title: "Választott ikon" }, [document.createTextNode(savedIcon)]));
+      wrapper.appendChild(el("span", { class: "myio-card-icon", title: (typeof str_ChosenIcon !== "undefined" ? str_ChosenIcon : "Választott ikon") }, [document.createTextNode(savedIcon)]));
     }
 
     return wrapper;
@@ -96,7 +96,7 @@
         btn.name = invCommandName;
         btn.value = String(index1based);
         changed(btn);
-      } catch { window.myioUtils.toast("changed() hiba"); }
+      } catch { window.myioUtils.toast(typeof str_ChangedError !== "undefined" ? str_ChangedError : "changed() hiba"); }
     });
 
     c.append(el("div", { class: "myio-cardTitle" }, [titleInner]));
@@ -116,7 +116,7 @@
         text: b.label,
         name: b.name,
         value: String(b.value),
-        onclick: (e) => { try { changed(e.currentTarget); } catch { window.myioUtils.toast("changed() nincs definiálva"); } }
+        onclick: (e) => { try { changed(e.currentTarget); } catch { window.myioUtils.toast(typeof str_ChangedNotDefined !== "undefined" ? str_ChangedNotDefined : "changed() nincs definiálva"); } }
       }));
     }
     c.append(row);
