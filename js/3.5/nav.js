@@ -102,11 +102,17 @@ function buildHeader() {
 	btnUpdate.style.transform = "rotate(90deg)"; // elforgatva
 	btnUpdate.onclick = () => { try { sendForm(); } catch(e){} };
 	left.append(btnUpdate);
+	if (!isHome) {
+		left.append(
+		mkNavBtn((str_Home || "Home"), "/")
+		);
+	}
 
 
 	const isHome =
 		location.pathname === "/" ||
 		location.pathname === "/index.html";
+	
 
 	// Mid nav buttons
 	const title = document.createElement("div");
@@ -122,11 +128,7 @@ function buildHeader() {
 		return b;
 	};
 
-	if (!isHome) {
-		mid.append(
-		mkNavBtn((str_Home || "Home"), "/")
-		);
-	}
+	
 	// LOGO
 	const logo = document.createElement("img");
 	logo.className = "myio-logo";
