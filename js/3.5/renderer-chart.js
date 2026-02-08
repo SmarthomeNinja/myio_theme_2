@@ -1315,7 +1315,7 @@
 
     if (outputs.length === 0) {
       const emptyRow = el("tr");
-      const td = el("td", { text: "Nincs ehhez a szenzorhoz rendelt kimenet." });
+      const td = el("td", { text: (typeof str_NoOutputsForSensor !== "undefined" ? str_NoOutputsForSensor : "Nincs ehhez a szenzorhoz rendelt kimenet.") });
       td.colSpan = 4;
       td.style.opacity = '0.5';
       td.style.textAlign = 'center';
