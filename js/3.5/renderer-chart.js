@@ -766,6 +766,12 @@
       data: { datasets: datasets },
       options: {
         animation: false,  // Animáció kikapcsolva
+        onHover: (event, activeElements) => {
+          // Cursor frissítés alapértelmezett hover esetén is
+          if (!activeElements || activeElements.length === 0) {
+            event.native.target.style.cursor = 'default';
+          }
+        },
         
         elements:
         {
