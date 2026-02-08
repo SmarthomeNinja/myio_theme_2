@@ -46,8 +46,8 @@
           </div>
         </div>
         <div class="myio-settings-footer">
-          <button class="myio-settings-btn myio-settings-btn-secondary myio-settings-cancel" type="button">Mégse</button>
-          <button class="myio-settings-btn myio-settings-btn-primary myio-settings-save" type="button">💾 Mentés</button>
+          <button class="myio-settings-btn myio-settings-btn-secondary myio-settings-cancel" type="button">${typeof str_Cancel !== "undefined" ? str_Cancel : "Mégse"}</button>
+          <button class="myio-settings-btn myio-settings-btn-primary myio-settings-save" type="button">${typeof str_Save !== "undefined" ? str_Save : "💾 Mentés"}</button>
         </div>
       </div>`;
 
@@ -82,7 +82,7 @@
       const newIcon = selectedIconBox.textContent.trim();
       const newNote = overlay.querySelector('.myio-setting-textarea').value.trim();
 
-      if (!newName) { toast('Az eszköz neve nem lehet üres!'); return; }
+      if (!newName) { toast(typeof str_DeviceNameRequired !== "undefined" ? str_DeviceNameRequired : "Az eszköz neve nem lehet üres!"); return; }
 
       saveCardName(cardId, newName);
       saveCardIcon(cardId, newIcon);
