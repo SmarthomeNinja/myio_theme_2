@@ -116,13 +116,13 @@ function buildHeader() {
 		btnHome.onclick = () => { window.location.href = "/"; };
 		left.append(btnHome);
 	}
-
+/*
 	if (!isHome) {
 		left.append(
 		mkNavBtn((str_Home || "Home"), "/")
 		);
 	}
-
+*/
 
 	
 	
