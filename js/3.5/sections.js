@@ -27,7 +27,7 @@
     const head = el("div", { class: "myio-sectionHead", role: "button", tabindex: "0" }, [
       el("h2", { class: "myio-sectionTitle", text: title }),
       el("div", { class: "myio-sectionMeta", text: meta || "" }),
-      el("div", { class: "myio-dragHandle", title: "Rendezés", text: "☰" })
+      el("div", { class: "myio-dragHandle", title: (typeof str_Reorder !== "undefined" ? str_Reorder : "Rendezés"), text: "☰" })
     ]);
 
     section.draggable = false;
