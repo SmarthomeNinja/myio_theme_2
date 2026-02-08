@@ -22,13 +22,13 @@
     overlay.innerHTML = `
       <div class="myio-settings-modal">
         <div class="myio-settings-header">
-          <div><h3 class="myio-settings-title">Kártya beállítások</h3><p class="myio-settings-subtitle">ID: ${escapeHtml(cardId)}</p></div>
+          <div><h3 class="myio-settings-title">${typeof str_CardSettings !== "undefined" ? str_CardSettings : "Kártya beállítások"}</h3><p class="myio-settings-subtitle">ID: ${escapeHtml(cardId)}</p></div>
           <button class="myio-settings-close" type="button">×</button>
         </div>
         <div class="myio-settings-content">
           <div class="myio-setting-row">
-            <label class="myio-setting-label">Kártya neve</label>
-            <input type="text" class="myio-setting-input myio-card-name-input" value="${escapeHtml(curName)}" placeholder="Kártya neve">
+            <label class="myio-setting-label">${typeof str_CardName !== "undefined" ? str_CardName : "Kártya neve"}</label>
+            <input type="text" class="myio-setting-input myio-card-name-input" value="${escapeHtml(curName)}" placeholder="${typeof str_CardName !== "undefined" ? str_CardName : "Kártya neve"}">
           </div>
           <div class="myio-setting-row">
             <label class="myio-setting-label">Választott ikon</label>
