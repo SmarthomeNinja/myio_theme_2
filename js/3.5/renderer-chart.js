@@ -874,8 +874,10 @@
       }
     });
 
-    // Drag-and-drop engedélyezése az annotation line-okhoz
-    enableAnnotationDrag(canvas, graphDiv, state);
+    // Drag-and-drop engedélyezése az annotation line-okhoz (csak új canvas esetén)
+    if (isNewCanvas) {
+      enableAnnotationDrag(canvas, graphDiv, state);
+    }
   }
 
 
