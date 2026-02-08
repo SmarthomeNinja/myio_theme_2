@@ -89,7 +89,7 @@
       saveCardNote(cardId, newNote);
       closeModal();
       if (typeof window.myioRenderAll === "function") window.myioRenderAll();
-      toast('✅ Mentve!');
+      toast(typeof str_Saved !== "undefined" ? str_Saved : "✅ Mentve!");
     });
   }
 
