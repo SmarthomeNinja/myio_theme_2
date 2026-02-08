@@ -872,6 +872,9 @@
         }
       }
     });
+
+    // Drag-and-drop engedélyezése az annotation line-okhoz
+    enableAnnotationDrag(canvas, state);
   }
 
 
