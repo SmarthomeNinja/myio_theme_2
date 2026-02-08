@@ -745,8 +745,9 @@
     // Canvas méret beállítása
     graphDiv.style.height = '400px';
     graphDiv.style.width = '100%';
-    
+
     let canvas = graphDiv.querySelector('canvas');
+    const isNewCanvas = !canvas;
     if (!canvas) {
       canvas = document.createElement('canvas');
       canvas.style.touchAction = 'none';
