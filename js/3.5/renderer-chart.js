@@ -502,7 +502,7 @@
 
     // --- Historikus adatok szekció ---
     const historicalSection = el("div", { class: "myio-chart-historical" });
-    const historicalTitle = el("h3", { text: "Betöltés" });
+    const historicalTitle = el("h3", { text: (typeof str_Loading !== "undefined" ? str_Loading : "Betöltés") });
     const historicalTable = el("table", { class: "myio-chart-table" });
     const histTbody = el("tbody");
     historicalTable.appendChild(histTbody);
@@ -510,7 +510,7 @@
 
     // --- Kimenetek szekció ---
     const outputSection = el("div", { class: "myio-chart-outputs" });
-    const outputTitle = el("h3", { text: "Kimenetek" });
+    const outputTitle = el("h3", { text: (typeof str_Outputs !== "undefined" ? str_Outputs : "Kimenetek") });
     const outputTable = el("table", { class: "myio-chart-table" });
     const outTbody = el("tbody");
     outputTable.appendChild(outTbody);
@@ -573,7 +573,7 @@
     state.mainData = parseCSVToArray(csvText);
 
     if (state.mainData.length === 0) {
-      graphDiv.innerHTML = '<p style="color:var(--myio-text-secondary,#aaa);text-align:center;padding:40px;">Nincs adat a mai napra.</p>';
+      graphDiv.innerHTML = '<p style="color:var(--myio-text-secondary,#aaa);text-align:center;padding:40px;">' + (typeof str_NoDataToday !== "undefined" ? str_NoDataToday : 'Nincs adat a mai napra.') + '</p>';
       return;
     }
 
