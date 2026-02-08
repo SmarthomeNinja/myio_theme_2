@@ -250,27 +250,29 @@
   }
   
   /** Kimenet érték küldése a szervernek */
-  async function sendOutputValueToServer(sensorId, output) {
+  function sendOutputValueToServer(sensorId, output) {
     try {
       // Érték konvertálása vissza 10x-re (szerver 10x-os értéket vár)
       const serverValue = Math.round(output.yVal * 10);
-      
-      // API endpoint - példa, módosítsd a valódi API-hoz
-      const url = `/api/sensor/${sensorId}/output/${output.id}`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: output.type,  // 'relay', 'pca', 'fet'
-          mode: output.mode,  // 'on' vagy 'off'
-          value: serverValue
-        })
-      });
-      
-      if (response.ok) {
-        console.log(`✓ Output érték elküldve: ${output.label} = ${output.yVal}°C`);
+
+      // Parancsnevek típus és mód alapján
+      let commandName;
+      const index = output.index + 1; // 1-től indexelve
+
+      if (output.type === 'relay') {
+        commandName = output.mode === 'on' ? `min_temp_ON*${index}` : `max_temp_OFF*${index}`;
+      } else if (output.type === 'pca') {
+        commandName = output.mode === 'on' ? `PCA_temp_MIN*${index}` : `PCA_temp_MAX*${index}`;
+      } else if (output.type === 'fet') {
+        commandName = output.mode === 'on' ? `mix_temp_MIN*${index}` : `mix_temp_MAX*${index}`;
+      }
+
+      if (commandName && typeof MyIOLive !== 'undefined') {
+        // MyIOLive.sendCommand használata
+        MyIOLive.sendCommand(`${commandName}=${serverValue}`, false);
+        console.log(`✓ Output érték elküldve: ${commandName}=${serverValue} (${output.yVal}°C)`);
       } else {
-        console.error('Hiba az output érték küldésekor:', response.status);
+        console.warn('MyIOLive nem elérhető vagy ismeretlen output típus');
       }
     } catch (err) {
       console.error('Output érték küldési hiba:', err);
