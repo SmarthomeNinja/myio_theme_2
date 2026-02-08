@@ -589,7 +589,7 @@
   }
 
   /** Drag-and-drop handler az annotation line-okhoz */
-  function enableAnnotationDrag(canvas, state) {
+  function enableAnnotationDrag(canvas, graphDiv, state) {
     let draggedOutput = null;
     let isDragging = false;
 
