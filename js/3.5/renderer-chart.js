@@ -645,8 +645,23 @@
         const newValue = pixelToValue(mouseY);
         draggedOutput.yVal = Math.round(newValue * 10) / 10; // 0.1 pontosság
 
-        // Chart frissítés
-        rebuildChart(graphDiv, state);
+        // Csak az annotation frissítése, nem a teljes chart
+        if (state.chart && state.chart.options.plugins.annotation) {
+          const visibleOutputs = state.outputLines.filter(o => o.visible);
+          const outputIndex = visibleOutputs.indexOf(draggedOutput);
+
+          if (outputIndex >= 0) {
+            const annotationKey = `output_${outputIndex}`;
+            const annotation = state.chart.options.plugins.annotation.annotations[annotationKey];
+
+            if (annotation) {
+              annotation.yMin = draggedOutput.yVal;
+              annotation.yMax = draggedOutput.yVal;
+              annotation.label.content = draggedOutput.label;
+              state.chart.update('none'); // Gyors frissítés animáció nélkül
+            }
+          }
+        }
       } else {
         // Cursor frissítés hover alapján
         const output = findOutputNearMouse(mouseY);
