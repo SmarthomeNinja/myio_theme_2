@@ -582,9 +582,9 @@ function buildSetupHeader() {
 
 	if (getCookie("SuperVisor") == '1') {
 		svInput.checked = true;
-		cb_SuperVisor = 1;
+		cb_SuperVisor = true;
 	} else {
-		cb_SuperVisor = 0;
+		cb_SuperVisor = false;
 	}
 
 	svInput.addEventListener("change", () => {
