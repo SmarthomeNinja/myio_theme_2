@@ -696,7 +696,7 @@ window.displaySave = function () {
 	tempString += '<option value="sav_gl">' + (typeof str_General !== 'undefined' ? str_General : 'General') + '</option>';
 	tempString += '<option value="sav_eman">' + (typeof str_Emanager !== 'undefined' ? str_Emanager : 'Emanager') + '</option>';
 	tempString += '</select></td></tr>';
-	tempString += '<tr><td colspan="2" align="center" style="padding:16px;"><button type="button" class="setup-button" style="width:100%; background-color: orangered;" name="sav_all" id="saveButton" value="' + (typeof actualSlot !== 'undefined' ? actualSlot : 0) + '">Save</button></td></tr></table>';
+	tempString += '<tr><td colspan="2" align="center" style="padding:16px;color:#fff;"><button type="button" class="setup-button" style="width:100%; background-color: orangered;" name="sav_all" id="saveButton" value="' + (typeof actualSlot !== 'undefined' ? actualSlot : 0) + '">Save</button></td></tr></table>';
 
 	modalBody.innerHTML = tempString;
 
