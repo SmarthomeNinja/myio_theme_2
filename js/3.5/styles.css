@@ -1,16 +1,19 @@
 /* styles.css – MyIO Dashboard CSS */
 
-/* Thermo Circular Styles */
+/* Termostat korkoros megjelenites */
 .myio-thermo-circular {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 0;
+  padding: 12px 0;
 }
 .myio-thermo-svg { display: block; }
-.myio-thermo-handle { transition: r 0.15s ease; }
-.myio-thermo-handle:hover { filter: brightness(1.1); }
+.myio-thermo-handle {
+  transition: r 0.15s ease;
+  cursor: pointer;
+}
+.myio-thermo-handle:hover { filter: brightness(1.15); }
 .myio-thermo-center {
   position: absolute;
   top: 51%;
@@ -20,27 +23,41 @@
   pointer-events: none;
 }
 .myio-thermo-mode {
-  font-size: clamp(10px, calc(20px * var(--myio-zoom, 1)), 24px);
-  font-weight: 500;
+  font-size: clamp(10px, calc(18px * var(--myio-zoom, 1)), 22px);
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
   margin-top: calc(3px * var(--myio-zoom, 1));
   margin-bottom: calc(3px * var(--myio-zoom, 1));
-  opacity: 0.7;
+  opacity: 0.6;
 }
 .myio-thermo-mode.active { opacity: 1; }
 .myio-thermo-avgtemp {
-  font-size: calc(40px * var(--myio-zoom, 1));
+  font-size: calc(38px * var(--myio-zoom, 1));
   font-weight: 300;
   line-height: 1;
-  color: #333;
+  color: rgba(255,255,255,.92);
 }
-.myio-thermo-avgtemp .decimal { font-size: calc(24px * var(--myio-zoom, 1)); vertical-align: top; }
-.myio-thermo-avgtemp .unit { font-size: calc(18px * var(--myio-zoom, 1)); vertical-align: top; margin-left: 2px; font-weight: 400; }
-.myio-thermo-hyst { font-size: clamp(12px, 11px * var(--myio-zoom, 1), 20px); color: #888; margin-top: 2px; }
+.myio-thermo-avgtemp .decimal {
+  font-size: calc(22px * var(--myio-zoom, 1));
+  vertical-align: top;
+  opacity: .7;
+}
+.myio-thermo-avgtemp .unit {
+  font-size: calc(16px * var(--myio-zoom, 1));
+  vertical-align: top;
+  margin-left: 2px;
+  font-weight: 400;
+  opacity: .6;
+}
+.myio-thermo-hyst {
+  font-size: clamp(11px, 11px * var(--myio-zoom, 1), 18px);
+  color: rgba(255,255,255,.45);
+  margin-top: 2px;
+}
 .myio-thermo-sensor {
-  font-size: clamp(10px, 16px * var(--myio-zoom, 1), 24px);
-  color: #666;
+  font-size: clamp(10px, 15px * var(--myio-zoom, 1), 22px);
+  color: rgba(255,255,255,.55);
   margin-top: 10px;
   display: flex;
   align-items: center;
@@ -48,66 +65,67 @@
   gap: 4px;
 }
 .myio-thermo-sensor .icon { display: inline-block; font-size: 16px; }
-.myio-thermo-buttons { display: flex; justify-content: center; gap: 20px; margin-top: 15px; }
+.myio-thermo-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 15px;
+}
 .myio-thermo-btn {
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  border: 2px solid #ddd;
-  background: #fff;
-  font-size: 24px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: rgba(255,255,255,.06);
+  font-size: 22px;
   font-weight: 300;
-  color: #666;
+  color: rgba(255,255,255,.65);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.15s ease;
 }
-.myio-thermo-btn:hover { border-color: #aaa; color: #333; }
-.myio-thermo-btn:active { transform: scale(0.95); background: #f5f5f5; }
-
-@media (prefers-color-scheme: dark) {
-  .myio-thermo-avgtemp { color: #fff; }
-  .myio-thermo-hyst { color: #aaa; }
-  .myio-thermo-sensor { color: #ccc; }
-  .myio-thermo-btn { background: #333; border-color: #555; color: #ccc; }
-  .myio-thermo-btn:hover { border-color: #777; color: #fff; }
+.myio-thermo-btn:hover {
+  border-color: rgba(255,255,255,.3);
+  color: rgba(255,255,255,.9);
+  background: rgba(255,255,255,.1);
+}
+.myio-thermo-btn:active {
+  transform: scale(0.95);
+  background: rgba(255,255,255,.08);
 }
 
-.myio-card.myio-heat .myio-thermo-mode.active { color: #FF6B35; }
-.myio-card.myio-cool .myio-thermo-mode.active { color: #35B8FF; }
+.myio-card.myio-heat .myio-thermo-mode.active { color: #ef6b3a; }
+.myio-card.myio-cool .myio-thermo-mode.active { color: #38bdf8; }
 
-/* Settings Modal Styles */
+/* Beallitasok modal - duplikaciok felulirasa */
 .myio-settings-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(4px);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 99999;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
   padding: 20px;
 }
 .myio-settings-overlay.is-open { opacity: 1; }
 
 .myio-settings-modal {
-  background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
-  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(16,30,42,.98) 0%, rgba(8,16,24,.99) 100%);
+  border-radius: 18px;
   width: 100%;
-  max-width: 440px;
-  max-height: 90vh;
+  max-width: 480px;
+  max-height: 88vh;
   overflow-y: auto;
-  box-shadow: 0 25px 80px rgba(0,0,0,0.6);
+  box-shadow: 0 16px 64px rgba(0,0,0,0.6), 0 0 1px rgba(255,255,255,.1);
   border: 1px solid rgba(255,255,255,0.1);
-  transform: scale(0.9) translateY(20px);
-  transition: transform 0.3s ease;
+  transform: scale(0.97) translateY(20px);
+  transition: all 0.25s cubic-bezier(.25,.8,.25,1);
 }
 .myio-settings-overlay.is-open .myio-settings-modal {
   transform: scale(1) translateY(0);
@@ -118,33 +136,36 @@
   justify-content: space-between;
   align-items: flex-start;
   padding: 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 .myio-settings-title { margin: 0; font-size: 20px; font-weight: 600; color: #fff; }
-.myio-settings-subtitle { margin: 6px 0 0; font-size: 13px; color: #888; }
+.myio-settings-subtitle { margin: 6px 0 0; font-size: 13px; color: rgba(255,255,255,.45); }
 .myio-settings-close {
-  background: rgba(255,255,255,0.1);
-  border: none;
-  font-size: 24px;
-  color: #999;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,.1);
+  font-size: 22px;
+  color: rgba(255,255,255,.6);
   cursor: pointer;
   padding: 8px 14px;
   border-radius: 10px;
   transition: all 0.2s;
 }
-.myio-settings-close:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.myio-settings-close:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
 
 .myio-settings-content { padding: 24px; }
 .myio-setting-row { margin-bottom: 24px; }
 .myio-setting-label { display: block; font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 8px; }
-.myio-setting-description { font-size: 12px; color: #888; margin-bottom: 8px; }
+.myio-setting-description { font-size: 12px; color: rgba(255,255,255,.4); margin-bottom: 8px; }
 .myio-setting-input {
   width: 100%;
-  padding: 14px 16px;
-  background: rgba(255,255,255,0.08);
-  border: 2px solid rgba(255,255,255,0.12);
-  border-radius: 12px;
-  font-size: 16px;
+  padding: 13px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  font-size: 15px;
   color: #fff;
   transition: all 0.2s;
   box-sizing: border-box;
@@ -152,7 +173,8 @@
 .myio-setting-input:focus {
   outline: none;
   border-color: var(--accent, #0397d6);
-  background: rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 3px rgba(3,151,214,.12);
 }
 .myio-setting-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
 
@@ -160,36 +182,45 @@
   display: flex;
   gap: 12px;
   padding: 20px 24px;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
 .myio-settings-btn {
   flex: 1;
-  padding: 14px 20px;
-  border-radius: 12px;
-  font-size: 15px;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   border: none;
 }
 .myio-settings-btn-secondary {
-  background: rgba(255,255,255,0.1);
-  color: #ccc;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,.7);
+  border: 1px solid rgba(255,255,255,.1);
 }
-.myio-settings-btn-secondary:hover { background: rgba(255,255,255,0.15); color: #fff; }
-.myio-settings-btn-primary {
-  background: linear-gradient(135deg, #0397d6 0%, #025a8a 100%);
+.myio-settings-btn-secondary:hover {
+  background: rgba(255,255,255,0.1);
   color: #fff;
 }
-.myio-settings-btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
-
-/* Long press active state */
-.myio-card.is-longpress-active {
-  transform: scale(0.98);
-  box-shadow: 0 0 0 3px rgba(3, 151, 214, 0.4);
+.myio-settings-btn-primary {
+  background: var(--accent, #0397d6);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(3,151,214,.2);
+}
+.myio-settings-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(3,151,214,.3);
 }
 
-/* Sunrise/Sunset Icons */
+/* Hosszu nyomas visszajelzes */
+.myio-card.is-longpress-active {
+  transform: scale(0.98);
+  box-shadow: 0 0 0 2px rgba(3, 151, 214, 0.35);
+}
+
+/* Napkelte/Napnyugta ikonok */
 .myio-sunrise-sunset-icons {
   display: flex;
   gap: 8px;
@@ -206,22 +237,15 @@
   transition: all 0.2s ease;
 }
 
-/* ON események - világos ikonok */
+/* ON esemenyek - vilagos ikonok */
 .myio-sun-icon.myio-sun-on {
-  color: #ffb300;
-  filter: drop-shadow(0 0 3px rgba(255, 179, 0, 0.5));
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.4));
   opacity: 1;
 }
 
-/* OFF események - sötét ikonok */
+/* OFF esemenyek - sotet ikonok */
 .myio-sun-icon.myio-sun-off {
-  color: #666;
+  color: rgba(255,255,255,.25);
   opacity: 0.5;
-}
-
-@media (prefers-color-scheme: dark) {
-  .myio-sun-icon.myio-sun-off {
-    color: #555;
-    opacity: 0.4;
-  }
 }
