@@ -685,7 +685,7 @@ window.displaySave = function () {
 	tempString = '<table style="width:100%; border-spacing:0; background-color:transparent;"><tr><td style="padding:8px; white-space:nowrap;">Slot:</td><td style="padding:8px; width:100%;"><select id="saveSelect" name="saveSelect" onchange="changeSaveButton()" class="setup-select">';
 
 	tempString += '</select></td></tr>';
-	tempString += '<tr><td style="padding:8px;">File:</td><td style="padding:8px;"><select id="saveType" name="saveType" onchange="changeSaveButton();" class="setup-select">';
+	tempString += '<tr><td style="padding:8px;color:#fff;">File:</td><td style="padding:8px;"><select id="saveType" name="saveType" onchange="changeSaveButton();" class="setup-select">';
 	tempString += '<option value="sav_all">' + (typeof str_All !== 'undefined' ? str_All : 'All') + '</option>';
 	tempString += '<option value="sav_r">' + (typeof str_Output !== 'undefined' ? str_Output : 'Output') + '</option>';
 	tempString += '<option value="sav_p">' + (typeof str_PCA_Output !== 'undefined' ? str_PCA_Output : 'PCA Output') + '</option>';
