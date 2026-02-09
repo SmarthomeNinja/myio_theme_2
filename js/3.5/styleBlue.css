@@ -2481,3 +2481,11 @@ html.myio-noanim .myio-sectionBody {
 		-ms-user-select: text !important;
 	}
 }
+
+/* Fix for large logo issue - ensure consistent size */
+.myio-logo {
+	height: 26px !important;
+	width: auto !important;
+	max-width: 120px !important;
+	display: block !important;
+}
