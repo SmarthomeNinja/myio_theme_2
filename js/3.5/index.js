@@ -127,21 +127,23 @@ let isDraggingCard = false;
 
     }
 
-    // Fullscreen logic
+    // Fullscreen logika – csak mobil eszközökön (érintőképernyő + kis kijelző)
+    function isMobileDevice() {
+      return navigator.maxTouchPoints > 0 && window.screen.width <= 1024;
+    }
+
     function checkOrientationAndFullscreen() {
+      if (!isMobileDevice()) return;
+
       if (window.innerWidth > window.innerHeight) {
-        // Landscape
+        // Landscape → fullscreen
         if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch((err) => {
-            console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
-          });
+          document.documentElement.requestFullscreen().catch(() => {});
         }
       } else {
-        // Portrait
+        // Portrait → kilépés fullscreen-ből
         if (document.fullscreenElement) {
-          document.exitFullscreen().catch((err) => {
-            console.log(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
-          });
+          document.exitFullscreen().catch(() => {});
         }
       }
     }
