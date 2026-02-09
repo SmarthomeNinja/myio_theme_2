@@ -264,34 +264,37 @@ body {
 	}
 	
 	:root{
-		--bg0:#070a12; --bg1:#0b1020;
-		--card:rgba(255,255,255,.06); --card2:rgba(255,255,255,.10);
-		--border:rgba(255,255,255,.12);
-		--text:rgba(255,255,255,.92); --muted:rgba(255,255,255,.65);
-		--accent:#0397d6; --ok:#19c37d; --warn:#f5a524; --bad:#f31260;
-		--radius:16px; --shadow:0 14px 40px rgba(0,0,0,.35);
-	  
+		--bg0:#050a10; --bg1:#0a1018;
+		--card:rgba(255,255,255,.045); --card2:rgba(255,255,255,.08);
+		--border:rgba(255,255,255,.09);
+		--text:rgba(255,255,255,.92); --muted:rgba(255,255,255,.58);
+		--accent:#0397d6; --accent-glow:rgba(3,151,214,.35);
+		--ok:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+		--radius:14px; --shadow:0 8px 32px rgba(0,0,0,.4);
+
 		--myio-zoom:1;
-		--header-h:70px;            /* JS felülírhatja */
-		--myio-header-h:26px;       /* JS felülírhatja */
+		--header-h:70px;
+		--myio-header-h:26px;
 		--ctl-h:clamp(20px, calc(31px * var(--myio-zoom)), 33px);
-	  
+
 		--myio-card-min:clamp(230px, calc(100px * var(--myio-zoom)), 1000px);
 	  }
-	  
+
 	  *{ box-sizing:border-box; }
-	  
+
 	  body{
 		margin:0;
-		font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+		font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
 		color:var(--text);
 		display:block !important;
 		width:100% !important;
 		background:
-		  radial-gradient(1200px 700px at 15% 10%, rgba(3,151,214,.22), transparent 60%),
-		  radial-gradient(900px 600px at 90% 0%, rgba(67,231,246,.18), transparent 55%),
-		  linear-gradient(180deg,#06131c 0%,#081a26 100%);
+		  radial-gradient(ellipse 1400px 900px at 10% 0%, rgba(3,151,214,.15), transparent 65%),
+		  radial-gradient(ellipse 800px 600px at 85% 5%, rgba(67,231,246,.10), transparent 55%),
+		  radial-gradient(ellipse 600px 400px at 50% 100%, rgba(3,80,140,.08), transparent 60%),
+		  linear-gradient(175deg,#04101a 0%,#061520 40%,#040e16 100%);
 		background-attachment:fixed;
+		min-height:100vh;
 	  }
 	  
 	  /* layout */
