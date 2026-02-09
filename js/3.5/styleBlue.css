@@ -728,52 +728,65 @@ body {
 	  }
 	  .myio-toggle input:checked + .myio-toggleTrack::before{ left:calc(100% - 46px); }
 	  
-	  /* card states */
-	  .myio-card.myio-warn{ background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.16); }
-	  
+	  /* kartya allapotok */
+	  .myio-card.myio-warn{
+		background:rgba(245,158,11,.08); border-color:rgba(245,158,11,.25);
+		box-shadow:0 2px 12px rgba(245,158,11,.08);
+	  }
+
 	  .myio-card.myio-on{
-		background:rgba(184, 233, 255, 0.92) !important;
-		border-color:rgba(180,180,180,.75) !important;
-		box-shadow:0 14px 38px rgba(0,0,0,.28) !important;
+		background:linear-gradient(165deg,rgba(3,151,214,.18),rgba(3,151,214,.06)) !important;
+		border-color:rgba(3,151,214,.4) !important;
+		box-shadow:0 2px 16px rgba(3,151,214,.12), inset 0 1px 0 rgba(255,255,255,.06) !important;
+	  }
+	  .myio-card.myio-on:hover{
+		box-shadow:0 4px 24px rgba(3,151,214,.18), inset 0 1px 0 rgba(255,255,255,.08) !important;
 	  }
 	  .myio-card.myio-on .myio-titleLeft,
 	  .myio-card.myio-on .myio-value,
 	  .myio-card.myio-on .myio-sub,
 	  .myio-card.myio-on .myio-cardTitle{
-		color:rgba(0,0,0,.85) !important;
+		color:rgba(255,255,255,.95) !important;
 	  }
-	  
-	  /* heat/cool on */
+
+	  /* futes/hutes allapotok */
 	  .myio-card.myio-on.myio-heat{
-		background:linear-gradient(180deg,rgba(194,36,14,.22),rgba(194,36,14,.10)) !important;
-		border-color:rgba(194,36,14,.35) !important;
+		background:linear-gradient(165deg,rgba(239,68,68,.14),rgba(194,36,14,.05)) !important;
+		border-color:rgba(239,68,68,.3) !important;
+		box-shadow:0 2px 16px rgba(239,68,68,.08), inset 0 1px 0 rgba(255,255,255,.04) !important;
 	  }
 	  .myio-card.myio-on.myio-cool{
-		background:linear-gradient(180deg,rgba(5,190,217,.22),rgba(5,190,217,.10)) !important;
-		border-color:rgba(5,190,217,.35) !important;
+		background:linear-gradient(165deg,rgba(5,190,217,.14),rgba(5,190,217,.04)) !important;
+		border-color:rgba(5,190,217,.3) !important;
+		box-shadow:0 2px 16px rgba(5,190,217,.08), inset 0 1px 0 rgba(255,255,255,.04) !important;
 	  }
 	  .myio-card.myio-on.myio-heat .myio-chip,
 	  .myio-card.myio-on.myio-cool .myio-chip{
-		background:rgba(255,255,255,.55) !important;
-		border-color:rgba(0,0,0,.10) !important;
+		background:rgba(255,255,255,.08) !important;
+		border-color:rgba(255,255,255,.12) !important;
 	  }
 	  .myio-card.myio-on.myio-heat input[type="number"],
 	  .myio-card.myio-on.myio-cool input[type="number"]{
-		background:rgba(255,255,255,.65) !important;
-		color:rgba(0,0,0,.92) !important;
+		background:rgba(255,255,255,.1) !important;
+		color:rgba(255,255,255,.92) !important;
 	  }
 	  .myio-card.myio-on.myio-heat .myio-cardTitle,
-	  .myio-card.myio-on.myio-cool .myio-cardTitle{ color:#fff !important; }
+	  .myio-card.myio-on.myio-cool .myio-cardTitle{ color:rgba(255,255,255,.9) !important; }
 	  .myio-card.myio-on.myio-heat .myio-sensorLine,
-	  .myio-card.myio-on.myio-cool .myio-sensorLine{ color:rgba(255,255,255,.95) !important; }
+	  .myio-card.myio-on.myio-cool .myio-sensorLine{ color:rgba(255,255,255,.85) !important; }
 	  .myio-card.myio-on.myio-heat .myio-sensorLine .val,
 	  .myio-card.myio-on.myio-cool .myio-sensorLine .val{ color:#fff !important; }
-	  
-	  /* sensor card stays glass */
+
+	  /* szenzor kartya - uveghatas */
 	  .myio-card.myio-sensor{
-		background:var(--card) !important;
+		background:linear-gradient(165deg,rgba(255,255,255,.05),rgba(255,255,255,.015)) !important;
 		border-color:var(--border) !important;
-		box-shadow:0 10px 25px rgba(0,0,0,.22) !important;
+		box-shadow:0 2px 12px rgba(0,0,0,.2) !important;
+		cursor:pointer;
+	  }
+	  .myio-card.myio-sensor:hover{
+		border-color:rgba(3,151,214,.3) !important;
+		box-shadow:0 4px 20px rgba(3,151,214,.1) !important;
 	  }
 	  .myio-card.myio-sensor .myio-dot{ background:var(--accent); }
 	  
