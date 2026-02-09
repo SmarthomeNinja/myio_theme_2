@@ -128,25 +128,56 @@ let isDraggingCard = false;
     }
 
     // Fullscreen logika – csak mobil eszközökön (érintőképernyő + kis kijelző)
+    // A requestFullscreen() user gesture-t igényel, ezért egy gombot mutatunk
     function isMobileDevice() {
       return navigator.maxTouchPoints > 0 && window.screen.width <= 1024;
+    }
+
+    let fsBtn = null;
+    function getFsBtn() {
+      if (fsBtn) return fsBtn;
+      fsBtn = document.createElement("button");
+      fsBtn.textContent = "⛶";
+      Object.assign(fsBtn.style, {
+        position: "fixed", bottom: "12px", right: "12px", zIndex: "99999",
+        width: "44px", height: "44px", borderRadius: "50%",
+        border: "none", background: "rgba(0,0,0,0.6)", color: "#fff",
+        fontSize: "22px", cursor: "pointer", display: "none",
+        alignItems: "center", justifyContent: "center"
+      });
+      fsBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        }
+        fsBtn.style.display = "none";
+      });
+      document.body.appendChild(fsBtn);
+      return fsBtn;
     }
 
     function checkOrientationAndFullscreen() {
       if (!isMobileDevice()) return;
 
       if (window.innerWidth > window.innerHeight) {
-        // Landscape → fullscreen
+        // Landscape → fullscreen gomb megjelenítése
         if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(() => {});
+          getFsBtn().style.display = "flex";
         }
       } else {
-        // Portrait → kilépés fullscreen-ből
+        // Portrait → gomb elrejtése, kilépés fullscreen-ből
+        if (fsBtn) fsBtn.style.display = "none";
         if (document.fullscreenElement) {
           document.exitFullscreen().catch(() => {});
         }
       }
     }
+
+    // Fullscreen változás figyelése (pl. user kilép swipe-pal)
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement && window.innerWidth > window.innerHeight && isMobileDevice()) {
+        getFsBtn().style.display = "flex";
+      }
+    });
 
     try {
       window.addEventListener("resize", checkOrientationAndFullscreen);
