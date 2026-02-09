@@ -1,6 +1,6 @@
 /* storage.js – LocalStorage kezelés: ikonok, nevek, kedvencek */
 
-(function() {
+(function () {
   const { myioNS } = window.myioUtils;
 
   const ICON_KEY = myioNS + ".card.icons";
@@ -21,7 +21,7 @@
       const icons = JSON.parse(localStorage.getItem(ICON_KEY) || '{}');
       icons[cardId] = icon;
       localStorage.setItem(ICON_KEY, JSON.stringify(icons));
-    } catch(e) { console.error('Icon save error:', e); }
+    } catch (e) { console.error('Icon save error:', e); }
   }
 
   // --- Név ---
@@ -36,7 +36,7 @@
       const names = JSON.parse(localStorage.getItem(NAMES_KEY) || '{}');
       names[cardId] = name;
       localStorage.setItem(NAMES_KEY, JSON.stringify(names));
-    } catch(e) { console.error('Name save error:', e); }
+    } catch (e) { console.error('Name save error:', e); }
   }
 
   // --- Megjegyzés ---
@@ -52,7 +52,7 @@
       if (note) notes[cardId] = note;
       else delete notes[cardId];
       localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
-    } catch(e) { console.error('Note save error:', e); }
+    } catch (e) { console.error('Note save error:', e); }
   }
 
   // --- Kedvencek ---
@@ -82,22 +82,87 @@
       localStorage.removeItem(FAV_SECTION_KEY);
       const scope = (typeof MYIOname === "string" && MYIOname.trim()) ? MYIOname.trim() : "default";
       localStorage.removeItem(`myio.cards.order.${scope}.${FAV_SECTION_KEY}`);
-      
+
       const sectionsOrderKey = `myio.sections.order.${scope}`;
       let saved = [];
-      try { saved = JSON.parse(localStorage.getItem(sectionsOrderKey) || "[]"); } catch {}
+      try { saved = JSON.parse(localStorage.getItem(sectionsOrderKey) || "[]"); } catch { }
       saved = Array.isArray(saved) ? saved.filter(k => k !== FAV_SECTION_KEY) : [];
       localStorage.setItem(sectionsOrderKey, JSON.stringify(saved));
     } catch (e) { console.error("Favorites cleanup error:", e); }
   }
 
+  // --- Zónák ---
+  const ZONES_KEY = myioNS + ".zones"; // [ { id, name }, ... ]
+  const ZONE_ASSIGN_KEY = myioNS + ".card.zones"; // { cardId: [zoneId1, zoneId2], ... }
+
+  function loadZones() {
+    try {
+      const z = JSON.parse(localStorage.getItem(ZONES_KEY) || "[]");
+      return Array.isArray(z) ? z : [];
+    } catch { return []; }
+  }
+
+  function saveZones(zones) {
+    try { localStorage.setItem(ZONES_KEY, JSON.stringify(zones)); } catch (e) { console.error("Zones save error:", e); }
+  }
+
+  function addZone(name) {
+    const zones = loadZones();
+    const id = "zone_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+    zones.push({ id, name });
+    saveZones(zones);
+    return id;
+  }
+
+  // Törléskor a hozzárendeléseket is takarítani kellene, de nem kritikus
+  function removeZone(id) {
+    const zones = loadZones().filter(z => z.id !== id);
+    saveZones(zones);
+
+    // Cleanup assignments
+    try {
+      const assigns = JSON.parse(localStorage.getItem(ZONE_ASSIGN_KEY) || "{}");
+      let changed = false;
+      Object.keys(assigns).forEach(cardId => {
+        if (assigns[cardId].includes(id)) {
+          assigns[cardId] = assigns[cardId].filter(zId => zId !== id);
+          if (assigns[cardId].length === 0) delete assigns[cardId];
+          changed = true;
+        }
+      });
+      if (changed) localStorage.setItem(ZONE_ASSIGN_KEY, JSON.stringify(assigns));
+    } catch { }
+  }
+
+  // --- Zóna hozzárendelések ---
+  function getCardZones(cardId) {
+    try {
+      const all = JSON.parse(localStorage.getItem(ZONE_ASSIGN_KEY) || "{}");
+      return Array.isArray(all[cardId]) ? all[cardId] : [];
+    } catch { return []; }
+  }
+
+  function setCardZones(cardId, zoneIds) {
+    try {
+      const all = JSON.parse(localStorage.getItem(ZONE_ASSIGN_KEY) || "{}");
+      if (!zoneIds || zoneIds.length === 0) {
+        delete all[cardId];
+      } else {
+        all[cardId] = zoneIds;
+      }
+      localStorage.setItem(ZONE_ASSIGN_KEY, JSON.stringify(all));
+    } catch (e) { console.error("Zone assign save error:", e); }
+  }
+
   // Export
   window.myioStorage = {
-    ICON_KEY, NAMES_KEY, NOTES_KEY, FAV_KEY, FAV_SECTION_KEY,
+    ICON_KEY, NAMES_KEY, NOTES_KEY, FAV_KEY, FAV_SECTION_KEY, ZONES_KEY, ZONE_ASSIGN_KEY,
     loadCardIcon, saveCardIcon,
     loadCardName, saveCardName,
     loadCardNote, saveCardNote,
     loadFavs, saveFavs, isFav, toggleFav,
-    cleanupFavoritesSectionState
+    cleanupFavoritesSectionState,
+    loadZones, saveZones, addZone, removeZone,
+    getCardZones, setCardZones
   };
 })();
