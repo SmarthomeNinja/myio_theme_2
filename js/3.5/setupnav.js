@@ -115,25 +115,20 @@ function buildSetupHeader() {
 	};
 	left.append(btnUpdate);
 
-	// Home button
-	const btnHome = document.createElement("button");
-	btnHome.type = "button";
-	btnHome.className = "myio-iconBtn";
-	btnHome.title = (typeof str_Home !== "undefined" ? str_Home : "Home");
-	btnHome.setAttribute("aria-label", btnHome.title);
-	btnHome.innerHTML = "🏠";
-	btnHome.onclick = () => {
-		window.location.href = "/";
-	};
-	left.append(btnHome);
+	// Home button removed - functionality moved to logo
 
-	// Mid - Title & Logo
+	// Mid - Title & Logo (logo now clickable for home navigation)
 	const logo = document.createElement("img");
 	logo.className = "myio-logo";
 	logo.src = host + "img/myIO_logo_white.svg";
 	logo.alt = "myIO";
 	logo.decoding = "async";
 	logo.loading = "eager";
+	logo.style.cursor = "pointer";
+	logo.title = (typeof str_Home !== "undefined" ? str_Home : "Home");
+	logo.onclick = () => {
+		window.location.href = "/";
+	};
 	mid.prepend(logo);
 
 	const title = document.createElement("div");
@@ -237,6 +232,76 @@ function buildSetupHeader() {
 
 	saveLoadRow.append(btnSave, btnLoad);
 	menuPanel.appendChild(saveLoadRow);
+
+	// Save Immediately section
+	const saveImmediatelyRow = document.createElement("div");
+	saveImmediatelyRow.className = "myio-menuRow myio-menuRowSaveImmediate";
+
+	const btnSaveImmediateMenu = document.createElement("button");
+	btnSaveImmediateMenu.type = "button";
+	btnSaveImmediateMenu.className = "myio-btn small myio-menuSaveImmediateBtn";
+	btnSaveImmediateMenu.innerHTML = "💾 Save Immediately";
+	btnSaveImmediateMenu.title = "Save Immediately";
+
+	const saveImmediateToggle = document.createElement("label");
+	saveImmediateToggle.className = "myio-miniToggle myio-miniToggleMenu";
+
+	const siInput = document.createElement("input");
+	siInput.type = "checkbox";
+
+	const siTrack = document.createElement("span");
+	siTrack.className = "myio-miniTrack";
+
+	saveImmediateToggle.append(siInput, siTrack);
+
+	const saveImmediatePanel = document.createElement("div");
+	saveImmediatePanel.className = "myio-menuSub myio-saveImmediateSub";
+	saveImmediatePanel.id = "saveImmediately";
+
+	// Check if save immediately should be visible based on current page
+	const pathname = window.location.pathname;
+	if (pathname == "/output"
+		|| pathname == "/input"
+		|| pathname == "/setup"
+		|| pathname == "/groups"
+		|| pathname == "/emanager"
+		|| pathname == "/pcaout") {
+		// Hide save immediately for these pages
+		saveImmediatelyRow.style.display = "none";
+		try {
+			if (typeof hideSave === "function") {
+				hideSave();
+			}
+		} catch (e) { }
+	} else if (pathname == "/computherm" || pathname == "/broadlink") {
+		try {
+			if (typeof broadlinkSave === "function") {
+				broadlinkSave();
+			}
+		} catch (e) { }
+	}
+
+	function syncSaveImmediateUI() {
+		const on = menuPanel.classList.contains("is-saveImmediateOpen");
+		siInput.checked = on;
+		btnSaveImmediateMenu.classList.toggle("is-on", on);
+	}
+	syncSaveImmediateUI();
+
+	siInput.addEventListener("change", () => {
+		const next = siInput.checked;
+		btnSaveImmediateMenu.classList.toggle("is-on", next);
+	});
+
+	btnSaveImmediateMenu.onclick = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		menuPanel.classList.toggle("is-saveImmediateOpen");
+		syncSaveImmediateUI();
+	};
+
+	saveImmediatelyRow.append(btnSaveImmediateMenu, saveImmediateToggle);
+	menuPanel.append(saveImmediatelyRow, saveImmediatePanel);
 
 	// Booster section
 	const boosterRow = document.createElement("div");
