@@ -592,6 +592,7 @@ function buildSetupHeader() {
 			const val = svInput.checked ? "1" : "0";
 			setCookie("SuperVisor", val);
 			cb_SuperVisor = (val === "1") ? 1 : 0;
+			console.log("SuperVisor changed to: " + val);
 		} catch (e) { }
 	});
 
