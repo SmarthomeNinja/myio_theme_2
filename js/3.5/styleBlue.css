@@ -522,10 +522,11 @@ body {
 	  
 	  .myio-value{
 		text-align:center;
-		font-weight:900;
-		letter-spacing:.2px;
+		font-weight:700;
+		letter-spacing:-.01em;
 		margin:0 0 10px;
-		font-size:calc(26px * var(--myio-zoom));
+		font-size:calc(28px * var(--myio-zoom));
+		color:rgba(255,255,255,.92);
 	  }
 	  
 	  .myio-sub{
