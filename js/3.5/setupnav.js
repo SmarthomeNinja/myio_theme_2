@@ -136,7 +136,64 @@ function buildSetupHeader() {
 	title.textContent = (typeof str_Settings !== "undefined" ? str_Settings : "Settings");
 	mid.append(title);
 
-	// Right - Menu panel
+	// Right side container
+	const rightContainer = document.createElement("div");
+	rightContainer.style.display = "flex";
+	rightContainer.style.alignItems = "center";
+	rightContainer.style.gap = "8px";
+
+	// Save Immediately button and modal (left of menu button)
+	const saveImmediateWrap = document.createElement("div");
+	saveImmediateWrap.style.position = "relative";
+	saveImmediateWrap.id = "saveImmediatelyWrapper";
+
+	const btnSaveImmediate = document.createElement("button");
+	btnSaveImmediate.type = "button";
+	btnSaveImmediate.className = "myio-iconBtn myio-saveImmediateBtn";
+	btnSaveImmediate.title = (typeof str_SaveImmediately !== "undefined" ? str_SaveImmediately : "Save Immediately");
+	btnSaveImmediate.setAttribute("aria-label", btnSaveImmediate.title);
+	btnSaveImmediate.innerHTML = "💾";
+	btnSaveImmediate.style.fontSize = "1.1em";
+
+	const saveImmediateModal = document.createElement("div");
+	saveImmediateModal.className = "myio-saveImmediateModal";
+	saveImmediateModal.id = "saveImmediately";
+
+	// Check if save immediately should be visible based on current page
+	const pathname = window.location.pathname;
+	if (pathname == "/output"
+		|| pathname == "/input"
+		|| pathname == "/setup"
+		|| pathname == "/groups"
+		|| pathname == "/emanager"
+		|| pathname == "/pcaout") {
+		// Initialize save immediately for these pages
+		try {
+			if (typeof hideSave === "function") {
+				setTimeout(() => hideSave(), 0);
+			}
+		} catch (e) { }
+	} else if (pathname == "/computherm" || pathname == "/broadlink") {
+		try {
+			if (typeof broadlinkSave === "function") {
+				setTimeout(() => broadlinkSave(), 0);
+			}
+		} catch (e) { }
+	} else {
+		// Hide save immediately button on other pages
+		saveImmediateWrap.style.display = "none";
+	}
+
+	btnSaveImmediate.onclick = (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		saveImmediateModal.classList.toggle("is-open");
+	};
+
+	saveImmediateWrap.append(btnSaveImmediate, saveImmediateModal);
+	rightContainer.append(saveImmediateWrap);
+
+	// Menu panel
 	const menuWrap = document.createElement("div");
 	menuWrap.style.position = "relative";
 
@@ -233,75 +290,7 @@ function buildSetupHeader() {
 	saveLoadRow.append(btnSave, btnLoad);
 	menuPanel.appendChild(saveLoadRow);
 
-	// Save Immediately section
-	const saveImmediatelyRow = document.createElement("div");
-	saveImmediatelyRow.className = "myio-menuRow myio-menuRowSaveImmediate";
-
-	const btnSaveImmediateMenu = document.createElement("button");
-	btnSaveImmediateMenu.type = "button";
-	btnSaveImmediateMenu.className = "myio-btn small myio-menuSaveImmediateBtn";
-	btnSaveImmediateMenu.innerHTML = "💾 Save Immediately";
-	btnSaveImmediateMenu.title = "Save Immediately";
-
-	const saveImmediateToggle = document.createElement("label");
-	saveImmediateToggle.className = "myio-miniToggle myio-miniToggleMenu";
-
-	const siInput = document.createElement("input");
-	siInput.type = "checkbox";
-
-	const siTrack = document.createElement("span");
-	siTrack.className = "myio-miniTrack";
-
-	saveImmediateToggle.append(siInput, siTrack);
-
-	const saveImmediatePanel = document.createElement("div");
-	saveImmediatePanel.className = "myio-menuSub myio-saveImmediateSub";
-	saveImmediatePanel.id = "saveImmediately";
-
-	// Check if save immediately should be visible based on current page
-	const pathname = window.location.pathname;
-	if (pathname == "/output"
-		|| pathname == "/input"
-		|| pathname == "/setup"
-		|| pathname == "/groups"
-		|| pathname == "/emanager"
-		|| pathname == "/pcaout") {
-		// Hide save immediately for these pages
-		saveImmediatelyRow.style.display = "none";
-		try {
-			if (typeof hideSave === "function") {
-				hideSave();
-			}
-		} catch (e) { }
-	} else if (pathname == "/computherm" || pathname == "/broadlink") {
-		try {
-			if (typeof broadlinkSave === "function") {
-				broadlinkSave();
-			}
-		} catch (e) { }
-	}
-
-	function syncSaveImmediateUI() {
-		const on = menuPanel.classList.contains("is-saveImmediateOpen");
-		siInput.checked = on;
-		btnSaveImmediateMenu.classList.toggle("is-on", on);
-	}
-	syncSaveImmediateUI();
-
-	siInput.addEventListener("change", () => {
-		const next = siInput.checked;
-		btnSaveImmediateMenu.classList.toggle("is-on", next);
-	});
-
-	btnSaveImmediateMenu.onclick = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		menuPanel.classList.toggle("is-saveImmediateOpen");
-		syncSaveImmediateUI();
-	};
-
-	saveImmediatelyRow.append(btnSaveImmediateMenu, saveImmediateToggle);
-	menuPanel.append(saveImmediatelyRow, saveImmediatePanel);
+	// Save Immediately section removed from menu - now in separate modal button
 
 	// Booster section
 	const boosterRow = document.createElement("div");
@@ -642,7 +631,15 @@ function buildSetupHeader() {
 	});
 
 	menuWrap.append(btnMenu, menuPanel);
-	right.append(menuWrap);
+	rightContainer.append(menuWrap);
+	right.append(rightContainer);
+
+	// Close save immediate modal when clicking outside
+	document.addEventListener("click", (e) => {
+		if (!saveImmediateModal.classList.contains("is-open")) return;
+		if (saveImmediateWrap.contains(e.target)) return;
+		saveImmediateModal.classList.remove("is-open");
+	});
 
 	// Message row
 	if (typeof message !== "undefined" && message && message.length > 0) {
