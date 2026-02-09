@@ -1,5 +1,9 @@
 /* setupnav.js - Modern Setup Navigation */
 
+// Global variables expected by other scripts
+var cb_SuperVisor = 0;
+var SaveImmediately = null;
+
 // Ensure viewport meta
 (function ensureViewportMeta() {
 	let m = document.querySelector('meta[name="viewport"]');
@@ -136,7 +140,23 @@ function buildSetupHeader() {
 	title.textContent = (typeof str_Settings !== "undefined" ? str_Settings : "Settings");
 	mid.append(title);
 
-	// Right - Menu panel
+	// Right - Save Immediately Container & Menu panel
+
+	// Save Immediately Container (restored functionality)
+	// User requested a "save icon". The hideSave() function populates this container with a button.
+	// We will style this buffer container to ensure it aligns well.
+	const saveContainer = document.createElement("div");
+	saveContainer.id = "saveImmediately";
+	saveContainer.style.display = "flex";
+	saveContainer.style.alignItems = "center";
+	saveContainer.style.marginRight = "10px"; // Space before menu button
+
+	// Assign global reference immediately so initializing logic works
+	window.SaveImmediately = saveContainer;
+	SaveImmediately = saveContainer;
+
+	right.appendChild(saveContainer);
+
 	const menuWrap = document.createElement("div");
 	menuWrap.style.position = "relative";
 
@@ -233,75 +253,7 @@ function buildSetupHeader() {
 	saveLoadRow.append(btnSave, btnLoad);
 	menuPanel.appendChild(saveLoadRow);
 
-	// Save Immediately section
-	const saveImmediatelyRow = document.createElement("div");
-	saveImmediatelyRow.className = "myio-menuRow myio-menuRowSaveImmediate";
-
-	const btnSaveImmediateMenu = document.createElement("button");
-	btnSaveImmediateMenu.type = "button";
-	btnSaveImmediateMenu.className = "myio-btn small myio-menuSaveImmediateBtn";
-	btnSaveImmediateMenu.innerHTML = "💾 Save Immediately";
-	btnSaveImmediateMenu.title = "Save Immediately";
-
-	const saveImmediateToggle = document.createElement("label");
-	saveImmediateToggle.className = "myio-miniToggle myio-miniToggleMenu";
-
-	const siInput = document.createElement("input");
-	siInput.type = "checkbox";
-
-	const siTrack = document.createElement("span");
-	siTrack.className = "myio-miniTrack";
-
-	saveImmediateToggle.append(siInput, siTrack);
-
-	const saveImmediatePanel = document.createElement("div");
-	saveImmediatePanel.className = "myio-menuSub myio-saveImmediateSub";
-	saveImmediatePanel.id = "saveImmediately";
-
-	// Check if save immediately should be visible based on current page
-	const pathname = window.location.pathname;
-	if (pathname == "/output"
-		|| pathname == "/input"
-		|| pathname == "/setup"
-		|| pathname == "/groups"
-		|| pathname == "/emanager"
-		|| pathname == "/pcaout") {
-		// Hide save immediately for these pages
-		saveImmediatelyRow.style.display = "none";
-		try {
-			if (typeof hideSave === "function") {
-				hideSave();
-			}
-		} catch (e) { }
-	} else if (pathname == "/computherm" || pathname == "/broadlink") {
-		try {
-			if (typeof broadlinkSave === "function") {
-				broadlinkSave();
-			}
-		} catch (e) { }
-	}
-
-	function syncSaveImmediateUI() {
-		const on = menuPanel.classList.contains("is-saveImmediateOpen");
-		siInput.checked = on;
-		btnSaveImmediateMenu.classList.toggle("is-on", on);
-	}
-	syncSaveImmediateUI();
-
-	siInput.addEventListener("change", () => {
-		const next = siInput.checked;
-		btnSaveImmediateMenu.classList.toggle("is-on", next);
-	});
-
-	btnSaveImmediateMenu.onclick = (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		menuPanel.classList.toggle("is-saveImmediateOpen");
-		syncSaveImmediateUI();
-	};
-
-	saveImmediatelyRow.append(btnSaveImmediateMenu, saveImmediateToggle);
-	menuPanel.append(saveImmediatelyRow, saveImmediatePanel);
+	// Save Immediately section REMOVED from menu as requested
 
 	// Booster section
 	const boosterRow = document.createElement("div");
@@ -584,11 +536,16 @@ function buildSetupHeader() {
 
 	if (getCookie("SuperVisor") == '1') {
 		svInput.checked = true;
+		cb_SuperVisor = 1;
+	} else {
+		cb_SuperVisor = 0;
 	}
 
 	svInput.addEventListener("change", () => {
 		try {
-			setCookie("SuperVisor", svInput.checked ? "1" : "0");
+			const val = svInput.checked ? "1" : "0";
+			setCookie("SuperVisor", val);
+			cb_SuperVisor = (val === "1") ? 1 : 0;
 		} catch (e) { }
 	});
 
@@ -643,6 +600,27 @@ function buildSetupHeader() {
 
 	menuWrap.append(btnMenu, menuPanel);
 	right.append(menuWrap);
+
+	// Initial logic for SaveImmediately
+	const pathname = window.location.pathname;
+	if (pathname == "/output"
+		|| pathname == "/input"
+		|| pathname == "/setup"
+		|| pathname == "/groups"
+		|| pathname == "/emanager"
+		|| pathname == "/pcaout") {
+		try {
+			if (typeof hideSave === "function") {
+				hideSave();
+			}
+		} catch (e) { }
+	} else if (pathname == "/computherm" || pathname == "/broadlink") {
+		try {
+			if (typeof broadlinkSave === "function") {
+				broadlinkSave();
+			}
+		} catch (e) { }
+	}
 
 	// Message row
 	if (typeof message !== "undefined" && message && message.length > 0) {
