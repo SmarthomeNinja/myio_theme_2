@@ -13,6 +13,7 @@
 		console.error('Error loading setup.css:', e);
 	}
 })();
+
 document.write('<div class="content"><table align="center" id="MasterTable">');
 document.write('<tr valign="top"><td width=50%><table id="t02" align="center"><tr>');
 OpenCloseCheckBox("Fet");
