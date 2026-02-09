@@ -1298,16 +1298,57 @@ body {
 
   .myio-mid{ display:flex; align-items:center; justify-content:center; min-width:0; }
 .myio-title{
-  color:orange;
-  font-weight:500;
+  color:rgba(255,180,50,.85);
+  font-weight:600;
   letter-spacing:.02em;
-  font-size:14px;
+  font-size:13px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
   max-width:min(60vw, 520px);
   pointer-events:none;
 }
+
+/* Egyedi slider (range input) stilus */
+input[type="range"]{
+  -webkit-appearance:none;
+  appearance:none;
+  height:6px;
+  background:rgba(255,255,255,.1);
+  border-radius:3px;
+  outline:none;
+  border:none;
+}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:18px; height:18px;
+  border-radius:50%;
+  background:var(--accent);
+  border:2px solid rgba(255,255,255,.3);
+  cursor:pointer;
+  box-shadow:0 1px 6px rgba(3,151,214,.3);
+  transition:box-shadow .15s ease, transform .1s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover{
+  box-shadow:0 2px 10px rgba(3,151,214,.5);
+  transform:scale(1.1);
+}
+input[type="range"]::-moz-range-thumb{
+  width:16px; height:16px;
+  border-radius:50%;
+  background:var(--accent);
+  border:2px solid rgba(255,255,255,.3);
+  cursor:pointer;
+}
+
+/* Scrollbar stilus */
+::-webkit-scrollbar{ width:5px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.12);
+  border-radius:3px;
+}
+::-webkit-scrollbar-thumb:hover{ background:rgba(255,255,255,.2); }
 .myio-menuRowNav{ gap:10px; }
 .myio-menuRowNav .myio-btn{ width:100%; }
 
