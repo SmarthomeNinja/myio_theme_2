@@ -669,12 +669,12 @@ body {
 		pointer-events:none !important;
 	  }
 	  .myio-miniTrack{
-		position:absolute; 
+		position:absolute;
 		inset: 1px;
 		border-radius:999px;
-		background:rgba(255,255,255,.25);
-		border:1px solid rgba(255,255,255,.35);
-		transition:background .18s ease, border-color .18s ease;
+		background:rgba(255,255,255,.15);
+		border:1px solid rgba(255,255,255,.2);
+		transition:all .22s cubic-bezier(.4,0,.2,1);
 	  }
 	  .myio-miniTrack::before{
 		content:"";
@@ -685,12 +685,13 @@ body {
 		transform:translateY(-50%);
 		background:#fff;
 		border-radius:50%;
-		box-shadow:0 2px 8px rgba(0,0,0,.35);
-		transition:left .18s ease;
+		box-shadow:0 1px 4px rgba(0,0,0,.3);
+		transition:left .22s cubic-bezier(.4,0,.2,1);
 	  }
 	  .myio-miniToggle input:checked + .myio-miniTrack{
 		background:var(--accent);
-		border-color:rgba(3,151,214,.65);
+		border-color:rgba(3,151,214,.5);
+		box-shadow:0 0 8px rgba(3,151,214,.25);
 	  }
 	  .myio-miniToggle input:checked + .myio-miniTrack::before{
 		left:calc(100% - var(--ctl-h) + 10px);
