@@ -350,18 +350,23 @@ body {
 	  }
 	  
 	  .myio-btn{
-		border:1px solid var(--border);
-		background:var(--card2);
+		border:1px solid rgba(255,255,255,.1);
+		background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,.04));
 		color:var(--text);
-		padding:10px 12px;
-		border-radius:12px;
-		font-weight:800;
+		padding:10px 14px;
+		border-radius:10px;
+		font-weight:700;
 		cursor:pointer;
-		transition:transform .05s ease, background .15s ease, border-color .15s ease;
+		transition:all .15s ease;
+		letter-spacing:.01em;
 	  }
-	  .myio-btn:hover{ background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.18); }
-	  .myio-btn:active{ transform:translateY(1px); }
-	  .myio-btn.small{ padding:8px 10px; font-size:12px; border-radius:999px; }
+	  .myio-btn:hover{
+		background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.07));
+		border-color:rgba(255,255,255,.2);
+		box-shadow:0 2px 8px rgba(0,0,0,.2);
+	  }
+	  .myio-btn:active{ transform:translateY(1px); box-shadow:none; }
+	  .myio-btn.small{ padding:8px 12px; font-size:12px; border-radius:8px; }
 	  
 	  /* szekciok */
 	  .myio-section{
