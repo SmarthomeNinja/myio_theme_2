@@ -80,5 +80,5 @@
 ## Fontos szabályok
 1. **MINDIG** a `/js/3.5` könyvtárban dolgozz
 2. **NE módosítsd** a `/setup` és `/chart` oldalakat
-3. **Tesztelj** minden változtatást a böngészőben (disable cache!)
+3. **Tesztelj** minden változtatást a böngészőben (disable cache!) `myio.local`
 4. **Használj** magyar kommenteket a kódban

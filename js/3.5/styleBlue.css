@@ -470,14 +470,21 @@ body {
 		}
 	  }
 	  
-	  /* cards */
+	  /* kartyak */
 	  .myio-card{
 		grid-column:auto !important;
 		border:1px solid var(--border);
-		background:var(--card);
+		background:linear-gradient(165deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
 		border-radius:var(--radius);
-		padding:calc(12px * var(--myio-zoom)*0.8);
-		box-shadow:0 10px 25px rgba(0,0,0,.22);
+		padding:calc(14px * var(--myio-zoom)*0.8);
+		box-shadow:0 2px 12px rgba(0,0,0,.2);
+		backdrop-filter:blur(4px);
+		transition:transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+	  }
+	  .myio-card:hover{
+		border-color:rgba(255,255,255,.16);
+		box-shadow:0 4px 20px rgba(0,0,0,.3);
+		transform:translateY(-1px);
 	  }
 	  	  
 	  .myio-headRow{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
