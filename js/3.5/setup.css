@@ -351,3 +351,55 @@
     color: rgba(255, 255, 255, 0.3);
     font-weight: 400;
 }
+/* Save Immediately Header Icon */
+#saveImmediately button[name="saveOn"] {
+    background: transparent;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.2s;
+    /* Hide text and show icon */
+    font-size: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#saveImmediately button[name="saveOn"]::before {
+    content: "💾"; /* Floppy disk icon */
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.9);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+#saveImmediately button[name="saveOn"]:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* When expanded (displaySave), it replaces the button with a table. */
+/* We need to ensure the table looks okay in the header. */
+#saveImmediately table {
+    background: rgba(16, 30, 42, 0.95) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 8px;
+    padding: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 8px;
+    z-index: 1000;
+}
+/* Note: #saveImmediately is display:flex in setupnav.js. */
+/* If the table is inserted, it might expand the header height if not absolute positioned. */
+/* But func.js replaces innerHTML. */
+/* So the table becomes the content of div#saveImmediately. */
+/* We should probably make div#saveImmediately relative so we can position the table absolutely if we want dropdown behavior? */
+/* But displaySave() puts a table. If we position it absolute, the header won't expand. */
+/* But the table has rows. */
+/* If we want it to look like a menu, absolute positioning is better. */
+
+#saveImmediately {
+    position: relative;
+}
