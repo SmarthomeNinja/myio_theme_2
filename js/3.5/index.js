@@ -149,6 +149,30 @@ let isDraggingCard = false;
       // checkOrientationAndFullscreen();
     }
 
+    // Fullscreen logic
+    function checkOrientationAndFullscreen() {
+      if (window.innerWidth > window.innerHeight) {
+        // Landscape
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch((err) => {
+            console.log(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+          });
+        }
+      } else {
+        // Portrait
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch((err) => {
+            console.log(`Error attempting to exit full-screen mode: ${err.message} (${err.name})`);
+          });
+        }
+      }
+    }
+
+    try {
+      window.addEventListener("resize", checkOrientationAndFullscreen);
+      window.addEventListener("orientationchange", checkOrientationAndFullscreen);
+    } catch (e) { console.error(e); }
+
     window.myioRenderAll = renderAll;
     renderAll();
   }
