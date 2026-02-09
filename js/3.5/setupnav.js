@@ -12,7 +12,9 @@
 	document.documentElement.style.webkitTextSizeAdjust = "100%";
 })();
 
-let MYIOname = document.title || "";
+if (typeof MYIOname === "undefined") {
+	var MYIOname = document.title || "";
+}
 MYIOname = MYIOname.replace(/\s*-\s*Setup\s*$/i, ""); // "- Setup" from the end
 
 // Build header on DOM ready
