@@ -1,29 +1,15 @@
 function broadlinkSave() {
-	if (typeof SaveImmediately === 'undefined' || !SaveImmediately) {
-		SaveImmediately = document.getElementById("saveImmediately");
-	}
-	if (!SaveImmediately) return;
 	SaveImmediately.innerHTML = '<button name="br_discovery" value="1" onclick="changed(this)">' + "Discovery" + '</button>';
 	SaveImmediately.innerHTML += '<button name="br_save" value="1" onclick="changed(this)">' + str_SaveImmediately + '</button>';
 	SaveImmediately.style.border = "none";
 }
 function hideSave() {
-	if (typeof SaveImmediately === 'undefined' || !SaveImmediately) {
-		SaveImmediately = document.getElementById("saveImmediately");
-	}
-	if (!SaveImmediately) return;
 	SaveImmediately.innerHTML = '<button name="saveOn" onclick="displaySave()">' + str_SaveImmediately + '</button>';
 	SaveImmediately.style.border = "none";
 }
-
 function displaySave() {
-	if (typeof SaveImmediately === 'undefined' || !SaveImmediately) {
-		SaveImmediately = document.getElementById("saveImmediately");
-	}
-	if (!SaveImmediately) return;
 	var tempString = "";
 	tempString = '<table style="opacity: 0.97;background-color:transparent;"><tr><td>slot:</td><td><select id="saveSelect" name="saveSelect" onchange=changeSaveButton()>';
-
 	tempString += '</select></td><td align="right"><button name="SaveClose" onclick="hideSave()">X</button></td></tr>';
 	tempString += '<tr><td>file:</td><td><select id="saveType" name="saveType" onchange=changeSaveButton();>';
 	tempString += '<option value="sav_all">' + str_All + '</option>';
