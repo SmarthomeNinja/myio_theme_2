@@ -698,7 +698,7 @@ body {
 		box-shadow:0 0 8px rgba(3,151,214,.25);
 	  }
 	  .myio-miniToggle input:checked + .myio-miniTrack::before{
-		left:calc(100% - var(--ctl-h) + 10px);
+		left:calc(100% - var(--ctl-h) + 2px);
 	  }
 	  
 	  .myio-toggle{
