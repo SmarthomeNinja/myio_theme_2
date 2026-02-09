@@ -464,7 +464,7 @@ body {
 	  /* grid + zoom */
 	  .myio-grid{
 		display:grid;
-		gap:calc(12px * var(--myio-zoom));
+		gap:calc(14px * var(--myio-zoom));
 		grid-template-columns:repeat(auto-fit, minmax(calc(var(--myio-card-min) * var(--myio-zoom)*1), 1fr));
 	  }
 	  
