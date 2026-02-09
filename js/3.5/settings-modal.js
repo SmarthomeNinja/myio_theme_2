@@ -51,7 +51,7 @@
       listEl.innerHTML = '';
       const currentZones = loadZones();
       if (currentZones.length === 0) {
-        listEl.innerHTML = `<div style="opacity:0.6;font-style:italic;padding:10px;">${typeof str_NoZonesYet !== "undefined" ? str_NoZonesYet : "Még nincsenek zónák."}</div>`;
+        listEl.innerHTML = `<div class="myio-zone-empty">${typeof str_NoZonesYet !== "undefined" ? str_NoZonesYet : "Még nincsenek zónák."}</div>`;
         return;
       }
 
@@ -151,9 +151,9 @@
           
           <div class="myio-setting-row">
             <label class="myio-setting-label">${typeof str_Zones !== "undefined" ? str_Zones : "Zónák"}</label>
-            <div class="myio-zone-display" style="padding:10px;background:rgba(255,255,255,0.05);border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;">
-              <span class="myio-zone-names" style="opacity:0.8;font-size:0.9em;">${escapeHtml(getZoneNames())}</span>
-              <span style="opacity:0.5;">✎</span>
+            <div class="myio-zone-display">
+              <span class="myio-zone-names">${escapeHtml(getZoneNames())}</span>
+              <span class="myio-zone-edit-icon">✎</span>
             </div>
           </div>
 
