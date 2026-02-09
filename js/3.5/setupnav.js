@@ -4,13 +4,7 @@
 var cb_SuperVisor = 0;
 var SaveImmediately = null;
 
-// Cookie helpers
-window.setCookie = function (cname, cvalue, exdays = 365) {
-	const d = new Date();
-	d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-	let expires = "expires=" + d.toUTCString();
-	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
-};
+
 
 window.getCookie = function (cname) {
 	let name = cname + "=";
