@@ -660,8 +660,8 @@ body {
 	  /* toggles */
 	  .myio-miniToggle{
 		position:relative;
-		width:calc(var(--ctl-h) * 1.2);
-		height:calc(var(--ctl-h) * 0.6);
+		width:calc(var(--ctl-h) * 1.8);
+		height:var(--ctl-h);
 		flex:0 0 auto;
 	  }
 	  .myio-miniToggle input{
