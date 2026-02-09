@@ -82,3 +82,4 @@
 2. **NE módosítsd** a `/setup` és `/chart` oldalakat
 3. **Tesztelj** minden változtatást a böngészőben (disable cache!) mindeig innen nyisd meg az oldalt: `http://myio.local/`
 4. **Használj** magyar kommenteket a kódban
+5. **NE** nyúlj a styleBlue.css-hez. Az index oldalhoz a styleBlueNew.css tartozik.
