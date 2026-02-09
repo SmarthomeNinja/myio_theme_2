@@ -450,6 +450,7 @@ body {
 	cursor: pointer;
 	transition: all .15s ease;
 	letter-spacing: .01em;
+	min-width: 70px;
 }
 
 .myio-btn:hover {
