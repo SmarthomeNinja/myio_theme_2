@@ -990,16 +990,18 @@ body {
 	  .myio-menuRowBooster .myio-menuBoosterBtn{ flex:1 1 auto; }
 	  .myio-menuRowBooster .myio-miniToggleMenu{ flex:0 0 auto; }
 	  .myio-menuBoosterBtn.is-on{
-		background:rgba(3,151,214,.95) !important;
-		border-color:rgba(3,151,214,.95) !important;
+		background:rgba(3,151,214,.8) !important;
+		border-color:rgba(3,151,214,.6) !important;
+		box-shadow:0 0 8px rgba(3,151,214,.2) !important;
 	  }
-	  
+
 	  .myio-menuRowAutoRefresh{ justify-content:space-between; }
 	  .myio-menuRowAutoRefresh .myio-menuAutoRefreshBtn{ flex:1 1 auto; }
 	  .myio-menuRowAutoRefresh .myio-miniToggleMenu{ flex:0 0 auto; }
 	  .myio-menuAutoRefreshBtn.is-on{
-		background:rgba(3,151,214,.95) !important;
-		border-color:rgba(3,151,214,.95) !important;
+		background:rgba(3,151,214,.8) !important;
+		border-color:rgba(3,151,214,.6) !important;
+		box-shadow:0 0 8px rgba(3,151,214,.2) !important;
 	  }
 	  
 	  .myio-menuSub{
