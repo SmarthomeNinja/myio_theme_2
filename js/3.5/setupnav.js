@@ -585,6 +585,7 @@ function buildSetupHeader() {
 		cb_SuperVisor = true;
 	} else {
 		cb_SuperVisor = false;
+		svInput.checked = false;
 	}
 
 	svInput.addEventListener("change", () => {
