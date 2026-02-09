@@ -363,74 +363,97 @@ body {
 	  .myio-btn:active{ transform:translateY(1px); }
 	  .myio-btn.small{ padding:8px 10px; font-size:12px; border-radius:999px; }
 	  
-	  /* sections */
+	  /* szekciok */
 	  .myio-section{
-		margin-top:14px;
+		margin-top:16px;
 		border:1px solid var(--border);
-		background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));
-		border-radius:18px;
-		box-shadow:var(--shadow);
-		overflow:visible !important; /* sticky miatt */
+		background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+		border-radius:16px;
+		box-shadow:0 4px 20px rgba(0,0,0,.3);
+		overflow:visible !important;
+		transition:box-shadow .3s ease;
 	  }
-	  
+	  .myio-section:hover{
+		box-shadow:0 6px 28px rgba(0,0,0,.4);
+	  }
+
 	  .myio-sectionHead{
 		display:flex; align-items:center; justify-content:space-between; gap:calc(10px * var(--myio-zoom));
-		padding:calc(12px * var(--myio-zoom)) calc(14px * var(--myio-zoom)) !important;
-		background:var(--accent);
+		padding:calc(13px * var(--myio-zoom)) calc(16px * var(--myio-zoom)) !important;
+		background:linear-gradient(135deg,rgba(3,151,214,.85) 0%,rgba(2,110,165,.95) 100%);
 		position:sticky !important;
 		top:calc(var(--header-h) - 10px) !important;
 		z-index:5;
-		border-top-left-radius:14px;
-		border-top-right-radius:14px;
-		box-shadow:inset 0 -1px 0 rgba(255,255,255,.25);
+		border-top-left-radius:15px;
+		border-top-right-radius:15px;
+		box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 2px 8px rgba(3,151,214,.2);
+		cursor:pointer;
+		transition:background .2s ease;
+	  }
+	  .myio-sectionHead:hover{
+		background:linear-gradient(135deg,rgba(3,151,214,.95) 0%,rgba(2,120,180,1) 100%);
 	  }
 	  .myio-sectionHead:focus{ outline:none; }
-	  .myio-sectionHead:focus-visible{ outline:2px dashed #ff8c00; outline-offset:6px; }
-	  
+	  .myio-sectionHead:focus-visible{ outline:2px dashed rgba(255,200,50,.7); outline-offset:4px; }
+
 	  .myio-sectionTitle{
 		margin:0;
 		color:#fff !important;
-		font-weight:900;
-		letter-spacing:.04em;
-		font-size:clamp(14px, calc(17px * var(--myio-zoom)), 26px) !important;
+		font-weight:700;
+		letter-spacing:.03em;
+		font-size:clamp(13px, calc(16px * var(--myio-zoom)), 24px) !important;
 	  }
 	  .myio-sectionMeta{
 		margin-left:auto;
 		font-size:clamp(10px, calc(12px * var(--myio-zoom)), 18px) !important;
-		color:rgba(255,255,255,.85) !important;
+		color:rgba(255,255,255,.75) !important;
 	  }
-	  .myio-sectionTitle::before{ content:"▸ "; color:rgba(255,255,255,.95) !important; }
-	  .myio-section:not(.is-collapsed) .myio-sectionTitle::before{ content:"▾ "; }
-	  
+	  .myio-sectionTitle::before{
+		content:"";
+		display:inline-block;
+		width:0; height:0;
+		border-left:6px solid #fff;
+		border-top:4px solid transparent;
+		border-bottom:4px solid transparent;
+		margin-right:10px;
+		transition:transform .25s ease;
+		vertical-align:middle;
+	  }
+	  .myio-section:not(.is-collapsed) .myio-sectionTitle::before{
+		transform:rotate(90deg);
+	  }
+
 	  .myio-sectionBody{
-		padding:12px 14px;
+		padding:14px 16px;
 		overflow:hidden;
 		max-height:100000px;
 		opacity:1;
 		transform:translateY(0);
-		transition:max-height .35s ease, opacity .25s ease, transform .25s ease;
+		transition:max-height .35s ease, opacity .2s ease, transform .2s ease;
 		will-change:max-height, opacity, transform;
 	  }
 	  .myio-section.is-collapsed .myio-sectionBody{
-		max-height:0;
+		max-height:0; padding-top:0; padding-bottom:0;
 		opacity:0;
-		transform:translateY(-6px);
+		transform:translateY(-4px);
 	  }
 	  html.myio-noanim .myio-sectionBody{ transition:none !important; }
-	  
+
 	  .myio-dragHandle{
 		all:unset;
 		cursor:grab;
-		font-size:18px;
+		font-size:17px;
 		line-height:1;
-		color:rgba(255,255,255,.55);
+		color:rgba(255,255,255,.45);
 		user-select:none;
+		transition:color .15s ease;
 	  }
-	  .myio-dragHandle:active{ cursor:grabbing; }
+	  .myio-dragHandle:hover{ color:rgba(255,255,255,.8); }
+	  .myio-dragHandle:active{ cursor:grabbing; color:#fff; }
 	  .myio-section.is-dragging{
-		outline:2px dashed #ff9800;
+		outline:2px dashed rgba(255,180,50,.6);
 		outline-offset:4px;
-		box-shadow:0 0 0 3px rgba(255,152,0,.15);
+		box-shadow:0 0 0 3px rgba(255,152,0,.1), 0 8px 32px rgba(0,0,0,.5);
 	  }
 	  
 	  /* grid + zoom */
