@@ -25,9 +25,7 @@ function initSetupPage() {
 	renderSetupPage();
 }
 
-// Helper functions
-//const B_var = (label) => ({ label });
-//const B_End = () => { };
+
 
 // Create setup container
 function renderSetupPage() {
