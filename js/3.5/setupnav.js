@@ -4,6 +4,29 @@
 var cb_SuperVisor = 0;
 var SaveImmediately = null;
 
+// Cookie helpers
+window.setCookie = function (cname, cvalue, exdays = 365) {
+	const d = new Date();
+	d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+	let expires = "expires=" + d.toUTCString();
+	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+};
+
+window.getCookie = function (cname) {
+	let name = cname + "=";
+	let ca = document.cookie.split(';');
+	for (let i = 0; i < ca.length; i++) {
+		let c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
+};
+
 // Ensure viewport meta
 (function ensureViewportMeta() {
 	let m = document.querySelector('meta[name="viewport"]');
@@ -39,6 +62,24 @@ function buildSetupHeader() {
 		const ov = document.createElement("div");
 		ov.id = "overlay";
 		document.body.prepend(ov);
+	}
+
+	// Modal Container for Save Dialog
+	if (!document.getElementById("myio-save-modal")) {
+		const modal = document.createElement("div");
+		modal.id = "myio-save-modal";
+		modal.className = "myio-modal";
+		modal.style.display = "none";
+		modal.innerHTML = `
+			<div class="myio-modal-content">
+				<span class="myio-modal-close" onclick="hideSave()">&times;</span>
+				<div id="saveModalHead">Save Immediately</div>
+				<form method="POST" id="saveForm">
+				<div id="saveModalBody"></div>
+				</form>
+			</div>
+		`;
+		document.body.appendChild(modal);
 	}
 
 	// Header container
@@ -119,8 +160,6 @@ function buildSetupHeader() {
 	};
 	left.append(btnUpdate);
 
-	// Home button removed - functionality moved to logo
-
 	// Mid - Title & Logo (logo now clickable for home navigation)
 	const logo = document.createElement("img");
 	logo.className = "myio-logo";
@@ -142,16 +181,25 @@ function buildSetupHeader() {
 
 	// Right - Save Immediately Container & Menu panel
 
-	// Save Immediately Container (restored functionality)
-	// User requested a "save icon". The hideSave() function populates this container with a button.
-	// We will style this buffer container to ensure it aligns well.
+	// Save Immediately Container
 	const saveContainer = document.createElement("div");
 	saveContainer.id = "saveImmediately";
 	saveContainer.style.display = "flex";
 	saveContainer.style.alignItems = "center";
-	saveContainer.style.marginRight = "10px"; // Space before menu button
+	saveContainer.style.justifyContent = "center";
+	saveContainer.style.marginRight = "10px";
 
-	// Assign global reference immediately so initializing logic works
+	// Create persistent Save Button
+	const saveBtn = document.createElement("button");
+	saveBtn.name = "saveOn";
+	saveBtn.innerHTML = "💾";
+	saveBtn.onclick = (e) => {
+		e.preventDefault();
+		displaySave();
+	};
+	saveContainer.appendChild(saveBtn);
+
+	// Assign global reference
 	window.SaveImmediately = saveContainer;
 	SaveImmediately = saveContainer;
 
@@ -252,8 +300,6 @@ function buildSetupHeader() {
 
 	saveLoadRow.append(btnSave, btnLoad);
 	menuPanel.appendChild(saveLoadRow);
-
-	// Save Immediately section REMOVED from menu as requested
 
 	// Booster section
 	const boosterRow = document.createElement("div");
@@ -601,27 +647,6 @@ function buildSetupHeader() {
 	menuWrap.append(btnMenu, menuPanel);
 	right.append(menuWrap);
 
-	// Initial logic for SaveImmediately
-	const pathname = window.location.pathname;
-	if (pathname == "/output"
-		|| pathname == "/input"
-		|| pathname == "/setup"
-		|| pathname == "/groups"
-		|| pathname == "/emanager"
-		|| pathname == "/pcaout") {
-		try {
-			if (typeof hideSave === "function") {
-				hideSave();
-			}
-		} catch (e) { }
-	} else if (pathname == "/computherm" || pathname == "/broadlink") {
-		try {
-			if (typeof broadlinkSave === "function") {
-				broadlinkSave();
-			}
-		} catch (e) { }
-	}
-
 	// Message row
 	if (typeof message !== "undefined" && message && message.length > 0) {
 		const msg = document.createElement("div");
@@ -653,6 +678,103 @@ function buildSetupHeader() {
 		}
 	} catch (e) { }
 }
+
+// Override Save functionality to use Modal
+window.displaySave = function () {
+	const modal = document.getElementById("myio-save-modal");
+	const modalBody = document.getElementById("saveModalBody");
+	if (!modal || !modalBody) return;
+
+	var tempString = "";
+	tempString = '<table style="width:100%; border-spacing:0; color:#fff;"><tr><td style="padding:8px; white-space:nowrap;">Slot:</td><td style="padding:8px; width:100%;"><select id="saveSelect" name="saveSelect" onchange="changeSaveButton()" class="setup-select">';
+
+	tempString += '</select></td></tr>';
+	tempString += '<tr><td style="padding:8px;">File:</td><td style="padding:8px;"><select id="saveType" name="saveType" onchange="changeSaveButton();" class="setup-select">';
+	tempString += '<option value="sav_all">' + (typeof str_All !== 'undefined' ? str_All : 'All') + '</option>';
+	tempString += '<option value="sav_r">' + (typeof str_Output !== 'undefined' ? str_Output : 'Output') + '</option>';
+	tempString += '<option value="sav_p">' + (typeof str_PCA_Output !== 'undefined' ? str_PCA_Output : 'PCA Output') + '</option>';
+	tempString += '<option value="sav_f">' + (typeof str_PWM_simple !== 'undefined' ? str_PWM_simple : 'PWM') + '</option>';
+	tempString += '<option value="sav_sw">' + (typeof str_Input !== 'undefined' ? str_Input : 'Input') + '</option>';
+	tempString += '<option value="sav_pr">' + (typeof str_Prot !== 'undefined' ? str_Prot : 'Prot') + '</option>';
+	tempString += '<option value="sav_gr">' + (typeof str_Group !== 'undefined' ? str_Group : 'Group') + '</option>';
+	tempString += '<option value="sav_gl">' + (typeof str_General !== 'undefined' ? str_General : 'General') + '</option>';
+	tempString += '<option value="sav_eman">' + (typeof str_Emanager !== 'undefined' ? str_Emanager : 'Emanager') + '</option>';
+	tempString += '</select></td></tr>';
+	tempString += '<tr><td colspan="2" align="center" style="padding:16px;"><button type="button" class="setup-button" style="width:100%; background-color: orangered;" name="sav_all" id="saveButton" value=' + (typeof actualSlot !== 'undefined' ? actualSlot : 0) + ' onclick="document.getElementById(\\'saveForm\\').submit()" >Save</button></td></tr></table>';
+
+	modalBody.innerHTML = tempString;
+
+	// Because we replaced innerHTML, we need to bind the form action to sending hidden fields if needed, 
+	// OR reuse the existing func logic which uses `changed()`.
+	// The original used: onclick="changed(this,this.name,1,1,1)"
+	// changed() uses sendForm() or AJAX.
+	// But `changed()` refers to `document.getElementById('sending')`.
+	// We must ensure that works.
+	// Let's use `changed()` calling but we need to pass the button element.
+	// We can update the onclick handler after insertion.
+
+	// Populate slots
+	setTimeout(() => {
+		const SaveSelect = document.getElementById("saveSelect");
+		if (SaveSelect && typeof slot_description !== "undefined") {
+			for (let i = 0; i < slot_description.length; i++) {
+				if (slot_description[i] != "" && slot_description[i] != "-" && slot_description[i] != null) {
+					var option = document.createElement("option");
+					option.value = i;
+					option.text = slot_description[i];
+					if (typeof actualSlot !== 'undefined' && i == actualSlot) { option.selected = true; }
+					SaveSelect.add(option);
+				}
+			}
+		}
+
+		const saveButton = document.getElementById("saveButton");
+		if (saveButton) {
+			saveButton.onclick = function () {
+				// We need to leverage `changed` if available, or manually submit form.
+				// In `func.js`, `changeSaveButton` updates button name and value.
+				// And then `changed(this, this.name, ...)` is called.
+				if (typeof changed === 'function') {
+					changed(this, this.name, 1, 1, 1);
+				} else {
+					// Fallback
+					document.getElementById("sending").name = this.name;
+					document.getElementById("sending").value = this.value;
+					sendForm();
+				}
+			};
+		}
+
+		if (typeof changeSaveButton === "function") changeSaveButton();
+	}, 0);
+
+	modal.style.display = "block";
+};
+
+window.hideSave = function () {
+	const modal = document.getElementById("myio-save-modal");
+	if (modal) {
+		modal.style.display = "none";
+	}
+};
+
+window.changeSaveButton = function () {
+	// Re-implement or wrapper if func.js is loaded
+	if (typeof window.SaveType === 'undefined') window.SaveType = document.getElementById("saveType");
+	else window.SaveType = document.getElementById("saveType");
+
+	if (typeof window.SaveButton === 'undefined') window.SaveButton = document.getElementById("saveButton");
+	else window.SaveButton = document.getElementById("saveButton");
+
+	if (typeof window.SaveSelect === 'undefined') window.SaveSelect = document.getElementById("saveSelect");
+	else window.SaveSelect = document.getElementById("saveSelect");
+
+	if (window.SaveType && window.SaveButton && window.SaveSelect) {
+		window.SaveButton.innerText = window.SaveType.options[window.SaveType.selectedIndex].text + ' ' + (typeof str_Save !== 'undefined' ? str_Save : 'Save') + ' slot : ' + window.SaveSelect.value;
+		window.SaveButton.name = window.SaveType.value;
+		window.SaveButton.value = window.SaveSelect.value;
+	}
+};
 
 // Initialize auto refresh from old cookies
 const cb_AutoRefresh = getCookie("AutoRefresh") !== '0';
