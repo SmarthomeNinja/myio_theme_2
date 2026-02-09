@@ -2,7 +2,7 @@
 
 (function () {
   const { el, toast, escapeHtml, myioNS } = window.myioUtils;
-  const { el, toast, escapeHtml, myioNS } = window.myioUtils;
+
   const {
     loadCardIcon, saveCardIcon,
     loadCardName, saveCardName,
