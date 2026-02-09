@@ -506,10 +506,10 @@ body {
 	  .myio-cardTitle{
 		user-select:none;
 		margin:2px 0 10px;
-		font-weight:800;
+		font-weight:600;
 		color:var(--muted);
 		text-align:center;
-		font-size:clamp(12px, calc(16px * var(--myio-zoom)), 24px);
+		font-size:clamp(12px, calc(15px * var(--myio-zoom)), 22px);
 		white-space:normal !important;
 		overflow:visible !important;
 		text-overflow:clip !important;
@@ -518,6 +518,7 @@ body {
 		-webkit-line-clamp:32;
 		line-clamp:3;
 		overflow:hidden !important;
+		letter-spacing:.01em;
 	  }
 	  
 	  .myio-value{
