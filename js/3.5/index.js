@@ -5,7 +5,7 @@
 // Stíluslap betöltése: host + "styles.css"
 (() => {
   try {
-    
+
     const href = host + 'styles.css';
 
     if (!document.querySelector(`link[rel="stylesheet"][href="${href}"]`)) {
@@ -22,9 +22,9 @@
 let isDraggingCard = false;
 
 // Dinamikus modul betöltő
-(function() {
+(function () {
   const BASE_PATH = document.currentScript?.src?.replace(/index\.js.*$/, '') || '/js/3.5/';
-  
+
   const modules = [
     'utils.js',
     'storage.js',
@@ -46,7 +46,7 @@ let isDraggingCard = false;
         resolve();
         return;
       }
-      
+
       const script = document.createElement('script');
       script.src = BASE_PATH + src;
       script.onload = resolve;
@@ -75,7 +75,7 @@ let isDraggingCard = false;
     const { $, myioNS } = window.myioUtils;
     const { ensureShell, ensureHeaderMask } = window.myioSections || {};
     const { clearCardFactories } = window.myioCards || {};
-    const { renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites } = window.myioRenderers || {};
+    const { renderSensors, renderSwitches, renderPCA, renderFET, renderRelays, renderFavorites, renderZones } = window.myioRenderers || {};
     const { renderThermo } = window.myioThermo || {};
     const { setupSectionReorder, setupCardReorder } = window.myioReorder || {};
     const { setupLongPressHandlers } = window.myioSettingsModal || {};
@@ -100,6 +100,7 @@ let isDraggingCard = false;
       if (renderFET) try { renderFET(root); } catch (e) { console.error(e); }
       if (renderSwitches) try { renderSwitches(root); } catch (e) { console.error(e); }
       if (renderFavorites) try { renderFavorites(root); } catch (e) { console.error(e); }
+      if (renderZones) try { renderZones(root); } catch (e) { console.error(e); }
 
       if (setupSectionReorder) setupSectionReorder();
       if (setupCardReorder) setupCardReorder();
@@ -130,7 +131,7 @@ let isDraggingCard = false;
 
   async function start() {
     await loadModules();
-    
+
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", initDashboard);
     } else {
