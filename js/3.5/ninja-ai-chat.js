@@ -486,7 +486,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       id--; // Adjust for 0-based index
       const valPercent = parseInt(value);
 
-      if (isNaN(id) || id < 1) {
+      if (isNaN(id) || id < 0) {
         showToast(`Ervenytelen PCA ID: ${id}`);
         return false;
       }
