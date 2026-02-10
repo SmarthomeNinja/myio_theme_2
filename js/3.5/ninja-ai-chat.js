@@ -595,8 +595,8 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         return false;
       }
 
-      // PWM flag ellenorzese
-      if (typeof PCA_PWM != 'undefined' && PCA_PWM[id] != 1) {
+      // PWM flag ellenorzese (PCA_PWM 0-bazisu, id 1-bazisu)
+      if (typeof PCA_PWM != 'undefined' && PCA_PWM[id - 1] != 1) {
         showToast(`PCA ${id} nem rendelkezik PWM kepesseggel`);
         return false;
       }
