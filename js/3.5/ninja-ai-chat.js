@@ -546,9 +546,9 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     return false;
   }
 
-  // PCA kimenet be/ki kapcsolása
+  // PCA kimenet be/ki kapcsolasa
+  // pcaId: 1-bazisu (megegyezik a szerver altal vart ertekkel)
   function executePCAToggleCommand(command, pcaId) {
-    pcaId--; // Adjust for 0-based index
     pcaId = parseInt(pcaId);
     try {
       if (isNaN(pcaId) || pcaId < 1) {
