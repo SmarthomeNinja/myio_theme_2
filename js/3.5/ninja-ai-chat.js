@@ -637,14 +637,69 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
           }
         }
       }
+      // pca_on(id)
+      else if (command.startsWith('pca_on(')) {
+        const id = command.match(/pca_on\((\d+)\)/);
+        if (id) {
+          const success = executePCAToggleCommand('on', id[1]);
+          if (success) {
+            executed++;
+            results.push(`PCA ${id[1]} bekapcsolva`);
+          }
+        }
+      }
+      // pca_off(id)
+      else if (command.startsWith('pca_off(')) {
+        const id = command.match(/pca_off\((\d+)\)/);
+        if (id) {
+          const success = executePCAToggleCommand('off', id[1]);
+          if (success) {
+            executed++;
+            results.push(`PCA ${id[1]} kikapcsolva`);
+          }
+        }
+      }
+      // pca_set(id, value)
+      else if (command.startsWith('pca_set(')) {
+        const match2 = command.match(/pca_set\((\d+),\s*(\d+)\)/);
+        if (match2) {
+          const success = executePCASetCommand(match2[1], match2[2]);
+          if (success) {
+            executed++;
+            results.push(`PCA ${match2[1]} -> ${match2[2]}%`);
+          }
+        }
+      }
+      // pwm_on(id)
+      else if (command.startsWith('pwm_on(')) {
+        const id = command.match(/pwm_on\((\d+)\)/);
+        if (id) {
+          const success = executePWMToggleCommand('on', id[1]);
+          if (success) {
+            executed++;
+            results.push(`PWM ${id[1]} bekapcsolva`);
+          }
+        }
+      }
+      // pwm_off(id)
+      else if (command.startsWith('pwm_off(')) {
+        const id = command.match(/pwm_off\((\d+)\)/);
+        if (id) {
+          const success = executePWMToggleCommand('off', id[1]);
+          if (success) {
+            executed++;
+            results.push(`PWM ${id[1]} kikapcsolva`);
+          }
+        }
+      }
       // pwm_set(id, value)
       else if (command.startsWith('pwm_set(')) {
         const match2 = command.match(/pwm_set\((\d+),\s*(\d+)\)/);
         if (match2) {
-          const success = executePWMCommand(match2[1], match2[2]);
+          const success = executePWMSetCommand(match2[1], match2[2]);
           if (success) {
             executed++;
-            results.push(`PWM ${match2[1]} → ${match2[2]}`);
+            results.push(`PWM ${match2[1]} -> ${match2[2]}%`);
           }
         }
       }
