@@ -565,6 +565,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
 
   // PWM/FET kimenet ertek beallitasa
   function executePWMSetCommand(pwmId, value) {
+    pwmId--; // Adjust for 0-based index
     try {
       const id = parseInt(pwmId);
       const valPercent = parseInt(value);
