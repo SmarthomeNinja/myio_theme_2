@@ -448,6 +448,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
 
   // PCA kimenet be/ki kapcsolása
   function executePCAToggleCommand(command, pcaId) {
+    pcaId--; // Adjust for 0-based index
     pcaId = parseInt(pcaId);
     try {
       if (isNaN(pcaId) || pcaId < 1) {
