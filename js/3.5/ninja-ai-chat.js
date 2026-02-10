@@ -687,12 +687,47 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     }
   }
 
+  // XML fallback: kinyeri a parancsokat ha a modell XML formatumot hasznal
+  function extractCommandsFromXML(text) {
+    const commands = [];
+    // <parameter name="command">relay_off(3)</parameter> formatum
+    const paramRegex = /<parameter\s+name="command">([^<]+)<\/parameter>/g;
+    let m;
+    while ((m = paramRegex.exec(text)) !== null) {
+      commands.push(m[1].trim());
+    }
+    // <invoke name="execute_command">...<parameter ...>relay_on(1)</parameter> formatum (command nev nelkul)
+    if (commands.length === 0) {
+      const invokeRegex = /<invoke[^>]*>[\s\S]*?<parameter[^>]*>([^<]+)<\/parameter>[\s\S]*?<\/invoke>/g;
+      while ((m = invokeRegex.exec(text)) !== null) {
+        const cmd = m[1].trim();
+        // Csak ismert parancsokat fogadjunk el
+        if (/^(relay_on|relay_off|pca_on|pca_off|pca_set|pwm_on|pwm_off|pwm_set)\(/.test(cmd)) {
+          commands.push(cmd);
+        }
+      }
+    }
+    return commands;
+  }
+
   // Parse and execute commands from AI response
   function executeCommandsFromResponse(text) {
     const commandRegex = /\[COMMAND\]([^\[]*?)\[\/COMMAND\]/g;
     let match;
     let executed = 0;
     const results = [];
+
+    // Ellenorizzuk, hogy van-e [COMMAND] tag - ha nincs, XML fallback
+    const hasCommandTags = /\[COMMAND\]/.test(text);
+    if (!hasCommandTags && /<(?:function_calls|invoke|parameter)/.test(text)) {
+      const xmlCommands = extractCommandsFromXML(text);
+      if (xmlCommands.length > 0) {
+        console.log('Ninja: XML formatum eszlelve, konvertalas [COMMAND] formatumra');
+        // Atkonvertalas [COMMAND] formatumra es ujra feldolgozas
+        const converted = xmlCommands.map(cmd => `[COMMAND]${cmd}[/COMMAND]`).join('\n');
+        return executeCommandsFromResponse(converted);
+      }
+    }
 
     while ((match = commandRegex.exec(text)) !== null) {
       const command = match[1].trim();
