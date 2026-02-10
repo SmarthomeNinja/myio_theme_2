@@ -446,59 +446,162 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     return false;
   }
 
-  // Execute PWM command - JAVÍTOTT VERZIÓ
-  function executePWMCommand(pwmId, value) {
+  // PCA kimenet be/ki kapcsolása
+  function executePCAToggleCommand(command, pcaId) {
+    pcaId = parseInt(pcaId);
     try {
-      const id = parseInt(pwmId);
-      const val = parseInt(value);
-
-      if (isNaN(id) || id < 1 || id > 16) {
-        showToast(`❌ Érvénytelen PWM ID: ${id}`);
-        return false;
-      }
-      if (isNaN(val) || val < 0 || val > 255) {
-        showToast(`❌ Érvénytelen PWM érték: ${val} (0-255 között kell lennie)`);
+      if (isNaN(pcaId) || pcaId < 1) {
+        showToast(`Ervenytelen PCA ID: ${pcaId}`);
         return false;
       }
 
-      // Használjuk a MyIOLive.sendCommand-ot ha elérhető
+      const action = command === 'on' ? 'PCA_ON' : 'PCA_OFF';
+
       if (typeof MyIOLive !== 'undefined' && MyIOLive.sendCommand) {
-        MyIOLive.sendCommand(`PCA*${id}=${val}`, true);
-        console.log(`✅ Ninja: PWM ${id} = ${val} parancs elküldve`);
+        MyIOLive.sendCommand(`${action}=${pcaId}`, true);
+        console.log(`Ninja: PCA ${pcaId} ${action} parancs elkulve`);
+        return true;
+      } else if (typeof changed === 'function') {
+        const fakeButton = { name: action, value: pcaId };
+        changed(fakeButton, fakeButton.name, 1, true);
         return true;
       } else {
-        // Fallback: changed() funkció használata
-        console.log('MyIOLive nem elérhető, changed() használata');
-        
-        if (typeof changed === 'function') {
-          const fakeInput = {
-            name: `PCA*${id}`,
-            value: val
-          };
-          changed(fakeInput, fakeInput.name, 1, true);
-          return true;
-        } else {
-          // Utolsó fallback: közvetlen HTTP kérés
-          const xhr = new XMLHttpRequest();
-          xhr.open('GET', `/data?PCA*${id}=${val}`, true);
-          xhr.onload = function() {
-            if (xhr.status === 200) {
-              console.log(`✅ Ninja: PWM ${id} = ${val} sikeres`);
-              if (typeof PCA !== 'undefined') {
-                PCA[id - 1] = val;
-              }
-            }
-          };
-          xhr.send();
-          return true;
-        }
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `${host}data?${action}=${pcaId}`, true);
+        xhr.send();
+        return true;
       }
     } catch (error) {
-      console.error('PWM command error:', error);
-      showToast(`❌ PWM parancs hiba: ${error.message}`);
+      console.error('PCA toggle command error:', error);
+      showToast(`PCA parancs hiba: ${error.message}`);
       return false;
     }
-    return false;
+  }
+
+  // PCA kimenet ertek beallitasa (csak mixer-es eszkozokon)
+  function executePCASetCommand(pcaId, value) {
+    try {
+      const id = parseInt(pcaId);
+      const valPercent = parseInt(value);
+
+      if (isNaN(id) || id < 1) {
+        showToast(`Ervenytelen PCA ID: ${id}`);
+        return false;
+      }
+      if (isNaN(valPercent) || valPercent < 0 || valPercent > 100) {
+        showToast(`Ervenytelen PCA ertek: ${valPercent} (0-100 kozott kell lennie)`);
+        return false;
+      }
+
+      // Mixer flag ellenorzese
+      if (typeof PCA_Mixer !== 'undefined' && PCA_Mixer[id - 1] != 1) {
+        showToast(`PCA ${id} nem rendelkezik mixer kepesseggel`);
+        return false;
+      }
+
+      // Szazalekbol 0-255 konverzio
+      const val255 = Math.round(valPercent * 2.55);
+
+      if (typeof MyIOLive !== 'undefined' && MyIOLive.sendCommand) {
+        MyIOLive.sendCommand(`PCA*${id}=${val255}`, true);
+        console.log(`Ninja: PCA ${id} = ${val255} (${valPercent}%) parancs elkulve`);
+        return true;
+      } else if (typeof changed === 'function') {
+        const fakeInput = { name: `PCA*${id}`, value: val255 };
+        changed(fakeInput, fakeInput.name, 1, true);
+        return true;
+      } else {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `${host}data?PCA*${id}=${val255}`, true);
+        xhr.onload = function() {
+          if (xhr.status === 200 && typeof PCA !== 'undefined') {
+            PCA[id - 1] = val255;
+          }
+        };
+        xhr.send();
+        return true;
+      }
+    } catch (error) {
+      console.error('PCA set command error:', error);
+      showToast(`PCA set parancs hiba: ${error.message}`);
+      return false;
+    }
+  }
+
+  // PWM/FET kimenet be/ki kapcsolasa
+  function executePWMToggleCommand(command, pwmId) {
+    pwmId = parseInt(pwmId);
+    try {
+      if (isNaN(pwmId) || pwmId < 1) {
+        showToast(`Ervenytelen PWM ID: ${pwmId}`);
+        return false;
+      }
+
+      const action = command === 'on' ? 'f_ON' : 'f_OFF';
+
+      if (typeof MyIOLive !== 'undefined' && MyIOLive.sendCommand) {
+        MyIOLive.sendCommand(`${action}=${pwmId}`, true);
+        console.log(`Ninja: PWM ${pwmId} ${action} parancs elkulve`);
+        return true;
+      } else if (typeof changed === 'function') {
+        const fakeButton = { name: action, value: pwmId };
+        changed(fakeButton, fakeButton.name, 1, true);
+        return true;
+      } else {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `${host}data?${action}=${pwmId}`, true);
+        xhr.send();
+        return true;
+      }
+    } catch (error) {
+      console.error('PWM toggle command error:', error);
+      showToast(`PWM parancs hiba: ${error.message}`);
+      return false;
+    }
+  }
+
+  // PWM/FET kimenet ertek beallitasa
+  function executePWMSetCommand(pwmId, value) {
+    try {
+      const id = parseInt(pwmId);
+      const valPercent = parseInt(value);
+
+      if (isNaN(id) || id < 1) {
+        showToast(`Ervenytelen PWM ID: ${id}`);
+        return false;
+      }
+      if (isNaN(valPercent) || valPercent < 0 || valPercent > 100) {
+        showToast(`Ervenytelen PWM ertek: ${valPercent} (0-100 kozott kell lennie)`);
+        return false;
+      }
+
+      // Szazalekbol 0-255 konverzio
+      const val255 = Math.round(valPercent * 2.55);
+
+      if (typeof MyIOLive !== 'undefined' && MyIOLive.sendCommand) {
+        MyIOLive.sendCommand(`fet*${id}=${val255}`, true);
+        console.log(`Ninja: PWM/FET ${id} = ${val255} (${valPercent}%) parancs elkulve`);
+        return true;
+      } else if (typeof changed === 'function') {
+        const fakeInput = { name: `fet*${id}`, value: val255 };
+        changed(fakeInput, fakeInput.name, 1, true);
+        return true;
+      } else {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', `${host}data?fet*${id}=${val255}`, true);
+        xhr.onload = function() {
+          if (xhr.status === 200 && typeof fet !== 'undefined') {
+            fet[id - 1] = val255;
+          }
+        };
+        xhr.send();
+        return true;
+      }
+    } catch (error) {
+      console.error('PWM set command error:', error);
+      showToast(`PWM set parancs hiba: ${error.message}`);
+      return false;
+    }
   }
 
   // Parse and execute commands from AI response
