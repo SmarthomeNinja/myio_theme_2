@@ -41,7 +41,7 @@ Ha a felhasználó eszközöket szeretne beállítani, adj ki parancsokat a vál
 
 FONTOS SZABÁLYOK:
 - A pca_set() parancsot CSAK azoknál a PCA eszközöknél használd, amelyeknél a kontextusban "mixer: true" szerepel!
-- Ha egy PCA eszköznek nincs mixer képessége, csak pca_on()/pca_off() parancsokat használj!
+- Ha egy PCA eszköznek nincs pwm képessége, csak pca_on()/pca_off() parancsokat használj!
 - Az értékek 0-100 közöttiek (százalék)!
 
 MÁSNYELVI TÁMOGATÁS:
@@ -481,7 +481,6 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
 
   // PCA kimenet ertek beallitasa (csak mixer-es eszkozokon)
   function executePCASetCommand(pcaId, value) {  
-    console.log(`executePCASetCommand called with PCA ID: ${pcaId}, value: ${value}`);
     pcaId--; // Adjust for 0-based index
     try {
       const id = parseInt(pcaId);
@@ -498,8 +497,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       }
 
       // Mixer flag ellenorzese
-      console.log('PCA_PWM:', typeof PCA_Mixer !== 'undefined' ? PCA_Mixer : 'nincs PCA_Mixer');
-      if (typeof PCA_Mixer != 'undefined' && PCA_Mixer[id] != 1) {
+      if (typeof PCA_PWM != 'undefined' && PCA_PWM[id] != 1) {
         showToast(`PCA ${id} nem rendelkezik mixer kepesseggel`);
         return false;
       }
