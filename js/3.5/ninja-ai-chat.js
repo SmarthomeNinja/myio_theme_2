@@ -915,8 +915,11 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       // Execute commands from response FIRST
       const execution = executeCommandsFromResponse(assistantMessage);
       
-      // Clean message for display (remove command tags)
-      const displayMessage = assistantMessage.replace(/\[COMMAND\][^\[]*?\[\/COMMAND\]/g, '').trim();
+      // Clean message for display (remove command tags + XML fallback tags)
+      let displayMessage = assistantMessage.replace(/\[COMMAND\][^\[]*?\[\/COMMAND\]/g, '').trim();
+      // XML formatum takaritasa is
+      displayMessage = displayMessage.replace(/<function_calls>[\s\S]*?<\/function_calls>/g, '').trim();
+      displayMessage = displayMessage.replace(/<\/?(?:invoke|parameter|function_calls)[^>]*>/g, '').trim();
       
       // Add assistant response (without command tags)
       addMessage(displayMessage, false);
