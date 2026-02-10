@@ -497,7 +497,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       }
 
       // Mixer flag ellenorzese
-      if (typeof PCA_Mixer !== 'undefined' && PCA_Mixer[id - 1] != 1) {
+      if (typeof PCA_Mixer !== 'undefined' && PCA_Mixer[id] != 1) {
         showToast(`PCA ${id} nem rendelkezik mixer kepesseggel`);
         return false;
       }
