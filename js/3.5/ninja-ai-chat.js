@@ -498,7 +498,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       }
 
       // Mixer flag ellenorzese
-      console.log('PCA_Mixer:', typeof PCA_Mixer !== 'undefined' ? PCA_Mixer : 'nincs PCA_Mixer');
+      console.log('PCA_PWM:', typeof PCA_Mixer !== 'undefined' ? PCA_Mixer : 'nincs PCA_Mixer');
       if (typeof PCA_Mixer != 'undefined' && PCA_Mixer[id] != 1) {
         showToast(`PCA ${id} nem rendelkezik mixer kepesseggel`);
         return false;
