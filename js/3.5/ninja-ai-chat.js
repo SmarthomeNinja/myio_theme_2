@@ -492,12 +492,12 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     return context;
   }
 
-  // Execute relay command - JAVÍTOTT VERZIÓ
+  // Execute relay command
+  // relayId: 1-bazisu (megegyezik a szerver altal vart ertekkel)
   function executeRelayCommand(command, relayId) {
-    relayId--; // Adjust for 0-based index
     try {
       const id = parseInt(relayId);
-      if (isNaN(id) || id < 0 || id >= relays.length) {
+      if (isNaN(id) || id < 1) {
         showToast(`❌ Érvénytelen relé ID: ${id}`);
         return false;
       }
