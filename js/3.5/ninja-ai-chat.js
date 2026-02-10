@@ -880,11 +880,11 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       // Get device context
       const deviceContext = getDeviceContext();
       
-      // Build context message for first user message
+      // Kontextus mindig csatolva az uzenethez (friss eszkoz allapotok, zonak, megjegyzesek)
       let contextMessage = message;
       const hasDevices = deviceContext.relays.length > 0 || deviceContext.pca.length > 0 || deviceContext.pwm.length > 0 || deviceContext.sensors.length > 0;
-      if (conversationHistory.length === 1 && hasDevices) {
-        contextMessage = `Rendszer kontextus:\n`;
+      if (hasDevices) {
+        contextMessage = `[Rendszer kontextus - aktualis eszkoz allapotok]\n`;
         if (deviceContext.zones && deviceContext.zones.length > 0) {
           contextMessage += `Elerheto zonak: ${JSON.stringify(deviceContext.zones)}\n`;
         }
@@ -901,8 +901,8 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
           contextMessage += `Szenzorok: ${JSON.stringify(deviceContext.sensors)}\n`;
         }
         contextMessage += `\nFelhasznalo kerdese: ${message}`;
-        
-        // Update last message with context
+
+        // Az utolso user uzenetet frissitjuk kontextussal
         conversationHistory[conversationHistory.length - 1].content = contextMessage;
       }
       
