@@ -351,7 +351,21 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     return meta;
   }
 
+  // RW ertek dekodolasa (ha myioUtils elerheto, hasznaljuk, kulonben fallback)
+  function decodeRWValue(rawVal) {
+    if (window.myioUtils && window.myioUtils.decodeRW) {
+      return window.myioUtils.decodeRW(rawVal);
+    }
+    // Fallback dekodolas: RW ertek = read*10000 + write*1000 + val (0-255)
+    const val = rawVal % 1000;
+    const write = Math.floor(rawVal / 1000) % 10;
+    const read = Math.floor(rawVal / 10000) % 10;
+    return { read, write, val };
+  }
+
   // Get device context for AI
+  // FONTOS: A description tombok 1-bazisuak, az ertek tombok 0-bazisuak!
+  // PCA_description[d] <-> PCA[d-1], cardId = pca:${d}, server parancs = d
   function getDeviceContext() {
     const context = {
       relays: [],
@@ -361,7 +375,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       zones: []
     };
 
-    // Elérhető zónák listája
+    // Elerheto zonak listaja
     if (window.myioStorage) {
       const allZones = window.myioStorage.loadZones();
       if (allZones.length > 0) {
@@ -369,101 +383,109 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       }
     }
 
-    // Relays
+    // Relays - relay_description[d] <-> relays[d-1], cardId relay:${d}
     if (typeof relay_description !== 'undefined' && typeof relays !== 'undefined') {
-      for (let i = 0; i < relay_description.length; i++) {
-        if (relay_description[i]) {
-          const cardId = `relay:${i + 1}`;
-          const meta = getCardMeta(cardId);
-          const entry = {
-            id: i + 1,
-            name: meta.customName || relay_description[i],
-            state: relays[i] == 11 ? 'be' : 'ki'
-          };
-          if (meta.zones && meta.zones.length) entry.zones = meta.zones;
-          if (meta.note) entry.note = meta.note;
-          context.relays.push(entry);
-        }
+      for (let d = 1; d < relay_description.length; d++) {
+        if (!relay_description[d]) continue;
+        const rawVal = relays[d - 1];
+        if (rawVal === 0 || rawVal === undefined) continue;
+        const cardId = `relay:${d}`;
+        const meta = getCardMeta(cardId);
+        const isOn = (rawVal === 11 || rawVal === 101 || rawVal === 111);
+        const entry = {
+          id: d,
+          name: meta.customName || relay_description[d],
+          state: isOn ? 'be' : 'ki'
+        };
+        if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+        if (meta.note) entry.note = meta.note;
+        context.relays.push(entry);
       }
     }
 
-    // PCA kimenetek
+    // PCA kimenetek - PCA_description[d] <-> PCA[d-1], cardId pca:${d}
     if (typeof PCA_description !== 'undefined' && typeof PCA !== 'undefined') {
       const hasPWM = typeof PCA_PWM !== 'undefined';
-      for (let i = 0; i < PCA_description.length; i++) {
-        if (PCA_description[i]) {
-          const cardId = `pca:${i + 1}`;
-          const meta = getCardMeta(cardId);
-          const val255 = PCA[i] !== undefined ? PCA[i] : 0;
-          const entry = {
-            id: i + 1,
-            name: meta.customName || PCA_description[i],
-            state: val255 > 0 ? 'be' : 'ki',
-            value: Math.round(val255 / 2.55),
-            PWM: hasPWM && PCA_PWM[i] == 1
-          };
-          if (meta.zones && meta.zones.length) entry.zones = meta.zones;
-          if (meta.note) entry.note = meta.note;
-          context.pca.push(entry);
-        }
+      const hasThermoAct = typeof PCA_thermoActivator !== 'undefined';
+      for (let d = 1; d < PCA_description.length; d++) {
+        if (!PCA_description[d]) continue;
+        const rawVal = PCA[d - 1];
+        if (rawVal === undefined) continue;
+        // Thermo-aktivalt PCA-kat kihagyjuk (kiveve sunrise=255)
+        if (hasThermoAct && PCA_thermoActivator[d - 1] !== 0 && PCA_thermoActivator[d - 1] !== 255) continue;
+        const decoded = decodeRWValue(rawVal);
+        if (!decoded.read && !decoded.write) continue;
+        const cardId = `pca:${d}`;
+        const meta = getCardMeta(cardId);
+        const isOn = decoded.val > 0 && decoded.read === 1;
+        const entry = {
+          id: d,
+          name: meta.customName || PCA_description[d],
+          state: isOn ? 'be' : 'ki',
+          value: Math.round(decoded.val / 2.55),
+          PWM: hasPWM && PCA_PWM[d - 1] == 1
+        };
+        if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+        if (meta.note) entry.note = meta.note;
+        context.pca.push(entry);
       }
     }
 
-    // PWM/FET kimenetek
+    // PWM/FET kimenetek - fet_description[d] <-> fet[d-1], cardId fet:${d}
     if (typeof fet_description !== 'undefined' && typeof fet !== 'undefined') {
-      for (let i = 0; i < fet_description.length; i++) {
-        if (fet_description[i]) {
-          const cardId = `fet:${i + 1}`;
-          const meta = getCardMeta(cardId);
-          const val255 = fet[i] !== undefined ? fet[i] : 0;
-          const entry = {
-            id: i + 1,
-            name: meta.customName || fet_description[i],
-            state: val255 > 0 ? 'be' : 'ki',
-            value: Math.round(val255 / 2.55)
-          };
-          if (meta.zones && meta.zones.length) entry.zones = meta.zones;
-          if (meta.note) entry.note = meta.note;
-          context.pwm.push(entry);
-        }
+      for (let d = 1; d < fet_description.length; d++) {
+        if (!fet_description[d]) continue;
+        const rawVal = fet[d - 1];
+        if (rawVal === undefined) continue;
+        const decoded = decodeRWValue(rawVal);
+        if (!decoded.read && !decoded.write) continue;
+        const cardId = `fet:${d}`;
+        const meta = getCardMeta(cardId);
+        const isOn = decoded.val > 0 && decoded.read === 1;
+        const entry = {
+          id: d,
+          name: meta.customName || fet_description[d],
+          state: isOn ? 'be' : 'ki',
+          value: Math.round(decoded.val / 2.55)
+        };
+        if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+        if (meta.note) entry.note = meta.note;
+        context.pwm.push(entry);
       }
     }
 
-    // Sensors - homerseklet
-    if (typeof thermo_description !== 'undefined' && typeof temperature !== 'undefined') {
-      for (let i = 0; i < thermo_description.length; i++) {
-        if (thermo_description[i] && temperature[i] !== undefined) {
-          const cardId = `sensors:thermo:${i + 1}`;
-          const meta = getCardMeta(cardId);
-          const entry = {
-            id: i + 1,
-            name: meta.customName || thermo_description[i],
-            type: 'homerseklet',
-            value: temperature[i] + ' C'
-          };
-          if (meta.zones && meta.zones.length) entry.zones = meta.zones;
-          if (meta.note) entry.note = meta.note;
-          context.sensors.push(entry);
-        }
+    // Sensors - homerseklet (thermo_eepromIndex alapu indexeles)
+    if (typeof thermo_eepromIndex !== 'undefined' && typeof thermo_temps !== 'undefined' && typeof thermo_description !== 'undefined') {
+      for (let i = 0; i < thermo_eepromIndex.length; i++) {
+        const idx = thermo_eepromIndex[i];
+        if (idx === 0 || !thermo_description[idx]) continue;
+        const cardId = `sensors:thermo:${idx}`;
+        const meta = getCardMeta(cardId);
+        const entry = {
+          name: meta.customName || thermo_description[idx],
+          type: 'homerseklet',
+          value: (thermo_temps[i] / 100) + ' °C'
+        };
+        if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+        if (meta.note) entry.note = meta.note;
+        context.sensors.push(entry);
       }
     }
 
-    // Sensors - paratartalom
+    // Sensors - paratartalom (0-bazisu)
     if (typeof hum_description !== 'undefined' && typeof humidity !== 'undefined') {
-      for (let i = 0; i < hum_description.length; i++) {
-        if (hum_description[i] && humidity[i] !== undefined) {
-          const cardId = `sensors:hum:${i}`;
-          const meta = getCardMeta(cardId);
-          const entry = {
-            id: i + 1,
-            name: meta.customName || hum_description[i],
-            type: 'paratartalom',
-            value: humidity[i] + ' %'
-          };
-          if (meta.zones && meta.zones.length) entry.zones = meta.zones;
-          if (meta.note) entry.note = meta.note;
-          context.sensors.push(entry);
-        }
+      for (let i = 0; i < humidity.length; i++) {
+        if (humidity[i] === 0 || !hum_description[i]) continue;
+        const cardId = `sensors:hum:${i}`;
+        const meta = getCardMeta(cardId);
+        const entry = {
+          name: meta.customName || hum_description[i],
+          type: 'paratartalom',
+          value: (humidity[i] / 10) + ' %'
+        };
+        if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+        if (meta.note) entry.note = meta.note;
+        context.sensors.push(entry);
       }
     }
 
