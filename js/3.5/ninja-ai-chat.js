@@ -743,18 +743,22 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       
       // Build context message for first user message
       let contextMessage = message;
-      if (conversationHistory.length === 1 && (deviceContext.relays.length > 0 || deviceContext.pwm.length > 0 || deviceContext.sensors.length > 0)) {
+      const hasDevices = deviceContext.relays.length > 0 || deviceContext.pca.length > 0 || deviceContext.pwm.length > 0 || deviceContext.sensors.length > 0;
+      if (conversationHistory.length === 1 && hasDevices) {
         contextMessage = `Rendszer kontextus:\n`;
         if (deviceContext.relays.length > 0) {
-          contextMessage += `Relék: ${JSON.stringify(deviceContext.relays)}\n`;
+          contextMessage += `Relek: ${JSON.stringify(deviceContext.relays)}\n`;
+        }
+        if (deviceContext.pca.length > 0) {
+          contextMessage += `PCA kimenetek: ${JSON.stringify(deviceContext.pca)}\n`;
         }
         if (deviceContext.pwm.length > 0) {
-          contextMessage += `PWM eszközök: ${JSON.stringify(deviceContext.pwm)}\n`;
+          contextMessage += `PWM/FET kimenetek: ${JSON.stringify(deviceContext.pwm)}\n`;
         }
         if (deviceContext.sensors.length > 0) {
           contextMessage += `Szenzorok: ${JSON.stringify(deviceContext.sensors)}\n`;
         }
-        contextMessage += `\nFelhasználó kérdése: ${message}`;
+        contextMessage += `\nFelhasznalo kerdese: ${message}`;
         
         // Update last message with context
         conversationHistory[conversationHistory.length - 1].content = contextMessage;
