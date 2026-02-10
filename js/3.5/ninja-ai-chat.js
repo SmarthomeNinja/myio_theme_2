@@ -480,10 +480,10 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   }
 
   // PCA kimenet ertek beallitasa (csak mixer-es eszkozokon)
-  function executePCASetCommand(pcaId, value) {
-    pcaId--; // Adjust for 0-based index
+  function executePCASetCommand(pcaId, value) {    
     try {
       const id = parseInt(pcaId);
+      id--; // Adjust for 0-based index
       const valPercent = parseInt(value);
 
       if (isNaN(id) || id < 1) {
