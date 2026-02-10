@@ -360,7 +360,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     relayId--; // Adjust for 0-based index
     try {
       const id = parseInt(relayId);
-      if (isNaN(id) || id < 1 || id > sizeof(relays)) {
+      if (isNaN(id) || id < 0 || id > sizeof(relays)) {
         showToast(`❌ Érvénytelen relé ID: ${id}`);
         return false;
       }
