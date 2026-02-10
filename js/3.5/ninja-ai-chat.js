@@ -631,9 +631,9 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   }
 
   // PWM/FET kimenet be/ki kapcsolasa
-  function executePWMToggleCommand(command, pwmId) {    
+  // pwmId: 1-bazisu (megegyezik a szerver altal vart ertekkel)
+  function executePWMToggleCommand(command, pwmId) {
     pwmId = parseInt(pwmId);
-    pwmId--; // Adjust for 0-based index
     try {
       if (isNaN(pwmId) || pwmId < 1) {
         showToast(`Ervenytelen PWM ID: ${pwmId}`);
