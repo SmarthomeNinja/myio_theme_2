@@ -307,24 +307,64 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     return div.innerHTML.replace(/\n/g, '<br>');
   }
 
+  // Zóna- és megjegyzés adatok kiolvasása egy cardId-hoz
+  function getCardMeta(cardId) {
+    const meta = {};
+    if (!window.myioStorage) return meta;
+
+    // Egyéni név
+    const customName = window.myioStorage.loadCardName(cardId);
+    if (customName) meta.customName = customName;
+
+    // Zónák (nevek)
+    const zoneIds = window.myioStorage.getCardZones(cardId);
+    if (zoneIds && zoneIds.length > 0) {
+      const allZones = window.myioStorage.loadZones();
+      meta.zones = zoneIds.map(zId => {
+        const z = allZones.find(x => x.id === zId);
+        return z ? z.name : null;
+      }).filter(Boolean);
+    }
+
+    // Megjegyzés
+    const note = window.myioStorage.loadCardNote(cardId);
+    if (note) meta.note = note;
+
+    return meta;
+  }
+
   // Get device context for AI
   function getDeviceContext() {
     const context = {
       relays: [],
       sensors: [],
       pca: [],
-      pwm: []
+      pwm: [],
+      zones: []
     };
+
+    // Elérhető zónák listája
+    if (window.myioStorage) {
+      const allZones = window.myioStorage.loadZones();
+      if (allZones.length > 0) {
+        context.zones = allZones.map(z => z.name);
+      }
+    }
 
     // Relays
     if (typeof relay_description !== 'undefined' && typeof relays !== 'undefined') {
       for (let i = 0; i < relay_description.length; i++) {
         if (relay_description[i]) {
-          context.relays.push({
+          const cardId = `relay:${i + 1}`;
+          const meta = getCardMeta(cardId);
+          const entry = {
             id: i + 1,
-            name: relay_description[i],
+            name: meta.customName || relay_description[i],
             state: relays[i] == 11 ? 'be' : 'ki'
-          });
+          };
+          if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+          if (meta.note) entry.note = meta.note;
+          context.relays.push(entry);
         }
       }
     }
@@ -334,14 +374,19 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       const hasPWM = typeof PCA_PWM !== 'undefined';
       for (let i = 0; i < PCA_description.length; i++) {
         if (PCA_description[i]) {
+          const cardId = `pca:${i + 1}`;
+          const meta = getCardMeta(cardId);
           const val255 = PCA[i] !== undefined ? PCA[i] : 0;
-          context.pca.push({
+          const entry = {
             id: i + 1,
-            name: PCA_description[i],
+            name: meta.customName || PCA_description[i],
             state: val255 > 0 ? 'be' : 'ki',
             value: Math.round(val255 / 2.55),
             PWM: hasPWM && PCA_PWM[i] == 1
-          });
+          };
+          if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+          if (meta.note) entry.note = meta.note;
+          context.pca.push(entry);
         }
       }
     }
@@ -350,13 +395,18 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     if (typeof fet_description !== 'undefined' && typeof fet !== 'undefined') {
       for (let i = 0; i < fet_description.length; i++) {
         if (fet_description[i]) {
+          const cardId = `fet:${i + 1}`;
+          const meta = getCardMeta(cardId);
           const val255 = fet[i] !== undefined ? fet[i] : 0;
-          context.pwm.push({
+          const entry = {
             id: i + 1,
-            name: fet_description[i],
+            name: meta.customName || fet_description[i],
             state: val255 > 0 ? 'be' : 'ki',
             value: Math.round(val255 / 2.55)
-          });
+          };
+          if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+          if (meta.note) entry.note = meta.note;
+          context.pwm.push(entry);
         }
       }
     }
@@ -365,12 +415,17 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     if (typeof thermo_description !== 'undefined' && typeof temperature !== 'undefined') {
       for (let i = 0; i < thermo_description.length; i++) {
         if (thermo_description[i] && temperature[i] !== undefined) {
-          context.sensors.push({
+          const cardId = `sensors:thermo:${i + 1}`;
+          const meta = getCardMeta(cardId);
+          const entry = {
             id: i + 1,
-            name: thermo_description[i],
+            name: meta.customName || thermo_description[i],
             type: 'homerseklet',
             value: temperature[i] + ' C'
-          });
+          };
+          if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+          if (meta.note) entry.note = meta.note;
+          context.sensors.push(entry);
         }
       }
     }
@@ -379,12 +434,17 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     if (typeof hum_description !== 'undefined' && typeof humidity !== 'undefined') {
       for (let i = 0; i < hum_description.length; i++) {
         if (hum_description[i] && humidity[i] !== undefined) {
-          context.sensors.push({
+          const cardId = `sensors:hum:${i}`;
+          const meta = getCardMeta(cardId);
+          const entry = {
             id: i + 1,
-            name: hum_description[i],
+            name: meta.customName || hum_description[i],
             type: 'paratartalom',
             value: humidity[i] + ' %'
-          });
+          };
+          if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+          if (meta.note) entry.note = meta.note;
+          context.sensors.push(entry);
         }
       }
     }
