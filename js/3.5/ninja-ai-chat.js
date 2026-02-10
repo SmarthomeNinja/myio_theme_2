@@ -580,14 +580,13 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   }
 
   // PCA kimenet ertek beallitasa (csak PWM-es eszkozokon)
-  function executePCASetCommand(pcaId, value) {  
-    pcaId--; // Adjust for 0-based index
+  // pcaId: 1-bazisu (megegyezik a szerver altal vart ertekkel)
+  function executePCASetCommand(pcaId, value) {
     try {
       const id = parseInt(pcaId);
-      
       const valPercent = parseInt(value);
 
-      if (isNaN(id) || id < 0 || id > 1024) {
+      if (isNaN(id) || id < 1) {
         showToast(`Ervenytelen PCA ID: ${id}`);
         return false;
       }
