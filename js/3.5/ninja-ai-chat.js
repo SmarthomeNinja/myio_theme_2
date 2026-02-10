@@ -481,7 +481,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
 
   // PCA kimenet ertek beallitasa (csak mixer-es eszkozokon)
   function executePCASetCommand(pcaId, value) {  
-    id--; // Adjust for 0-based index
+    pcaId--; // Adjust for 0-based index
     try {
       const id = parseInt(pcaId);
       
