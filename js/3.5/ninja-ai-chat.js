@@ -60,7 +60,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     
     // 3. Próbáljuk betölteni a /.env fájlból
     try {
-      const response = await fetch('/.env');
+      const response = await fetch(host+'.env');
       if (response.ok) {
         const text = await response.text();
         const match = text.match(/ANTHROPIC_API_KEY\s*=\s*(.+)/);
