@@ -312,63 +312,83 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     const context = {
       relays: [],
       sensors: [],
+      pca: [],
       pwm: []
     };
-    
+
     // Relays
     if (typeof relay_description !== 'undefined' && typeof relays !== 'undefined') {
       for (let i = 0; i < relay_description.length; i++) {
         if (relay_description[i]) {
           context.relays.push({
-            id: i + 1, // ID-k 1-től kezdődnek
+            id: i + 1,
             name: relay_description[i],
             state: relays[i] == 11 ? 'be' : 'ki'
           });
         }
       }
     }
-    
-    // PWM devices (PCA)
+
+    // PCA kimenetek
     if (typeof PCA_description !== 'undefined' && typeof PCA !== 'undefined') {
+      const hasMixer = typeof PCA_Mixer !== 'undefined';
       for (let i = 0; i < PCA_description.length; i++) {
         if (PCA_description[i]) {
-          context.pwm.push({
-            id: i + 1, // ID-k 1-től kezdődnek
+          const val255 = PCA[i] !== undefined ? PCA[i] : 0;
+          context.pca.push({
+            id: i + 1,
             name: PCA_description[i],
-            value: PCA[i]
+            state: val255 > 0 ? 'be' : 'ki',
+            value: Math.round(val255 / 2.55),
+            mixer: hasMixer && PCA_Mixer[i] == 1
           });
         }
       }
     }
-    
-    // Sensors - hőmérséklet
+
+    // PWM/FET kimenetek
+    if (typeof fet_description !== 'undefined' && typeof fet !== 'undefined') {
+      for (let i = 0; i < fet_description.length; i++) {
+        if (fet_description[i]) {
+          const val255 = fet[i] !== undefined ? fet[i] : 0;
+          context.pwm.push({
+            id: i + 1,
+            name: fet_description[i],
+            state: val255 > 0 ? 'be' : 'ki',
+            value: Math.round(val255 / 2.55)
+          });
+        }
+      }
+    }
+
+    // Sensors - homerseklet
     if (typeof thermo_description !== 'undefined' && typeof temperature !== 'undefined') {
       for (let i = 0; i < thermo_description.length; i++) {
         if (thermo_description[i] && temperature[i] !== undefined) {
           context.sensors.push({
             id: i + 1,
             name: thermo_description[i],
-            type: 'hőmérséklet',
-            value: temperature[i] + ' °C'
+            type: 'homerseklet',
+            value: temperature[i] + ' C'
           });
         }
       }
     }
-    
-    // Sensors - páratartalom
+
+    // Sensors - paratartalom
     if (typeof hum_description !== 'undefined' && typeof humidity !== 'undefined') {
       for (let i = 0; i < hum_description.length; i++) {
         if (hum_description[i] && humidity[i] !== undefined) {
           context.sensors.push({
             id: i + 1,
             name: hum_description[i],
-            type: 'páratartalom',
+            type: 'paratartalom',
             value: humidity[i] + ' %'
           });
         }
       }
     }
-    
+
     return context;
   }
 
