@@ -357,10 +357,10 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
 
   // Execute relay command - JAVÍTOTT VERZIÓ
   function executeRelayCommand(command, relayId) {
-    relayId--;
+    relayId--; // Adjust for 0-based index
     try {
       const id = parseInt(relayId);
-      if (isNaN(id) || id < 1 || id > 64) {
+      if (isNaN(id) || id < 1 || id > sizeof(relays)) {
         showToast(`❌ Érvénytelen relé ID: ${id}`);
         return false;
       }
