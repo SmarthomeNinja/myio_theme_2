@@ -22,7 +22,7 @@ ELÉRHETŐ PARANCSOK:
 2. PCA kimenetek (servo, fűtés, stb.):
    - "pca_on(id)" - PCA kimenet bekapcsolása (minden PCA eszközön elérhető)
    - "pca_off(id)" - PCA kimenet kikapcsolása (minden PCA eszközön elérhető)
-   - "pca_set(id, value)" - PCA érték beállítása 0-100 között (CSAK "mixer" képes eszközökön!)
+   - "pca_set(id, value)" - PCA érték beállítása 0-100 között (CSAK "PWM" képes eszközökön!)
    Például: "pca_set(5, 75)" - 5-ös PCA eszköz 75%-ra
 
 3. PWM/FET kimenetek (LED dimmer, motor, stb.):
@@ -40,7 +40,7 @@ Ha a felhasználó eszközöket szeretne beállítani, adj ki parancsokat a vál
 [COMMAND]pwm_set(10, 50)[/COMMAND]
 
 FONTOS SZABÁLYOK:
-- A pca_set() parancsot CSAK azoknál a PCA eszközöknél használd, amelyeknél a kontextusban "mixer: true" szerepel!
+- A pca_set() parancsot CSAK azoknál a PCA eszközöknél használd, amelyeknél a kontextusban "PWM: true" szerepel!
 - Ha egy PCA eszköznek nincs pwm képessége, csak pca_on()/pca_off() parancsokat használj!
 - Az értékek 0-100 közöttiek (százalék)!
 
@@ -55,7 +55,7 @@ PROTOKOLL:
 2. Ha parancs szükséges, add ki azt [COMMAND] tagek között
 3. Mutasd meg, hogy mi történik (pl. "LED-et 50%-ra dimmelek")
 4. Kerüld a többszörös parancsokat - egyszerre max 3 parancs
-5. Ha PCA_set-et akarsz használni, ellenőrizd a mixer flag-et!
+5. Ha PCA_set-et akarsz használni, ellenőrizd a PWM flag-et!
 
 Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   };
@@ -331,7 +331,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
 
     // PCA kimenetek
     if (typeof PCA_description !== 'undefined' && typeof PCA !== 'undefined') {
-      const hasMixer = typeof PCA_Mixer !== 'undefined';
+      const hasPWM = typeof PCA_PWM !== 'undefined';
       for (let i = 0; i < PCA_description.length; i++) {
         if (PCA_description[i]) {
           const val255 = PCA[i] !== undefined ? PCA[i] : 0;
@@ -340,7 +340,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
             name: PCA_description[i],
             state: val255 > 0 ? 'be' : 'ki',
             value: Math.round(val255 / 2.55),
-            mixer: hasMixer && PCA_Mixer[i] == 1
+            PWM: hasPWM && PCA_PWM[i] == 1
           });
         }
       }
@@ -479,7 +479,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     }
   }
 
-  // PCA kimenet ertek beallitasa (csak mixer-es eszkozokon)
+  // PCA kimenet ertek beallitasa (csak PWM-es eszkozokon)
   function executePCASetCommand(pcaId, value) {  
     pcaId--; // Adjust for 0-based index
     try {
@@ -496,9 +496,9 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         return false;
       }
 
-      // Mixer flag ellenorzese
+      // PWM flag ellenorzese
       if (typeof PCA_PWM != 'undefined' && PCA_PWM[id] != 1) {
-        showToast(`PCA ${id} nem rendelkezik mixer kepesseggel`);
+        showToast(`PCA ${id} nem rendelkezik PWM kepesseggel`);
         return false;
       }
 
