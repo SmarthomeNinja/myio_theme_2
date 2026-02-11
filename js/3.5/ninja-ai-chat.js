@@ -1399,32 +1399,30 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         conversationHistory[conversationHistory.length - 1].content = contextMessage;
       }
       
-      // Call Anthropic API
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      // Provider-specifikus API hivas
+      const provider = PROVIDERS[currentProvider];
+      const endpoint = provider.getEndpoint(currentModel, apiKey);
+
+      const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: NINJA_CONFIG.modelName,
-          max_tokens: NINJA_CONFIG.maxTokens,
-          system: NINJA_CONFIG.systemPrompt,
-          messages: conversationHistory
-        })
+        headers: provider.buildHeaders(apiKey),
+        body: JSON.stringify(
+          provider.buildBody(currentModel, NINJA_CONFIG.systemPrompt, conversationHistory, NINJA_CONFIG.maxTokens)
+        )
       });
-      
+
       removeLoadingIndicator();
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `API hiba: ${response.status}`);
+        let errorMsg = 'API hiba: ' + response.status;
+        if (errorData.error?.message) errorMsg = errorData.error.message;
+        else if (errorData.error?.errors?.[0]?.message) errorMsg = errorData.error.errors[0].message;
+        throw new Error(errorMsg);
       }
-      
+
       const data = await response.json();
-      const assistantMessage = data.content[0].text;
+      const assistantMessage = provider.parseResponse(data);
       
       // Execute commands from response FIRST
       const execution = executeCommandsFromResponse(assistantMessage);
