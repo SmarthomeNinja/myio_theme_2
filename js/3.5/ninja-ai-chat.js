@@ -516,6 +516,82 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       }
     }
 
+    // Termosztatok - PCA kimenetek thermo aktivatorral
+    if (typeof PCA !== 'undefined' && typeof PCA_thermoActivator !== 'undefined') {
+      for (let i = 0; i < PCA_thermoActivator.length; i++) {
+        if (PCA_thermoActivator[i] === 0 || PCA_thermoActivator[i] === 255) continue;
+        const d = i + 1; // 1-bazisu ID
+        if (!PCA_description || !PCA_description[d]) continue;
+
+        const cardId = `thermo:pca:${d}`;
+        const meta = getCardMeta(cardId);
+        const sensor = getThermoSensorInfo(PCA_thermoActivator[i]);
+        const onVal = (typeof PCA_min_temp_ON !== 'undefined' ? (PCA_min_temp_ON[i] / 10) : 0);
+        const offVal = (typeof PCA_max_temp_OFF !== 'undefined' ? (PCA_max_temp_OFF[i] / 10) : 0);
+        const isHeating = onVal < offVal;
+        const hysteresis = Math.round(Math.abs(offVal - onVal) / 2 * 10) / 10;
+        const target = Math.round((onVal + offVal) / 2 * 10) / 10;
+
+        const rawVal = PCA[i];
+        const decoded = decodeRWValue(rawVal);
+        const isActive = decoded.val > 0 && decoded.read === 1;
+
+        const entry = {
+          type: 'pca',
+          id: d,
+          name: meta.customName || PCA_description[d],
+          sensor: sensor.name,
+          sensorValue: sensor.value + ' ' + sensor.unit,
+          onValue: onVal,
+          offValue: offVal,
+          target: target,
+          hysteresis: hysteresis,
+          mode: isHeating ? 'futes' : 'hutes',
+          isActive: isActive
+        };
+        if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+        if (meta.note) entry.note = meta.note;
+        context.thermostats.push(entry);
+      }
+    }
+
+    // Termosztatok - Relay kimenetek thermo aktivatorral
+    if (typeof relays !== 'undefined' && typeof thermoActivator !== 'undefined') {
+      for (let i = 0; i < thermoActivator.length; i++) {
+        if (thermoActivator[i] === 0 || thermoActivator[i] === 255) continue;
+        const d = i + 1;
+        if (!relay_description || !relay_description[d]) continue;
+
+        const cardId = `thermo:relay:${d}`;
+        const meta = getCardMeta(cardId);
+        const sensor = getThermoSensorInfo(thermoActivator[i]);
+        const onVal = (typeof min_temp_ON !== 'undefined' ? (min_temp_ON[i] / 10) : 0);
+        const offVal = (typeof max_temp_OFF !== 'undefined' ? (max_temp_OFF[i] / 10) : 0);
+        const isHeating = onVal < offVal;
+        const hysteresis = Math.round(Math.abs(offVal - onVal) / 2 * 10) / 10;
+        const target = Math.round((onVal + offVal) / 2 * 10) / 10;
+
+        const isOn = (relays[i] == 101 || relays[i] == 111 || relays[i] == 11);
+
+        const entry = {
+          type: 'relay',
+          id: d,
+          name: meta.customName || relay_description[d],
+          sensor: sensor.name,
+          sensorValue: sensor.value + ' ' + sensor.unit,
+          onValue: onVal,
+          offValue: offVal,
+          target: target,
+          hysteresis: hysteresis,
+          mode: isHeating ? 'futes' : 'hutes',
+          isActive: isOn
+        };
+        if (meta.zones && meta.zones.length) entry.zones = meta.zones;
+        if (meta.note) entry.note = meta.note;
+        context.thermostats.push(entry);
+      }
+    }
+
     return context;
   }
 
