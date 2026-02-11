@@ -579,6 +579,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         };
         if (meta.zones && meta.zones.length) entry.zones = meta.zones;
         if (meta.note) entry.note = meta.note;
+        console.log('Adding thermostat entry from PCA:', entry);
         context.thermostats.push(entry);
       }
     }
