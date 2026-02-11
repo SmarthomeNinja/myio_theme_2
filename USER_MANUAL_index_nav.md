@@ -171,7 +171,31 @@ A header felső sáv tartalmazza az összes főbb vezérlést és beállítást.
   • Egyéb localStorage értékek
 ```
 
-#### **f) Logout (Kilépés)**
+#### **f) AI Ninja 🥷 **
+**Cél:** Mesterséges inteligencia integrálása
+
+```
+🚪 Használat:
+  1. Kattints az "AI Ninja 🥷" gombra a menü jobb alján
+  2. Megnyílik az Ninja AI modal ablak
+  3. Az AI működéséhez meg kell adni az előfizetésed API kulcsát.
+  4. Az AI Ninja saját AI előfizetésed használja.
+  4. 3 szolgáltató modelljeit támogatja az AI Ninja : Anthropic(Claude), OpenAI(ChatGPT), Google(Gemini)
+  5. Az API kulcs a szolgáltató felületén generálható
+  6. Az API kulcs és a modell váltása később a fogaskerék ikon (⚙) segítségével módosítható
+  7. Az AI Ninja hozzáfér a szerver álltal kezelt kártyákhoz, lekérdezheti, módosíthatja állapotukat.
+
+🔐 Biztonsági megjegyzés:
+  • Az API kulcs a böngészőben kerül letárolásra a localStorage-ben.
+  • Amennyiben nem szeretnéd, hogy a böngésződ tárolja az API kulcsot, saját szerveren kell futtatnod a témát és oda feltöltheted a .env nevü file-ba az API kulcsot a következő formában a szolgáltatótól függően:
+    • ANTHROPIC_API_KEY= API-KEY
+    • OPENAI_API_KEY= API-KEY
+    • GOOGLE_API_KEY= API-KEY
+```
+
+---
+
+#### **g) Logout (Kilépés)**
 **Cél:** Felhasználó kijelentkeztetése
 
 ```
@@ -232,31 +256,45 @@ Az index.js modul felépíti és kezeli a kártyákat tartalmazó dashboard-ot.
 
 ### 3. Kártyák Kezelése
 
-#### **Kattintás**
+#### **Kattintás az elnevezésre**
 ```
 🖱️ Egyszerű kattintás:
-  • Kapcsoló (Relé): Be/Ki váltás
-  • Termosztát/Szenzor: Részletes nézet megnyitása
-  • Szenzor + hosszú kattintás → Grafikon (Chart) megnyitása
+  • Kimenetek: Be/Ki kapcsolás
+  • Szenzor: → Grafikon (Chart) megnyitása
 ```
 
 #### **Hosszú Kattintás (Long Press)**
 ```
-🖱️ Hosszú nyomás (2-3 másodperc):
-  • Megnyitja a kártya "Beállítások" modalt
-  • Módosítható: Név, típus, CSS osztály stb.
+🖱️ Hosszú nyomás (0.5 másodperc):
+  • Megnyitja a kártya "Beállítások" modal ablakot
+  • Módosítható: Név (csak a böngészőben), zóna, ikon, megjegyzés
   • A módosítások localStorage-ban mentődnek
+```
+
+#### **Szenzor kártya -> Grafikon Modal Ablak**
+```
+🖱️ Egyszerű kattintás a Szenzor kártya elnevezésén:
+  • Megnyitja a kártyához tartozó grafikon modal ablakot
+  • Alapból az aktuális naphoz tartozó grafikon nyílik meg
+  • A grafikon Zoomolható
+  • A Betöltés szekcióban hozzáadhatóak további adatok a grafikonhoz
+    • Ugyan azon szenzorhoz tartozó korábbi napok
+    • Másik Szenzor adatai összehasonlítás végett
+    • Azonos szenzorokhoz azonos színeket rendel
+  • Kimenetek szekció:
+    • Ha talál olyan kimenetet, amit az adott szenzor vezérel, 
 ```
 
 #### **Drag & Drop (Áthelyezés)**
 ```
 🔄 Szekciók sorrendje:
   • Szekciókat el lehet mozgatni egymáshoz képest
-  • Hosszú nyomás → húzás → elengedés
+  • jobb oldalt burger ikon, hosszú nyomás → húzás → elengedés
 
 🔄 Kártyák sorrendje szekción belül:
   • Kártyákat el lehet mozgatni a szekción belül
-  • Vagy más szekciókba áthelyezhető
+  • Más szekciókba nem helyezhető át
+  • A kártya egy üres helyén hosszú nyomás → húzás → elengedés
   • Az új sorrend localStorage-ban mentődik
 
 💾 Perzisztencia:
