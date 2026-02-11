@@ -290,21 +290,15 @@ Az index.js modul felépíti és kezeli a kártyákat tartalmazó dashboard-ot.
     • Erre az elnevezésre nyomva értéke vizuálisan módosítható. 
 ```
 
-#### **Termosztát kártya -> Grafikon Modal Ablak**
+#### **Termosztát kártya**
 ```
-🖱️ Egyszerű kattintás a Szenzor kártya elnevezésén:
-  • Megnyitja a kártyához tartozó grafikon modal ablakot
-  • Alapból az aktuális naphoz tartozó grafikon nyílik meg
-  • A grafikon Zoomolható
-  • A Betöltés szekcióban hozzáadhatóak további adatok a grafikonhoz
-    • Ugyan azon szenzorhoz tartozó korábbi napok
-    • Másik Szenzor adatai összehasonlítás végett
-    • Azonos szenzorokhoz azonos színeket rendel
-  • Kimenetek szekció:
-    • Ha talál olyan kimenetet, amit az adott szenzor vezérel, azok ki és bekapcsolási értékeit kilistázza
-    • Az egyes kimenetek megjelenítése a grafikonon ki-be kapcslolható.
-    • A grafikonon megjelenített ki-bekapcsolási érték, vízszintes szaggatott vonallal jelenik meg, jobb oldalán az elnevezéssel.
-    • Erre az elnevezésre nyomva értéke vizuálisan módosítható. 
+  • A kártya alján található +,- gombok 0.1 Celsius fokkal állítják fel, vagy le a középhömérsékletet.
+  • A a kártya kék vagy piros színe utal a hűtés, fűtés üzemre. 
+    • Ha a kikapcsolási érték nagyobb a bekapcsolási értéknél, akkor fűtés üzem (Piros)
+    • Ha a kikapcsolási érték kissebb a bekapcsolási értéknél, akkor hűtés üzem (Kék)
+  • Az íven található két kör jellemzi a ki és bekapcsolási értéket.
+    • A bekapcsolási érték a színes, a kikapcsolási érték a szürke.
+    • Minél közelebb vannak a körök egymáshoz annál kissebb a hiszterézis, minél távolabb vannak, annál nagyobb.
 ```
 
 #### **Drag & Drop (Áthelyezés)**
