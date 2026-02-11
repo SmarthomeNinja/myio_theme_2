@@ -342,7 +342,7 @@ function buildHeader() {
 			const selectBtn = document.createElement("button");
 			selectBtn.type = "button";
 			selectBtn.style.cssText = `
-				background: #0066cc;
+				background: ${isActive ? '#00aa00' : '#0066cc'};
 				color: #fff;
 				border: none;
 				border-radius: 6px;
@@ -354,16 +354,20 @@ function buildHeader() {
 				flex-shrink: 0;
 				transition: background 0.2s;
 			`;
-			selectBtn.textContent = typeof str_Select !== "undefined" ? str_Select : "Kiválaszt";
-			selectBtn.onmouseover = () => selectBtn.style.background = "#0052a3";
-			selectBtn.onmouseout = () => selectBtn.style.background = "#0066cc";
+			selectBtn.textContent = isActive ? (typeof str_Selected !== "undefined" ? str_Selected : "Kiválasztva") : (typeof str_Select !== "undefined" ? str_Select : "Kiválaszt");
+			const hoverColorSelect = isActive ? "#008800" : "#0052a3";
+			const baseColorSelect = isActive ? "#00aa00" : "#0066cc";
+			selectBtn.onmouseover = () => selectBtn.style.background = hoverColorSelect;
+			selectBtn.onmouseout = () => selectBtn.style.background = baseColorSelect;
 			selectBtn.onclick = () => {
-				try { setCookie("Host", host); } catch (e) { }
-				modal.style.display = "none";
-				document.body.removeChild(modal);
+				if (!isActive) {
+					try { setCookie("Host", host); } catch (e) { }
+					modal.style.display = "none";
+					document.body.removeChild(modal);
+				}
 			};
+			selectBtn.disabled = isActive;
 
-			item.appendChild(hostLabel);
 			item.appendChild(selectBtn);
 
 			// Törlés gomb (csak nem alapbeállított host esetén)
