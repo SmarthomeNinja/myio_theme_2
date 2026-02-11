@@ -267,6 +267,15 @@ function buildHeader() {
 		const contentBody = document.createElement("div");
 		contentBody.className = "myio-settings-content";
 
+		// Bezárás funkciók
+		const closeModal = () => {
+			modal.classList.remove('is-open');
+			setTimeout(() => {
+				if (modal.parentNode) document.body.removeChild(modal);
+			}, 200);
+		};
+		
+		closeBtn.onclick = closeModal;
 		// Host lista
 		const listContainer = document.createElement("div");
 
@@ -449,15 +458,6 @@ function buildHeader() {
 		addContainer.appendChild(addBtn);
 		contentBody.appendChild(addContainer);
 
-		// Bezárás funkciók
-		const closeModal = () => {
-			modal.classList.remove('is-open');
-			setTimeout(() => {
-				if (modal.parentNode) document.body.removeChild(modal);
-			}, 200);
-		};
-		
-		closeBtn.onclick = closeModal;
 
 		// Escape-re bezárás
 		const onKeyDown = (e) => {
