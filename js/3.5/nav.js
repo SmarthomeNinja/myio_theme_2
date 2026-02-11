@@ -276,6 +276,7 @@ function buildHeader() {
 		};
 		
 		closeBtn.onclick = closeModal;
+
 		// Host lista
 		const listContainer = document.createElement("div");
 
