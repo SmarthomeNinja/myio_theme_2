@@ -1236,7 +1236,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       
       // Kontextus mindig csatolva az uzenethez (friss eszkoz allapotok, zonak, megjegyzesek)
       let contextMessage = message;
-      const hasDevices = deviceContext.relays.length > 0 || deviceContext.pca.length > 0 || deviceContext.pwm.length > 0 || deviceContext.sensors.length > 0;
+      const hasDevices = deviceContext.relays.length > 0 || deviceContext.pca.length > 0 || deviceContext.pwm.length > 0 || deviceContext.sensors.length > 0 || deviceContext.thermostats.length > 0;
       if (hasDevices) {
         contextMessage = `[Rendszer kontextus - aktualis eszkoz allapotok]\n`;
         if (deviceContext.zones && deviceContext.zones.length > 0) {
