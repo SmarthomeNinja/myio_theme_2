@@ -240,49 +240,35 @@ function buildHeader() {
 	// ===== BOOSTER HOST MODAL =====
 	function createBoosterModal() {
 		const modal = document.createElement("div");
-		modal.className = "myio-boosterModal";
-		modal.style.cssText = `
-			position: fixed;
-			top: 0; left: 0; right: 0; bottom: 0;
-			background: rgba(0,0,0,0.5);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			z-index: 10000;
-		`;
-
+		modal.className = "myio-settings-overlay";
+		
 		const content = document.createElement("div");
-		content.style.cssText = `
-			background: #1a1a1a;
-			border-radius: 12px;
-			padding: 20px;
-			width: 90%;
-			max-width: 500px;
-			max-height: 80vh;
-			overflow-y: auto;
-			box-shadow: 0 4px 20px rgba(0,0,0,0.7);
-			border: 1px solid rgba(255,255,255,0.1);
-		`;
+		content.className = "myio-settings-modal";
 
-		// Cím
-		const title = document.createElement("div");
-		title.style.cssText = `
-			color: #fff;
-			font-size: 1.2em;
-			font-weight: 800;
-			margin-bottom: 15px;
-			text-align: center;
-		`;
+		// Header
+		const header = document.createElement("div");
+		header.className = "myio-settings-header";
+		
+		const titleWrap = document.createElement("div");
+		const title = document.createElement("h3");
+		title.className = "myio-settings-title";
 		title.textContent = typeof str_Host !== "undefined" ? str_Host : "Host";
-		content.appendChild(title);
+		titleWrap.appendChild(title);
+		
+		const closeBtn = document.createElement("button");
+		closeBtn.className = "myio-settings-close";
+		closeBtn.type = "button";
+		closeBtn.textContent = "×";
+		
+		header.append(titleWrap, closeBtn);
+		content.appendChild(header);
+		
+		// Content konténer
+		const contentBody = document.createElement("div");
+		contentBody.className = "myio-settings-content";
 
 		// Host lista
 		const listContainer = document.createElement("div");
-		listContainer.style.cssText = `
-			margin-bottom: 15px;
-			max-height: 40vh;
-			overflow-y: auto;
-		`;
 
 		const currentHost = typeof Host !== "undefined" ? Host : "";
 		const hosts = getBoosterHosts();
@@ -402,14 +388,14 @@ function buildHeader() {
 			listContainer.appendChild(item);
 		});
 
-		content.appendChild(listContainer);
+		contentBody.appendChild(listContainer);
 
 		// Új host hozzáadása
 		const addContainer = document.createElement("div");
 		addContainer.style.cssText = `
 			display: flex;
 			gap: 8px;
-			margin-bottom: 15px;
+			margin-bottom: 16px;
 		`;
 
 		const newHostInput = document.createElement("input");
@@ -464,9 +450,9 @@ function buildHeader() {
 
 		addContainer.appendChild(newHostInput);
 		addContainer.appendChild(addBtn);
-		content.appendChild(addContainer);
+		contentBody.appendChild(addContainer);
 
-		// Bezárás gomb
+		contentBody.appendChild(content);
 		const closeBtn = document.createElement("button");
 		closeBtn.type = "button";
 		closeBtn.style.cssText = `
