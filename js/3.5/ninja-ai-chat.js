@@ -1235,6 +1235,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     
     try {
       // Get device context
+      console.log('Ninja: Eszkoz kontextus lekerese...');
       const deviceContext = getDeviceContext();
       
       // Kontextus mindig csatolva az uzenethez (friss eszkoz allapotok, zonak, megjegyzesek)
