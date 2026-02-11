@@ -245,6 +245,11 @@
         isDragging = false;
         // Szerver küldés
         sendOutputValueToServer(sensorId, output);
+
+        // Táblázat érték frissítése
+        if (output.valueCell) {
+          output.valueCell.textContent = String(output.yVal) + (output.mode === 'on' ? ' ▲' : ' ▼');
+        }
       }
     });
   }
