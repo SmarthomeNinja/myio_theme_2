@@ -378,8 +378,7 @@ function buildHeader() {
 				delBtn.onmouseout = () => delBtn.style.background = "#cc3333";
 				delBtn.onclick = () => {
 					removeBoosterHost(host);
-					modal.style.display = "none";
-					document.body.removeChild(modal);
+					closeModal();
 					openBoosterModal();
 				};
 				item.appendChild(delBtn);
@@ -437,8 +436,7 @@ function buildHeader() {
 			if (newHost) {
 				addBoosterHost(newHost);
 				newHostInput.value = "";
-				modal.style.display = "none";
-				document.body.removeChild(modal);
+				closeModal();
 				openBoosterModal();
 			}
 		};
