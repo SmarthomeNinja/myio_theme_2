@@ -100,6 +100,7 @@ function buildHeader() {
 	const nav = document.createElement("div");
 	nav.className = "myio-nav";
 	hdr.append(nav);
+
 	const isHome =
 		location.pathname === "/" ||
 		location.pathname === "/index.html";
@@ -132,31 +133,12 @@ function buildHeader() {
 		btnHome.onclick = () => { window.location.href = "/"; };
 		left.append(btnHome);
 	}
-	/*
-		if (!isHome) {
-			left.append(
-			mkNavBtn((str_Home || "Home"), "/")
-			);
-		}
-	*/
-
-
-
 
 	// Mid nav buttons
 	const title = document.createElement("div");
 	title.className = "myio-title";
 	title.textContent = MYIOname.slice(5);
 	mid.append(title);
-
-	const mkNavBtn = (label, href) => {
-		const b = document.createElement("button");
-		b.type = "button";
-		b.textContent = label;
-		b.onclick = () => { window.location.href = href; };
-		return b;
-	};
-
 
 	// LOGO
 	const logo = document.createElement("img");
@@ -165,6 +147,7 @@ function buildHeader() {
 	logo.alt = "myIO";
 	logo.decoding = "async";
 	logo.loading = "eager";
+	logo.onclick = () => { window.location.href = "/"; };
 	mid.prepend(logo);
 
 	// Logout
