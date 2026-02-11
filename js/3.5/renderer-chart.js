@@ -1348,6 +1348,9 @@
       valCell.style.fontSize = '13px';
       valCell.style.opacity = '0.7';
 
+      // Referencia tárolása az output objektumban a későbbi frissítéshez
+      output.valueCell = valCell;
+
       // Toggle
       const toggleCell = el("td");
       const toggleLabel = el("label", { class: "myio-chart-toggle" });
