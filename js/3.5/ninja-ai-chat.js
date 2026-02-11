@@ -1163,6 +1163,39 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
           }
         }
       }
+      // thermo_target(type, id, target)
+      else if (command.startsWith('thermo_target(')) {
+        const match2 = command.match(/thermo_target\(\s*(pca|relay)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/);
+        if (match2) {
+          const success = executeThermoTargetCommand(match2[1], match2[2], match2[3]);
+          if (success) {
+            executed++;
+            results.push(`Termosztat ${match2[1].toUpperCase()} ${match2[2]} cel: ${match2[3]}°`);
+          }
+        }
+      }
+      // thermo_on(type, id, value)
+      else if (command.startsWith('thermo_on(')) {
+        const match2 = command.match(/thermo_on\(\s*(pca|relay)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/);
+        if (match2) {
+          const success = executeThermoOnCommand(match2[1], match2[2], match2[3]);
+          if (success) {
+            executed++;
+            results.push(`Termosztat ${match2[1].toUpperCase()} ${match2[2]} ON: ${match2[3]}°`);
+          }
+        }
+      }
+      // thermo_off(type, id, value)
+      else if (command.startsWith('thermo_off(')) {
+        const match2 = command.match(/thermo_off\(\s*(pca|relay)\s*,\s*(\d+)\s*,\s*([\d.]+)\s*\)/);
+        if (match2) {
+          const success = executeThermoOffCommand(match2[1], match2[2], match2[3]);
+          if (success) {
+            executed++;
+            results.push(`Termosztat ${match2[1].toUpperCase()} ${match2[2]} OFF: ${match2[3]}°`);
+          }
+        }
+      }
     }
 
     return { count: executed, results };
