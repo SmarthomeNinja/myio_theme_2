@@ -363,6 +363,32 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     return { read, write, val };
   }
 
+  // Szenzor nev es ertek kiolvasasa thermoActivator ertekbol
+  // activator < 100: homerseklet szenzor, >= 101: paratartalom szenzor
+  function getThermoSensorInfo(activator) {
+    if (activator < 100) {
+      let value = 0;
+      if (typeof thermo_eepromIndex !== 'undefined' && typeof thermo_temps !== 'undefined') {
+        for (let j = 0; j < thermo_eepromIndex.length; j++) {
+          if (activator == thermo_eepromIndex[j]) value = thermo_temps[j] / 100;
+        }
+      }
+      let name = '-';
+      if (typeof thermo_description !== 'undefined' && thermo_description && thermo_description[activator] != null) {
+        name = thermo_description[activator];
+      }
+      return { name, value, unit: '°C', isTemp: true };
+    } else {
+      const hi = activator - 101;
+      const value = (typeof humidity !== 'undefined' && humidity && humidity[hi] != null) ? (humidity[hi] / 10) : 0;
+      let name = '-';
+      if (typeof hum_description !== 'undefined' && hum_description && hum_description[hi] != null) {
+        name = hum_description[hi];
+      }
+      return { name, value, unit: '%', isTemp: false };
+    }
+  }
+
   // Get device context for AI
   // FONTOS: A description tombok 1-bazisuak, az ertek tombok 0-bazisuak!
   // PCA_description[d] <-> PCA[d-1], cardId = pca:${d}, server parancs = d
@@ -372,6 +398,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       sensors: [],
       pca: [],
       pwm: [],
+      thermostats: [],
       zones: []
     };
 
