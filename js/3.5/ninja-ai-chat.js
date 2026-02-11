@@ -182,6 +182,11 @@ PROTOKOLL:
 Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   };
 
+  // Aktualis provider es modell (localStorage-bol vagy alapertelmezett)
+  let currentProvider = localStorage.getItem('NINJA_PROVIDER') || 'anthropic';
+  if (!PROVIDERS[currentProvider]) currentProvider = 'anthropic';
+  let currentModel = localStorage.getItem('NINJA_MODEL') || PROVIDERS[currentProvider].models[0].id;
+
   // Conversation history
   let conversationHistory = [];
   let isNinjaOpen = false;
