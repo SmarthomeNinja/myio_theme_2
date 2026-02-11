@@ -348,8 +348,7 @@ function buildHeader() {
 			selectBtn.onclick = () => {
 				if (!isActive) {
 					try { setCookie("Host", host); } catch (e) { }
-					modal.style.display = "none";
-					document.body.removeChild(modal);
+					closeModal();
 				}
 			};
 
