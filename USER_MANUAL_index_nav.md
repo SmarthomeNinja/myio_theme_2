@@ -184,6 +184,7 @@ A header felső sáv tartalmazza az összes főbb vezérlést és beállítást.
   5. Az API kulcs a szolgáltató felületén generálható
   6. Az API kulcs és a modell váltása később a fogaskerék ikon (⚙) segítségével módosítható
   7. Az AI Ninja hozzáfér a szerver álltal kezelt kártyákhoz, lekérdezheti, módosíthatja állapotukat.
+  8. Az AI Ninja megkapja az egyes kártyák paramétereit, így tudni fogja a Zoná(ka)t, ahova a kártya rendelvevan és a kártyákhoz rendelt megjegyzéseket is.
 
 🔐 Biztonsági megjegyzés:
   • Az API kulcs a böngészőben kerül letárolásra a localStorage-ben.
@@ -272,6 +273,23 @@ Az index.js modul felépíti és kezeli a kártyákat tartalmazó dashboard-ot.
 ```
 
 #### **Szenzor kártya -> Grafikon Modal Ablak**
+```
+🖱️ Egyszerű kattintás a Szenzor kártya elnevezésén:
+  • Megnyitja a kártyához tartozó grafikon modal ablakot
+  • Alapból az aktuális naphoz tartozó grafikon nyílik meg
+  • A grafikon Zoomolható
+  • A Betöltés szekcióban hozzáadhatóak további adatok a grafikonhoz
+    • Ugyan azon szenzorhoz tartozó korábbi napok
+    • Másik Szenzor adatai összehasonlítás végett
+    • Azonos szenzorokhoz azonos színeket rendel
+  • Kimenetek szekció:
+    • Ha talál olyan kimenetet, amit az adott szenzor vezérel, azok ki és bekapcsolási értékeit kilistázza
+    • Az egyes kimenetek megjelenítése a grafikonon ki-be kapcslolható.
+    • A grafikonon megjelenített ki-bekapcsolási érték, vízszintes szaggatott vonallal jelenik meg, jobb oldalán az elnevezéssel.
+    • Erre az elnevezésre nyomva értéke vizuálisan módosítható. 
+```
+
+#### **Termosztát kártya -> Grafikon Modal Ablak**
 ```
 🖱️ Egyszerű kattintás a Szenzor kártya elnevezésén:
   • Megnyitja a kártyához tartozó grafikon modal ablakot
