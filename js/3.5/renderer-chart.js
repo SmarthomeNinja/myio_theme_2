@@ -674,6 +674,11 @@
         // Érték küldése a szervernek
         sendOutputValueToServer(state.sensorId, draggedOutput);
         console.log(`Drag befejeződött: ${draggedOutput.label} = ${draggedOutput.yVal}°C`);
+
+        // Táblázat érték frissítése
+        if (draggedOutput.valueCell) {
+          draggedOutput.valueCell.textContent = String(draggedOutput.yVal) + (draggedOutput.mode === 'on' ? ' ▲' : ' ▼');
+        }
       }
       isDragging = false;
       draggedOutput = null;
