@@ -546,6 +546,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
 
     // Termosztatok - PCA kimenetek thermo aktivatorral
     if (typeof PCA !== 'undefined' && typeof PCA_thermoActivator !== 'undefined') {
+      console.log('Processing PCA thermo activators for thermostats...');
       for (let i = 0; i < PCA_thermoActivator.length; i++) {
         if (PCA_thermoActivator[i] === 0 || PCA_thermoActivator[i] === 255) continue;
         const d = i + 1; // 1-bazisu ID
