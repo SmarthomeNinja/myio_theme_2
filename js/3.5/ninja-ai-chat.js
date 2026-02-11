@@ -242,9 +242,13 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         <div class="ninja-header">
           <div class="ninja-title">
             <span style="font-size: 24px;">${NINJA_ICON}</span>
-            <span>Ninja AI Asszisztens</span>
+            <span>Ninja AI</span>
+            <span class="ninja-model-badge" id="ninja-model-badge" title="Kattints a beallitasokhoz"></span>
           </div>
-          <button class="ninja-close" aria-label="Bezárás">&times;</button>
+          <div class="ninja-header-btns">
+            <button class="ninja-settings-btn" id="ninja-settings-btn" aria-label="Beallitasok" title="Beallitasok">&#9881;</button>
+            <button class="ninja-close" aria-label="Bezárás">&times;</button>
+          </div>
         </div>
         
         <div class="ninja-messages" id="ninja-messages">
