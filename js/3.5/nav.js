@@ -198,20 +198,283 @@ function buildHeader() {
 
 	boosterToggle.append(tInput, tTrack);
 
-	// ---- LENYÍLÓ HOST PANEL ----
-	const boosterPanel = document.createElement("div");
-	boosterPanel.className = "myio-menuSub myio-boosterSub";
+	// ===== BOOSTER HOST LISTA - localStorage kezelés =====
+	const BOOSTER_HOSTS_KEY = "myio.booster.hosts";
+	const DEFAULT_HOST = "http://okoslak.hu/ext";
 
-	const hostInput = document.createElement("input");
-	hostInput.type = "text";
-	hostInput.maxLength = 200;
-	hostInput.name = "Host";
-	hostInput.value = (typeof Host !== "undefined" ? Host : "");
-	hostInput.placeholder = (typeof str_Host !== "undefined" ? str_Host : "Host");
-	hostInput.onchange = () => {
-		try { setCookie("Host", hostInput.value); } catch (e) { }
-	};
-	boosterPanel.append(hostInput);
+	function getBoosterHosts() {
+		try {
+			const stored = localStorage.getItem(BOOSTER_HOSTS_KEY);
+			if (stored) {
+				const hosts = JSON.parse(stored);
+				if (Array.isArray(hosts)) return hosts;
+			}
+		} catch (e) { }
+		return [DEFAULT_HOST];
+	}
+
+	function saveBoosterHosts(hosts) {
+		try {
+			localStorage.setItem(BOOSTER_HOSTS_KEY, JSON.stringify(hosts));
+		} catch (e) { }
+	}
+
+	function addBoosterHost(host) {
+		const hosts = getBoosterHosts();
+		if (!hosts.includes(host) && host.trim()) {
+			hosts.push(host);
+			saveBoosterHosts(hosts);
+		}
+	}
+
+	function removeBoosterHost(host) {
+		if (host === DEFAULT_HOST) return; // alapbeállított nem törölhető
+		const hosts = getBoosterHosts();
+		const idx = hosts.indexOf(host);
+		if (idx > -1) {
+			hosts.splice(idx, 1);
+			saveBoosterHosts(hosts);
+		}
+	}
+
+	// ===== BOOSTER HOST MODAL =====
+	function createBoosterModal() {
+		const modal = document.createElement("div");
+		modal.className = "myio-boosterModal";
+		modal.style.cssText = `
+			position: fixed;
+			top: 0; left: 0; right: 0; bottom: 0;
+			background: rgba(0,0,0,0.5);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			z-index: 10000;
+		`;
+
+		const content = document.createElement("div");
+		content.style.cssText = `
+			background: #1a1a1a;
+			border-radius: 12px;
+			padding: 20px;
+			width: 90%;
+			max-width: 500px;
+			max-height: 80vh;
+			overflow-y: auto;
+			box-shadow: 0 4px 20px rgba(0,0,0,0.7);
+			border: 1px solid rgba(255,255,255,0.1);
+		`;
+
+		// Cím
+		const title = document.createElement("div");
+		title.style.cssText = `
+			color: #fff;
+			font-size: 1.2em;
+			font-weight: 800;
+			margin-bottom: 15px;
+			text-align: center;
+		`;
+		title.textContent = typeof str_Host !== "undefined" ? str_Host : "Host";
+		content.appendChild(title);
+
+		// Host lista
+		const listContainer = document.createElement("div");
+		listContainer.style.cssText = `
+			margin-bottom: 15px;
+			max-height: 40vh;
+			overflow-y: auto;
+		`;
+
+		const hosts = getBoosterHosts();
+		hosts.forEach((host) => {
+			const item = document.createElement("div");
+			item.style.cssText = `
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				background: rgba(255,255,255,0.08);
+				border: 1px solid rgba(255,255,255,0.1);
+				border-radius: 8px;
+				padding: 10px 12px;
+				margin-bottom: 8px;
+				gap: 8px;
+			`;
+
+			const hostLabel = document.createElement("div");
+			hostLabel.style.cssText = `
+				flex: 1;
+				color: #fff;
+				font-size: 0.95em;
+				word-break: break-all;
+				user-select: text;
+			`;
+			hostLabel.textContent = host;
+
+			const selectBtn = document.createElement("button");
+			selectBtn.type = "button";
+			selectBtn.style.cssText = `
+				background: #0066cc;
+				color: #fff;
+				border: none;
+				border-radius: 6px;
+				padding: 6px 12px;
+				cursor: pointer;
+				font-size: 0.85em;
+				font-weight: 700;
+				white-space: nowrap;
+				flex-shrink: 0;
+				transition: background 0.2s;
+			`;
+			selectBtn.textContent = typeof str_Select !== "undefined" ? str_Select : "Kiválaszt";
+			selectBtn.onmouseover = () => selectBtn.style.background = "#0052a3";
+			selectBtn.onmouseout = () => selectBtn.style.background = "#0066cc";
+			selectBtn.onclick = () => {
+				try { setCookie("Host", host); } catch (e) { }
+				modal.style.display = "none";
+				document.body.removeChild(modal);
+			};
+
+			item.appendChild(hostLabel);
+			item.appendChild(selectBtn);
+
+			// Törlés gomb (csak nem alapbeállított host esetén)
+			if (host !== DEFAULT_HOST) {
+				const delBtn = document.createElement("button");
+				delBtn.type = "button";
+				delBtn.style.cssText = `
+					background: #cc3333;
+					color: #fff;
+					border: none;
+					border-radius: 6px;
+					padding: 6px 10px;
+					cursor: pointer;
+					font-size: 0.85em;
+					font-weight: 700;
+					white-space: nowrap;
+					flex-shrink: 0;
+					transition: background 0.2s;
+				`;
+				delBtn.textContent = "✕";
+				delBtn.title = typeof str_Delete !== "undefined" ? str_Delete : "Törlés";
+				delBtn.onmouseover = () => delBtn.style.background = "#aa1111";
+				delBtn.onmouseout = () => delBtn.style.background = "#cc3333";
+				delBtn.onclick = () => {
+					removeBoosterHost(host);
+					modal.style.display = "none";
+					document.body.removeChild(modal);
+					openBoosterModal();
+				};
+				item.appendChild(delBtn);
+			}
+
+			listContainer.appendChild(item);
+		});
+
+		content.appendChild(listContainer);
+
+		// Új host hozzáadása
+		const addContainer = document.createElement("div");
+		addContainer.style.cssText = `
+			display: flex;
+			gap: 8px;
+			margin-bottom: 15px;
+		`;
+
+		const newHostInput = document.createElement("input");
+		newHostInput.type = "text";
+		newHostInput.placeholder = "http://...";
+		newHostInput.style.cssText = `
+			flex: 1;
+			background: rgba(255,255,255,0.1);
+			border: 1px solid rgba(255,255,255,0.2);
+			border-radius: 6px;
+			padding: 8px 12px;
+			color: #fff;
+			font-size: 0.9em;
+			outline: none;
+			transition: border 0.2s;
+		`;
+		newHostInput.onfocus = () => newHostInput.style.borderColor = "rgba(0,102,204,0.5)";
+		newHostInput.onblur = () => newHostInput.style.borderColor = "rgba(255,255,255,0.2)";
+
+		const addBtn = document.createElement("button");
+		addBtn.type = "button";
+		addBtn.style.cssText = `
+			background: #00aa00;
+			color: #fff;
+			border: none;
+			border-radius: 6px;
+			padding: 8px 16px;
+			cursor: pointer;
+			font-size: 0.85em;
+			font-weight: 700;
+			white-space: nowrap;
+			transition: background 0.2s;
+		`;
+		addBtn.textContent = typeof str_Add !== "undefined" ? str_Add : "Hozzáad";
+		addBtn.onmouseover = () => addBtn.style.background = "#008800";
+		addBtn.onmouseout = () => addBtn.style.background = "#00aa00";
+		addBtn.onclick = () => {
+			const newHost = newHostInput.value.trim();
+			if (newHost) {
+				addBoosterHost(newHost);
+				newHostInput.value = "";
+				modal.style.display = "none";
+				document.body.removeChild(modal);
+				openBoosterModal();
+			}
+		};
+
+		// Enter-re is reagáljon
+		newHostInput.onkeypress = (e) => {
+			if (e.key === "Enter") addBtn.onclick();
+		};
+
+		addContainer.appendChild(newHostInput);
+		addContainer.appendChild(addBtn);
+		content.appendChild(addContainer);
+
+		// Bezárás gomb
+		const closeBtn = document.createElement("button");
+		closeBtn.type = "button";
+		closeBtn.style.cssText = `
+			width: 100%;
+			background: rgba(255,255,255,0.1);
+			color: #fff;
+			border: 1px solid rgba(255,255,255,0.2);
+			border-radius: 6px;
+			padding: 10px;
+			cursor: pointer;
+			font-size: 0.9em;
+			font-weight: 700;
+			transition: background 0.2s;
+		`;
+		closeBtn.textContent = typeof str_Close !== "undefined" ? str_Close : "Bezárás";
+		closeBtn.onmouseover = () => closeBtn.style.background = "rgba(255,255,255,0.15)";
+		closeBtn.onmouseout = () => closeBtn.style.background = "rgba(255,255,255,0.1)";
+		closeBtn.onclick = () => {
+			modal.style.display = "none";
+			document.body.removeChild(modal);
+		};
+		content.appendChild(closeBtn);
+
+		// Escape-re bezárás
+		const onKeyDown = (e) => {
+			if (e.key === "Escape") {
+				modal.style.display = "none";
+				if (modal.parentNode) document.body.removeChild(modal);
+				document.removeEventListener("keydown", onKeyDown);
+			}
+		};
+		document.addEventListener("keydown", onKeyDown);
+
+		modal.appendChild(content);
+		return modal;
+	}
+
+	function openBoosterModal() {
+		const modal = createBoosterModal();
+		document.body.appendChild(modal);
+	}
 
 	// ---- SZINKRON (MOST MÁR OKÉ) ----
 	function syncBoosterUI() {
@@ -234,16 +497,16 @@ function buildHeader() {
 		console.log("BOOSTER set to:", getCookie("Booster"));
 	});
 
-	// ---- GOMB: HOST LENYIT ----
+	// ---- GOMB: HOST MODAL MEGNYITÁSA ----
 	btnBoosterMenu.onclick = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
-		menuPanel.classList.toggle("is-boosterOpen");
+		openBoosterModal();
 	};
 
 	// ---- ÖSSZERAKÁS ----
 	boosterRow.append(btnBoosterMenu, boosterToggle);
-	menuPanel.append(boosterRow, boosterPanel);
+	menuPanel.append(boosterRow);
 
 
 	// ===== Auto Refresh sor a menüben =====
