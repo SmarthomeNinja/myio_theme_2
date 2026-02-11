@@ -4,10 +4,86 @@
 (function() {
   'use strict';
 
+  // Provider konfiguraciok
+  const PROVIDERS = {
+    anthropic: {
+      name: 'Anthropic (Claude)',
+      models: [
+        { id: 'claude-haiku-4-5-20251001', name: 'Claude 4.5 Haiku' },
+        { id: 'claude-sonnet-4-5-20250929', name: 'Claude 4.5 Sonnet' },
+        { id: 'claude-opus-4-6', name: 'Claude Opus 4.6' }
+      ],
+      keyPlaceholder: 'sk-ant-api...',
+      storageKey: 'ANTHROPIC_API_KEY',
+      getEndpoint: () => 'https://api.anthropic.com/v1/messages',
+      buildHeaders: (apiKey) => ({
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      }),
+      buildBody: (model, systemPrompt, messages, maxTokens) => ({
+        model,
+        max_tokens: maxTokens,
+        system: systemPrompt,
+        messages
+      }),
+      parseResponse: (data) => data.content[0].text
+    },
+    openai: {
+      name: 'OpenAI (GPT)',
+      models: [
+        { id: 'gpt-4o-mini', name: 'GPT-4o Mini' },
+        { id: 'gpt-4o', name: 'GPT-4o' },
+        { id: 'gpt-4.1-mini', name: 'GPT-4.1 Mini' },
+        { id: 'gpt-4.1', name: 'GPT-4.1' }
+      ],
+      keyPlaceholder: 'sk-...',
+      storageKey: 'OPENAI_API_KEY',
+      getEndpoint: () => 'https://api.openai.com/v1/chat/completions',
+      buildHeaders: (apiKey) => ({
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      }),
+      buildBody: (model, systemPrompt, messages, maxTokens) => ({
+        model,
+        max_tokens: maxTokens,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...messages
+        ]
+      }),
+      parseResponse: (data) => data.choices[0].message.content
+    },
+    google: {
+      name: 'Google (Gemini)',
+      models: [
+        { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
+        { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+        { id: 'gemini-2.5-pro-preview-05-06', name: 'Gemini 2.5 Pro' }
+      ],
+      keyPlaceholder: 'AIza...',
+      storageKey: 'GOOGLE_API_KEY',
+      getEndpoint: (model, apiKey) => `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      buildHeaders: () => ({
+        'Content-Type': 'application/json'
+      }),
+      buildBody: (model, systemPrompt, messages, maxTokens) => ({
+        system_instruction: { parts: [{ text: systemPrompt }] },
+        contents: messages.map(m => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }]
+        })),
+        generationConfig: {
+          maxOutputTokens: maxTokens
+        }
+      }),
+      parseResponse: (data) => data.candidates[0].content.parts[0].text
+    }
+  };
+
   // Konfiguráció
   const NINJA_CONFIG = {
-    // modelName: 'claude-sonnet-4-5-20250929',
-    modelName: 'claude-haiku-4-5-20251001',
     maxTokens: 4096,
     systemPrompt: `Te a Ninja vagy, egy okos otthon asszisztens a MyIO smart home rendszerben.
 
