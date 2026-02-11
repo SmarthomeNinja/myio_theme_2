@@ -284,18 +284,28 @@ function buildHeader() {
 			overflow-y: auto;
 		`;
 
+		const currentHost = typeof Host !== "undefined" ? Host : "";
 		const hosts = getBoosterHosts();
 		hosts.forEach((host) => {
 			const item = document.createElement("div");
+			const isActive = host === currentHost;
 			item.style.cssText = `
 				display: flex;
 				align-items: center;
 				justify-content: space-between;
-				background: rgba(255,255,255,0.08);
-				border: 1px solid rgba(255,255,255,0.1);
+				background: ${isActive ? 'rgba(0, 102, 204, 0.2)' : 'rgba(255,255,255,0.08)'};
+				border: 1px solid ${isActive ? 'rgba(0, 102, 204, 0.5)' : 'rgba(255,255,255,0.1)'};
 				border-radius: 8px;
 				padding: 10px 12px;
 				margin-bottom: 8px;
+				gap: 8px;
+			`;
+
+			const hostLabelContainer = document.createElement("div");
+			hostLabelContainer.style.cssText = `
+				flex: 1;
+				display: flex;
+				align-items: center;
 				gap: 8px;
 			`;
 
@@ -308,6 +318,26 @@ function buildHeader() {
 				user-select: text;
 			`;
 			hostLabel.textContent = host;
+
+			// Aktív jelölés
+			if (isActive) {
+				const activeBadge = document.createElement("span");
+				activeBadge.style.cssText = `
+					background: #0066cc;
+					color: #fff;
+					padding: 2px 8px;
+					border-radius: 4px;
+					font-size: 0.75em;
+					font-weight: 700;
+					white-space: nowrap;
+					flex-shrink: 0;
+				`;
+				activeBadge.textContent = "✓ " + (typeof str_Active !== "undefined" ? str_Active : "Aktív");
+				hostLabelContainer.appendChild(activeBadge);
+			}
+
+			hostLabelContainer.appendChild(hostLabel);
+			item.appendChild(hostLabelContainer);
 
 			const selectBtn = document.createElement("button");
 			selectBtn.type = "button";
