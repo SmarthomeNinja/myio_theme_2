@@ -505,6 +505,11 @@ function buildHeader() {
 	}
 
 	function openBoosterModal() {
+		// Ha az aktuális Host nem szerepel a listában, add hozzá
+		const currentHost = typeof Host !== "undefined" ? Host : "";
+		if (currentHost && !getBoosterHosts().includes(currentHost)) {
+			addBoosterHost(currentHost);
+		}
 		const modal = createBoosterModal();
 		document.body.appendChild(modal);
 	}
