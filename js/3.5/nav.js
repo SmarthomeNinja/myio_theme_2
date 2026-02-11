@@ -453,16 +453,37 @@ function buildHeader() {
 		contentBody.appendChild(addContainer);
 
 		// Escape-re bezárás
+		// Bezárás funkciók
+		const closeModal = () => {
+			modal.classList.remove('is-open');
+			setTimeout(() => {
+				if (modal.parentNode) document.body.removeChild(modal);
+			}, 200);
+		};
+		
+		closeBtn.onclick = closeModal;
+
+		// Escape-re bezárás
 		const onKeyDown = (e) => {
 			if (e.key === "Escape") {
-				modal.style.display = "none";
-				if (modal.parentNode) document.body.removeChild(modal);
+				closeModal();
 				document.removeEventListener("keydown", onKeyDown);
 			}
 		};
 		document.addEventListener("keydown", onKeyDown);
+		
+		// Overlay klikre bezárás
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) closeModal();
+		});
 
+		content.appendChild(header);
+		content.appendChild(contentBody);
 		modal.appendChild(content);
+		
+		// is-open osztály hozzáadása az animációhoz
+		requestAnimationFrame(() => modal.classList.add('is-open'));
+		
 		return modal;
 	}
 
