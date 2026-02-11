@@ -123,17 +123,6 @@ function buildHeader() {
 	btnUpdate.onclick = () => { try { sendForm(); } catch (e) { } };
 	left.append(btnUpdate);
 
-	if (!isHome) {
-		const btnHome = document.createElement("button");
-		btnHome.type = "button";
-		btnHome.className = "myio-iconBtn";
-		btnHome.title = (typeof str_Home !== "undefined" ? str_Home : "Home");
-		btnHome.setAttribute("aria-label", btnHome.title);
-		btnHome.innerHTML = "🏠";
-		btnHome.onclick = () => { window.location.href = "/"; };
-		left.append(btnHome);
-	}
-
 	// Mid nav buttons
 	const title = document.createElement("div");
 	title.className = "myio-title";
