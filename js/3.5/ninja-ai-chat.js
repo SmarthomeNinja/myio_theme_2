@@ -349,7 +349,23 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     if (saveKeyBtn) {
       saveKeyBtn.onclick = saveAPIKey;
     }
-    
+
+    // Settings toggle gomb
+    document.getElementById('ninja-settings-btn').onclick = toggleSettings;
+
+    // Model badge kattinthato (megnyitja a beallitasokat)
+    document.getElementById('ninja-model-badge').onclick = toggleSettings;
+
+    // Provider valaszto
+    const providerSelect = document.getElementById('ninja-provider-select');
+    if (providerSelect) {
+      providerSelect.onchange = onProviderChange;
+    }
+
+    // Modell lista feltoltese es badge frissitese
+    populateModelSelect();
+    updateModelBadge();
+
     // Check for API key
     checkAPIKey();
   }
