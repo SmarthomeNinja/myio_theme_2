@@ -214,21 +214,21 @@ Az index.js modul felépíti és kezeli a kártyákat tartalmazó dashboard-ot.
 
 ### 2. Szekciók & Kártyák
 
-**Szekció:** Eszközök logikai csoportja (pl. "Világítás", "Fűtés")
+**Szekció:** Eszközök logikai csoportja (pl. "Világítás", "Fűtés","kedvencek")
 **Kártya:** Egyedi eszköz vezérlőeleme
 
-#### Kártya Típusok:
+#### Kártya és Szekció Típusok:
 
-| Típus | Ikon | Funkció | Szerkeszthető |
-|-------|------|---------|---------------|
-| **Relé** (Kapcsoló) | 🔌 | Be/Ki kapcsolás | ✅ |
-| **PWM** (Fényerő) | 💡 | Fényerő csúszka (0-100%) | ✅ |
-| **Szenzor** | 📊 | Hőmérséklet, páratartalom stb. | ❌ |
-| **Termosztát** | 🌡️ | Hőmérséklet vezérlés | ✅ |
-| **PCA** | 🎨 | RGB LED szín vezérlés | ✅ |
-| **FET** | ⚡ | MOSFET vezérlés | ✅ |
-| **Zóna** | 🗺️ | Terület vezérlés | ✅ |
-| **Favorit** | ⭐ | Gyors hozzáférési kártyák | ✅ |
+ **Kimenet**    - Be/Ki kapcsolás 
+ **PCA**        - Univerzális kimenet 0-100%, Be/Ki kapcsolás 
+ **PWM**        - 0-100%-ig vezérelhető kimenet típus  
+ **Szenzor**    - Hőmérséklet, páratartalom stb. 
+ **Termosztát** - Hőmérséklet vezérlés
+ **Bemenet**    - A bemenetekhez tartozó rövid és hosszú nyomás funkciók.
+
+#### Szekció Típusok:
+ **Zóna**       - Terület alapú csoport. A zónák a kártyák beállításai alatt kezelhetők.        
+ **Kedvencek**  - Gyors hozzáférési kártyák. A kedvenc ikonnal "★" adhatóak, ehez a csoporthoz a kártyák.
 
 ### 3. Kártyák Kezelése
 
