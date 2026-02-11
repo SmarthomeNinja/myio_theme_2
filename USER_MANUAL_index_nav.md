@@ -228,7 +228,7 @@ Az index.js modul felépíti és kezeli a kártyákat tartalmazó dashboard-ot.
 
 #### Szekció Típusok:
  **Zóna**       - Terület alapú csoport. A zónák a kártyák beállításai alatt kezelhetők.        
- **Kedvencek**  - Gyors hozzáférési kártyák. A kedvenc ikonnal "★" adhatóak, ehez a csoporthoz a kártyák.
+ **Kedvencek**  - Gyors hozzáférési kártyák. A kedvenc ikonnal "☆" adhatóak, ehez a csoporthoz a kártyák.
 
 ### 3. Kártyák Kezelése
 
