@@ -31,6 +31,31 @@ ELÉRHETŐ PARANCSOK:
    - "pwm_set(id, value)" - PWM érték beállítása 0-100 között
    Például: "pwm_set(10, 50)" - 10-es PWM eszköz 50%-ra
 
+4. Termosztát beállítások (CSAK thermoActivator-ral rendelkező kimeneteken!):
+   A kontextusban "thermostats" listában megtalálod az összes termosztátos kimenetet.
+   Minden termosztátnak van: type (relay/pca), id, onValue (bekapcsolási hőfok), offValue (kikapcsolási hőfok), hysteresis, mode (futes/hutes), target (célhőmérséklet).
+
+   - "thermo_target(type, id, target)" - Célhőmérséklet beállítása, a jelenlegi hiszterézis MEGTARTÁSÁVAL
+     A rendszer automatikusan kiszámolja az ON és OFF értékeket a meglévő hiszterézisből.
+     Például: "thermo_target(pca, 1, 25.0)" - PCA 1 célhőmérséklet 25.0°C
+
+   - "thermo_on(type, id, value)" - CSAK a bekapcsolási (ON) hőfok módosítása
+     Például: "thermo_on(relay, 3, 24.0)" - Relay 3 ON érték 24.0°C-ra
+
+   - "thermo_off(type, id, value)" - CSAK a kikapcsolási (OFF) hőfok módosítása
+     Például: "thermo_off(pca, 2, 26.0)" - PCA 2 OFF érték 26.0°C-ra
+
+   TERMOSZTÁT LOGIKA:
+   - Fűtés mód (mode=futes): ON < OFF. A fűtés bekapcsol ha a hőmérséklet az ON alá csökken, kikapcsol ha az OFF fölé emelkedik.
+   - Hűtés mód (mode=hutes): ON > OFF. A hűtés bekapcsol ha a hőmérséklet az ON fölé emelkedik, kikapcsol ha az OFF alá csökken.
+
+   PÉLDÁK:
+   - "Legyen a nappali hőmérséklete 25 fok" → Keresd meg a nappali zónában lévő termosztáto(ka)t, használd thermo_target()-et
+   - "Ne legyen melegebb 26 foknál" → Fűtés módban ez az OFF érték, használd thermo_off()-ot
+   - "Ne legyen hidegebb 20 foknál" → Fűtés módban ez az ON érték, használd thermo_on()-ot
+   - "Állítsd a bekapcsolási hőfokot 23-ra" → thermo_on()
+   - "Állítsd a kikapcsolási hőfokot 26-ra" → thermo_off()
+
 PARANCSOK FORMÁTUMA:
 Ha a felhasználó eszközöket szeretne beállítani, adj ki parancsokat a válaszodban [COMMAND] tagek között:
 [COMMAND]relay_on(1)[/COMMAND]
