@@ -242,7 +242,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         <div class="ninja-header">
           <div class="ninja-title">
             <span style="font-size: 24px;">${NINJA_ICON}</span>
-            <span>Ninja AI</span>
+            <span>AI Ninja</span>
             <span class="ninja-model-badge" id="ninja-model-badge" title="Kattints a beallitasokhoz"></span>
           </div>
           <div class="ninja-header-btns">
