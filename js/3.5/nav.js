@@ -452,7 +452,6 @@ function buildHeader() {
 		addContainer.appendChild(addBtn);
 		contentBody.appendChild(addContainer);
 
-		// Escape-re bezárás
 		// Bezárás funkciók
 		const closeModal = () => {
 			modal.classList.remove('is-open');
