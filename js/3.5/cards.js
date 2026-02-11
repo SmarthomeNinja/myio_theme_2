@@ -66,7 +66,7 @@
 
     // Megjegyzés ikon
     if (noteContent && noteContent.trim()) {
-      wrapper.appendChild(el("span", { class: "myio-card-icon myio-note-icon", title: (typeof str_Note !== "undefined" ? str_Note : "Megjegyzés") }, [document.createTextNode("📝")])); //📝📋🗒✉
+      wrapper.appendChild(el("span", { class: "myio-card-icon myio-note-icon", title: (typeof str_Note !== "undefined" ? str_Note : "Megjegyzés") }, [document.createTextNode("📋")])); //📝📋🗒✉
     }
 
     if (savedIcon && savedIcon !== '☆' && savedIcon !== '★') {
