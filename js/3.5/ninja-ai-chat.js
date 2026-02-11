@@ -839,6 +839,196 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     }
   }
 
+  // Termosztat parancs segédfüggvény - elküldi az ON és/vagy OFF értékeket a szervernek
+  // type: 'relay' vagy 'pca', id: 1-bazisu, onVal/offVal: °C-ban (pl. 25.1)
+  function sendThermoValues(type, id, onVal, offVal) {
+    // Ertekek 1/10 fokra konvertalasa (szerver formatum)
+    const onServer = Math.round(onVal * 10);
+    const offServer = Math.round(offVal * 10);
+
+    let onName, offName;
+    if (type === 'pca') {
+      onName = `PCA_temp_MIN*${id}`;
+      offName = `PCA_temp_MAX*${id}`;
+    } else {
+      onName = `min_temp_ON*${id}`;
+      offName = `max_temp_OFF*${id}`;
+    }
+
+    const commandStr = `${onName}=${onServer}&${offName}=${offServer}`;
+
+    if (typeof MyIOLive !== 'undefined' && MyIOLive.sendCommand) {
+      MyIOLive.sendCommand(commandStr, true);
+      console.log(`Ninja: Thermo ${type} ${id} ON=${onVal}° OFF=${offVal}° parancs elkulve`);
+      return true;
+    } else if (typeof changedPair === 'function') {
+      const onInput = document.createElement('input');
+      onInput.name = onName;
+      onInput.value = String(onServer);
+      const offInput = document.createElement('input');
+      offInput.name = offName;
+      offInput.value = String(offServer);
+      changedPair(onInput, onInput.name, offInput, offInput.name);
+      return true;
+    } else {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', `${host}data?${commandStr}`, true);
+      xhr.send();
+      return true;
+    }
+  }
+
+  // Termosztat celhofo beallitasa - megtartja a jelenlegi hiszterezist
+  // type: 'relay' vagy 'pca', id: 1-bazisu, target: celhofo °C-ban
+  function executeThermoTargetCommand(type, id, target) {
+    try {
+      id = parseInt(id);
+      target = parseFloat(target);
+      if (isNaN(id) || id < 1) {
+        showToast(`Ervenytelen thermo ID: ${id}`);
+        return false;
+      }
+      if (isNaN(target)) {
+        showToast(`Ervenytelen homerseklet: ${target}`);
+        return false;
+      }
+
+      const idx = id - 1; // 0-bazisu index a tombokhoz
+      let currentOn, currentOff;
+
+      if (type === 'pca') {
+        if (typeof PCA_min_temp_ON === 'undefined' || typeof PCA_max_temp_OFF === 'undefined') {
+          showToast('PCA termosztat adatok nem elerhetoek');
+          return false;
+        }
+        currentOn = PCA_min_temp_ON[idx] / 10;
+        currentOff = PCA_max_temp_OFF[idx] / 10;
+      } else {
+        if (typeof min_temp_ON === 'undefined' || typeof max_temp_OFF === 'undefined') {
+          showToast('Relay termosztat adatok nem elerhetoek');
+          return false;
+        }
+        currentOn = min_temp_ON[idx] / 10;
+        currentOff = max_temp_OFF[idx] / 10;
+      }
+
+      // Hiszterezis szamitasa az aktualis ertekekbol
+      let hysteresis = Math.abs(currentOff - currentOn) / 2;
+      // Ha nincs hiszterezis (mindketto 0 vagy egyenlo), alapertelmezett 0.5°C
+      if (hysteresis < 0.1) hysteresis = 0.5;
+
+      const isHeating = currentOn < currentOff;
+      let newOn, newOff;
+
+      if (isHeating) {
+        // Futes: ON (alacsonyabb) < OFF (magasabb)
+        newOn = Math.round((target - hysteresis) * 10) / 10;
+        newOff = Math.round((target + hysteresis) * 10) / 10;
+      } else {
+        // Hutes: ON (magasabb) > OFF (alacsonyabb)
+        newOn = Math.round((target + hysteresis) * 10) / 10;
+        newOff = Math.round((target - hysteresis) * 10) / 10;
+      }
+
+      // Lokalis tombok frissitese
+      if (type === 'pca') {
+        PCA_min_temp_ON[idx] = Math.round(newOn * 10);
+        PCA_max_temp_OFF[idx] = Math.round(newOff * 10);
+      } else {
+        min_temp_ON[idx] = Math.round(newOn * 10);
+        max_temp_OFF[idx] = Math.round(newOff * 10);
+      }
+
+      return sendThermoValues(type, id, newOn, newOff);
+    } catch (error) {
+      console.error('Thermo target command error:', error);
+      showToast(`Termosztat parancs hiba: ${error.message}`);
+      return false;
+    }
+  }
+
+  // Termosztat ON ertek beallitasa (csak a bekapcsolasi hofok)
+  function executeThermoOnCommand(type, id, value) {
+    try {
+      id = parseInt(id);
+      value = parseFloat(value);
+      if (isNaN(id) || id < 1) {
+        showToast(`Ervenytelen thermo ID: ${id}`);
+        return false;
+      }
+      if (isNaN(value)) {
+        showToast(`Ervenytelen hofo: ${value}`);
+        return false;
+      }
+
+      const idx = id - 1;
+      let currentOff;
+
+      if (type === 'pca') {
+        if (typeof PCA_max_temp_OFF === 'undefined') {
+          showToast('PCA termosztat adatok nem elerhetoek');
+          return false;
+        }
+        currentOff = PCA_max_temp_OFF[idx] / 10;
+        PCA_min_temp_ON[idx] = Math.round(value * 10);
+      } else {
+        if (typeof max_temp_OFF === 'undefined') {
+          showToast('Relay termosztat adatok nem elerhetoek');
+          return false;
+        }
+        currentOff = max_temp_OFF[idx] / 10;
+        min_temp_ON[idx] = Math.round(value * 10);
+      }
+
+      return sendThermoValues(type, id, value, currentOff);
+    } catch (error) {
+      console.error('Thermo ON command error:', error);
+      showToast(`Termosztat ON parancs hiba: ${error.message}`);
+      return false;
+    }
+  }
+
+  // Termosztat OFF ertek beallitasa (csak a kikapcsolasi hofok)
+  function executeThermoOffCommand(type, id, value) {
+    try {
+      id = parseInt(id);
+      value = parseFloat(value);
+      if (isNaN(id) || id < 1) {
+        showToast(`Ervenytelen thermo ID: ${id}`);
+        return false;
+      }
+      if (isNaN(value)) {
+        showToast(`Ervenytelen hofo: ${value}`);
+        return false;
+      }
+
+      const idx = id - 1;
+      let currentOn;
+
+      if (type === 'pca') {
+        if (typeof PCA_min_temp_ON === 'undefined') {
+          showToast('PCA termosztat adatok nem elerhetoek');
+          return false;
+        }
+        currentOn = PCA_min_temp_ON[idx] / 10;
+        PCA_max_temp_OFF[idx] = Math.round(value * 10);
+      } else {
+        if (typeof min_temp_ON === 'undefined') {
+          showToast('Relay termosztat adatok nem elerhetoek');
+          return false;
+        }
+        currentOn = min_temp_ON[idx] / 10;
+        max_temp_OFF[idx] = Math.round(value * 10);
+      }
+
+      return sendThermoValues(type, id, currentOn, value);
+    } catch (error) {
+      console.error('Thermo OFF command error:', error);
+      showToast(`Termosztat OFF parancs hiba: ${error.message}`);
+      return false;
+    }
+  }
+
   // XML fallback: kinyeri a parancsokat ha a modell XML formatumot hasznal
   function extractCommandsFromXML(text) {
     const commands = [];
