@@ -425,9 +425,9 @@ function buildHeader() {
 		};
 
 		// Enter-re is reagáljon
-		newHostInput.onkeypress = (e) => {
+		newHostInput.addEventListener("keydown", (e) => {
 			if (e.key === "Enter") addBtn.onclick();
-		};
+		});
 
 		addContainer.appendChild(newHostInput);
 		addContainer.appendChild(addBtn);
