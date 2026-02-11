@@ -184,7 +184,7 @@ A header felső sáv tartalmazza az összes főbb vezérlést és beállítást.
   5. Az API kulcs a szolgáltató felületén generálható
   6. Az API kulcs és a modell váltása később a fogaskerék ikon (⚙) segítségével módosítható
   7. Az AI Ninja hozzáfér a szerver álltal kezelt kártyákhoz, lekérdezheti, módosíthatja állapotukat.
-  8. Az AI Ninja megkapja az egyes kártyák paramétereit, így tudni fogja a Zoná(ka)t, ahova a kártya rendelvevan és a kártyákhoz rendelt megjegyzéseket is.
+  8. Az AI Ninja megkapja az egyes kártyák paramétereit, így tudni fogja a Zoná(ka)t, ahova a kártya rendelve van és a kártyákhoz rendelt megjegyzéseket is.
 
 🔐 Biztonsági megjegyzés:
   • Az API kulcs a böngészőben kerül letárolásra a localStorage-ben.
