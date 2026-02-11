@@ -191,36 +191,41 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   let conversationHistory = [];
   let isNinjaOpen = false;
 
-  // API kulcs beolvasása (environment változó vagy localStorage)
-  async function getAPIKey() {
-    // 1. Először localStorage
-    const stored = localStorage.getItem('ANTHROPIC_API_KEY');
+  // API kulcs beolvasasa az aktualis providerhez
+  async function getAPIKey(providerKey) {
+    const pKey = providerKey || currentProvider;
+    const provider = PROVIDERS[pKey];
+    if (!provider) return null;
+
+    // 1. localStorage
+    const stored = localStorage.getItem(provider.storageKey);
     if (stored) return stored;
-    
-    // 2. Globális változó (ha a szerver betöltötte)
-    if (typeof ANTHROPIC_API_KEY !== 'undefined' && ANTHROPIC_API_KEY) {
+
+    // 2. Globalis valtozo (csak Anthropic - backward compatible)
+    if (pKey === 'anthropic' && typeof ANTHROPIC_API_KEY !== 'undefined' && ANTHROPIC_API_KEY) {
       return ANTHROPIC_API_KEY;
     }
-    
-    // 3. Próbáljuk betölteni a /.env fájlból
-    try {
-      const response = await fetch(host+'.env');
-      if (response.ok) {
-        const text = await response.text();
-        const match = text.match(/ANTHROPIC_API_KEY\s*=\s*(.+)/);
-        if (match && match[1]) {
-          const key = match[1].trim().replace(/['"]/g, '');
-          if (key && key.startsWith('sk-ant-')) {
-            // Cache it in localStorage
-            localStorage.setItem('ANTHROPIC_API_KEY', key);
-            return key;
+
+    // 3. .env file (csak Anthropic - backward compatible)
+    if (pKey === 'anthropic') {
+      try {
+        const response = await fetch(host + '.env');
+        if (response.ok) {
+          const text = await response.text();
+          const match = text.match(/ANTHROPIC_API_KEY\s*=\s*(.+)/);
+          if (match && match[1]) {
+            const key = match[1].trim().replace(/['"]/g, '');
+            if (key && key.startsWith('sk-ant-')) {
+              localStorage.setItem(provider.storageKey, key);
+              return key;
+            }
           }
         }
+      } catch (err) {
+        console.log('Could not load .env file:', err);
       }
-    } catch (err) {
-      console.log('Could not load .env file:', err);
     }
-    
+
     return null;
   }
 
