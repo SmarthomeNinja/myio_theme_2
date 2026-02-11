@@ -375,31 +375,45 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     const key = await getAPIKey();
     const setupDiv = document.getElementById('ninja-api-setup');
     const inputArea = document.querySelector('.ninja-input-area');
-    
+    const statusDiv = document.getElementById('ninja-key-status');
+
     if (!key) {
-      setupDiv.style.display = 'block';
-      inputArea.style.opacity = '0.5';
-      inputArea.style.pointerEvents = 'none';
+      if (setupDiv) setupDiv.style.display = 'block';
+      if (inputArea) {
+        inputArea.style.opacity = '0.5';
+        inputArea.style.pointerEvents = 'none';
+      }
+      if (statusDiv) {
+        statusDiv.textContent = '⚠️ API kulcs szukseges a hasznalatahoz';
+        statusDiv.style.color = '#fcb034';
+      }
     } else {
-      setupDiv.style.display = 'none';
-      inputArea.style.opacity = '1';
-      inputArea.style.pointerEvents = 'auto';
+      if (inputArea) {
+        inputArea.style.opacity = '1';
+        inputArea.style.pointerEvents = 'auto';
+      }
+      if (statusDiv) {
+        statusDiv.textContent = '✅ API kulcs beallitva';
+        statusDiv.style.color = '#43E7F6';
+      }
     }
   }
 
-  // Save API key
+  // Save API key - provider-fuggo
   function saveAPIKey() {
     const input = document.getElementById('ninja-api-key-input');
     const key = input.value.trim();
-    
-    if (key && key.startsWith('sk-ant-')) {
-      localStorage.setItem('ANTHROPIC_API_KEY', key);
-      input.value = '';
-      checkAPIKey();
-      showToast('✅ API kulcs mentve!');
-    } else {
-      showToast('❌ Érvénytelen API kulcs formátum');
+    const provider = PROVIDERS[currentProvider];
+
+    if (!key) {
+      showToast('❌ Kerlek add meg az API kulcsot!');
+      return;
     }
+
+    localStorage.setItem(provider.storageKey, key);
+    input.value = '';
+    checkAPIKey();
+    showToast('✅ ' + provider.name + ' API kulcs mentve!');
   }
 
   // Toast notification
