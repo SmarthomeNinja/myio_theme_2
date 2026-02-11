@@ -285,14 +285,26 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         
         <div class="ninja-api-setup" id="ninja-api-setup" style="display: none;">
           <div class="ninja-api-notice">
-            <p>⚠️ Anthropic API kulcs szükséges a használathoz</p>
-            <input 
-              type="password" 
-              id="ninja-api-key-input" 
-              placeholder="sk-ant-api..."
-              class="ninja-api-input"
-            />
-            <button id="ninja-save-key" class="ninja-btn-primary">Mentés</button>
+            <div class="ninja-settings-row">
+              <label>Provider:</label>
+              <select id="ninja-provider-select" class="ninja-select">
+                ${Object.entries(PROVIDERS).map(([key, p]) =>
+                  '<option value="' + key + '"' + (key === currentProvider ? ' selected' : '') + '>' + p.name + '</option>'
+                ).join('')}
+              </select>
+            </div>
+            <div class="ninja-settings-row">
+              <label>Modell:</label>
+              <select id="ninja-model-select" class="ninja-select"></select>
+            </div>
+            <div class="ninja-settings-row">
+              <label>API kulcs:</label>
+              <div style="display: flex; gap: 8px; flex: 1;">
+                <input type="password" id="ninja-api-key-input" placeholder="${PROVIDERS[currentProvider].keyPlaceholder}" class="ninja-api-input" style="flex: 1;" />
+                <button id="ninja-save-key" class="ninja-btn-primary">Mentes</button>
+              </div>
+            </div>
+            <div id="ninja-key-status" class="ninja-key-status"></div>
           </div>
         </div>
       </div>
