@@ -18,6 +18,14 @@ A **myIO Dashboard** egy okos otthon vezérlőrendszer böngészőalkalmazása. 
 
 ---
 
+## Full Screen, teljes képernyős mód
+
+A **myIO Dashboard** telefonon és tableten képes teljes képernyős módban futni
+📍 Használat:
+  • Fordítsd a telefont fekvő pozicióba (legyen bekapcsolva az elforgatás engedélyezése a telefonban)
+  • Ha automatikusan nem kapcsol be a teljes képernyős mód, kattints a jobb alsó sarokban megjelenő ikonra.
+---
+
 ## Navigáció & Header (nav.js)
 
 A header felső sáv tartalmazza az összes főbb vezérlést és beállítást.
