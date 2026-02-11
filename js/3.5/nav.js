@@ -476,7 +476,6 @@ function buildHeader() {
 			if (e.target === modal) closeModal();
 		});
 
-		content.appendChild(header);
 		content.appendChild(contentBody);
 		modal.appendChild(content);
 		
