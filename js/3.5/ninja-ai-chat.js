@@ -854,7 +854,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
       while ((m = invokeRegex.exec(text)) !== null) {
         const cmd = m[1].trim();
         // Csak ismert parancsokat fogadjunk el
-        if (/^(relay_on|relay_off|pca_on|pca_off|pca_set|pwm_on|pwm_off|pwm_set)\(/.test(cmd)) {
+        if (/^(relay_on|relay_off|pca_on|pca_off|pca_set|pwm_on|pwm_off|pwm_set|thermo_target|thermo_on|thermo_off)\(/.test(cmd)) {
           commands.push(cmd);
         }
       }
