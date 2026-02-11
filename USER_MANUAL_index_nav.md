@@ -282,7 +282,10 @@ Az index.js modul felépíti és kezeli a kártyákat tartalmazó dashboard-ot.
     • Másik Szenzor adatai összehasonlítás végett
     • Azonos szenzorokhoz azonos színeket rendel
   • Kimenetek szekció:
-    • Ha talál olyan kimenetet, amit az adott szenzor vezérel, 
+    • Ha talál olyan kimenetet, amit az adott szenzor vezérel, azok ki és bekapcsolási értékeit kilistázza
+    • Az egyes kimenetek megjelenítése a grafikonon ki-be kapcslolható.
+    • A grafikonon megjelenített ki-bekapcsolási érték, vízszintes szaggatott vonallal jelenik meg, jobb oldalán az elnevezéssel.
+    • Erre az elnevezésre nyomva értéke vizuálisan módosítható. 
 ```
 
 #### **Drag & Drop (Áthelyezés)**
