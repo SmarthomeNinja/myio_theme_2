@@ -421,6 +421,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
   // FONTOS: A description tombok 1-bazisuak, az ertek tombok 0-bazisuak!
   // PCA_description[d] <-> PCA[d-1], cardId = pca:${d}, server parancs = d
   function getDeviceContext() {
+    console.log('Gathering device context for Ninja AI...');
     const context = {
       relays: [],
       sensors: [],
