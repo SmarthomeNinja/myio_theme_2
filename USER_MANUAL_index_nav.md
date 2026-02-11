@@ -269,6 +269,7 @@ Az index.js modul felépíti és kezeli a kártyákat tartalmazó dashboard-ot.
 🖱️ Hosszú nyomás (0.5 másodperc):
   • Megnyitja a kártya "Beállítások" modal ablakot
   • Módosítható: Név (csak a böngészőben), zóna, ikon, megjegyzés
+  • Ha megjegyzés van a kártyán egy ikon fogja mutatni.
   • A módosítások localStorage-ban mentődnek
 ```
 
