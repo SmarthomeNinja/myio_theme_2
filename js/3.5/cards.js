@@ -18,9 +18,10 @@
   function makeFavIcon(cardId) {
     const savedIcon = loadCardIcon(cardId);
     const on = isFav(cardId);
-    
+    const noteContent = window.myioStorage && typeof window.myioStorage.loadCardNote === "function" ? window.myioStorage.loadCardNote(cardId) : '';
+
     const wrapper = el("span", { class: "myio-fav-wrapper" });
-    
+
     const starBtn = el("button", {
       class: "myio-favInTitle" + (on ? " is-fav" : ""),
       type: "button",
@@ -31,17 +32,17 @@
     starBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
-    
+
       const wasFav = isFav(cardId);
       const before = loadFavs();
       const firstFavWillBeCreated = (!wasFav && before.length === 0);
-    
+
       toggleFav(cardId);
 
       if (loadFavs().length === 0) {
         cleanupFavoritesSectionState();
       }
-      
+
       if (firstFavWillBeCreated) {
         try {
           const scope = (typeof MYIOname === "string" && MYIOname.trim()) ? MYIOname.trim() : "default";
@@ -53,16 +54,21 @@
           localStorage.setItem(ORDER_KEY, JSON.stringify(saved));
         } catch (err) { console.error("Favorites order update error:", err); }
       }
-    
+
       const now = isFav(cardId);
       starBtn.textContent = now ? "★" : "☆";
       starBtn.classList.toggle("is-fav", now);
-    
+
       if (typeof window.myioRenderAll === "function") window.myioRenderAll();
     });
-    
+
     wrapper.appendChild(starBtn);
-    
+
+    // Megjegyzés ikon
+    if (noteContent && noteContent.trim()) {
+      wrapper.appendChild(el("span", { class: "myio-card-icon myio-note-icon", title: (typeof str_Note !== "undefined" ? str_Note : "Megjegyzés") }, [document.createTextNode("📝")]));
+    }
+
     if (savedIcon && savedIcon !== '☆' && savedIcon !== '★') {
       wrapper.appendChild(el("span", { class: "myio-card-icon", title: (typeof str_ChosenIcon !== "undefined" ? str_ChosenIcon : "Választott ikon") }, [document.createTextNode(savedIcon)]));
     }
