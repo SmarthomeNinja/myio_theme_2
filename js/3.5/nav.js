@@ -452,8 +452,6 @@ function buildHeader() {
 		addContainer.appendChild(addBtn);
 		contentBody.appendChild(addContainer);
 
-		contentBody.appendChild(content);
-
 		// Escape-re bezárás
 		const onKeyDown = (e) => {
 			if (e.key === "Escape") {
