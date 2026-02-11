@@ -514,6 +514,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
 
   // Send message to Claude API
   async function sendMessage() {
+    console.log('Ninja: Üzenet küldése...');
     const input = document.getElementById('ninja-input');
     const message = input.value.trim();
     
