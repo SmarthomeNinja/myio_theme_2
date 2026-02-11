@@ -1336,7 +1336,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     return { count: executed, results };
   }
 
-  // Send message to Claude API
+  // Uzenet kuldese az AI providernek
   async function sendMessage() {
     const input = document.getElementById('ninja-input');
     const message = input.value.trim();
