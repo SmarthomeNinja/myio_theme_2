@@ -366,7 +366,6 @@ function buildHeader() {
 					document.body.removeChild(modal);
 				}
 			};
-			selectBtn.disabled = isActive;
 
 			item.appendChild(selectBtn);
 
