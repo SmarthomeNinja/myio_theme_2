@@ -200,7 +200,7 @@ function buildHeader() {
 
 	// ===== BOOSTER HOST LISTA - localStorage kezelés =====
 	const BOOSTER_HOSTS_KEY = "myio.booster.hosts";
-	const DEFAULT_HOST = "http://okoslak.hu/ext";
+	const DEFAULT_HOST = "https://okoslak.hu/ext";
 
 	function getBoosterHosts() {
 		try {
