@@ -83,3 +83,4 @@
 3. **Böngésző** ha szükséges a böngészőben (disable cache!) eléred a weboldalt. mindig innen nyisd meg az oldalt: `http://myio.local/`, felhasználőnév:admin, password :admin
 4. **Használj** magyar kommenteket a kódban
 5. **NE** nyúlj a styleBlue.css-hez. Az index oldalhoz a styleBlueNew.css tartozik.
+6. **myIO** a myIO felirat így néz ki... kis betüvel kezdődik, ez a brand része.
