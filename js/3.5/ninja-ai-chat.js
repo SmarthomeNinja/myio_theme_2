@@ -544,7 +544,7 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         context.sensors.push(entry);
       }
     }
-    console.log('aaaaProcessing PCA thermo activators for thermostats...');
+    console.log('Sensors processed:', context.sensors);
     // Termosztatok - PCA kimenetek thermo aktivatorral
     if (typeof PCA !== 'undefined' && typeof PCA_thermoActivator !== 'undefined') {
       console.log('Processing PCA thermo activators for thermostats...');
