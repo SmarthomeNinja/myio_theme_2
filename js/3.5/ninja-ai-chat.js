@@ -1254,6 +1254,9 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         if (deviceContext.sensors.length > 0) {
           contextMessage += `Szenzorok: ${JSON.stringify(deviceContext.sensors)}\n`;
         }
+        if (deviceContext.thermostats.length > 0) {
+          contextMessage += `Termosztatok: ${JSON.stringify(deviceContext.thermostats)}\n`;
+        }
         contextMessage += `\nFelhasznalo kerdese: ${message}`;
 
         // Az utolso user uzenetet frissitjuk kontextussal
