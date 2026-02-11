@@ -1428,14 +1428,12 @@ html.myio-noanim .myio-sectionBody {
 .myio-card-icon {
 	font-size: 1.3em;
 	margin-top: 4px;
-	opacity: 0.95;
 }
 
 .myio-fav-wrapper .myio-card-icon {
 	font-size: 1.1em;
 	line-height: 1;
 	display: block;
-	opacity: 0.9;
 }
 
 /* Desktop long-press feedback */
