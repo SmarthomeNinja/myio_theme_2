@@ -11,7 +11,7 @@
 
 ## Bevezetés
 
-A **MyIO Dashboard** egy okos otthon vezérlőrendszer böngészőalkalmazása. Két fő modul kezeli a felhasználói felületet:
+A **myIO Dashboard** egy okos otthon vezérlőrendszer böngészőalkalmazása. Két fő modul kezeli a felhasználói felületet:
 
 - **`nav.js`** – Header és menüfunkciók
 - **`index.js`** – Dashboard tartalma (kártyák, szekciók, eszközök)
@@ -31,21 +31,30 @@ A header felső sáv tartalmazza az összes főbb vezérlést és beállítást.
 📍 Használat:
   • Kattints a ↻ gombra
   • Az oldal újra betölti az adatokat a szerverről
-  • Beállítások és a felhasználó-szerializációs státusza megmarad
+  • Az oldal visszapozicionál
 ```
 
-### 2. Home Gomb
-**Ikon:** 🏠
-**Helye:** Header bal oldal (csak más oldalakon jelenik meg)
-**Funkció:** Vissza a főoldalra navigál.
+### 2. myIO logo
+**Ikon:** myIO
+**Helye:** Header közepe
+**Funkció:** Vissza navigál a főoldalra.
 
 ```
 📍 Használat:
-  • Kattints a 🏠 gombra
+  • Kattints a myIO logóra
   • Rögtön a dashboard főoldalára kerülsz
 ```
 
-### 3. Menu Gomb
+### 3. Sárga felirat 
+**Helye:** Header közepe a logó jobb oldalán
+**Funkció:** A szerver nevét jelzi. 
+
+```
+📍 Használat:
+  • Az általános beállítások között módosítható.
+```
+
+### 4. Menu Gomb
 **Ikon:** ≡ (hamburger menü)
 **Helye:** Header jobb oldal
 **Funkció:** Megnyitja az összes beállítást tartalmazó panelt.
@@ -53,7 +62,7 @@ A header felső sáv tartalmazza az összes főbb vezérlést és beállítást.
 ```
 📍 Használat:
   • Kattints a ≡ gombra a menü megnyitásához
-  • Kattints ismét a bezáráshoz
+  • Kattints ismét a bezáráshoz (az ikon 'X'-re vált)
   • ESC billentyűvel is bezárhatod
   • A menü automatikusan bezáródik, ha kívülre kattintasz
 ```
@@ -62,21 +71,19 @@ A header felső sáv tartalmazza az összes főbb vezérlést és beállítást.
 
 ### Menu Lehetőségek
 
-#### **a) Booster**
-**Cél:** Szerver elérhetőség konfigurálása (fejlesztői / haladó felhasználók)
+#### **a) Témák**
+**Cél:** a myIO Server az SD kártya helyett innen tölti be a webes megjelenítéshez szükséges file-okat
 
 ```
 🔧 Beállítás:
-  1. Kattints a "Booster" gombra a menüben
-  2. Engedélyezd a "Booster" toggle-t (ki/be)
-  3. Add meg a Host URL-t az input mezőben
-     Pl: http://192.168.1.100/
+  1. Engedélyezd a "Témék" toggle-t (ki/be)
+  2. Kattints a "Témák" gombra a menüben
+  3. Megnyílik egy modal ablak, ahol egy listából kiválasztható, vagy törölhető egy korábban hozzáadot URL
+  3. Add meg az Host URL-t az input mezőben, ahol az új téma elérhető
   4. A beállítás automatikusan cookie-ban mentődik
 
 💡 Tipp:
-  • Alapvetően a `host` globális változó használódik
-  • Booster: alternatív szerverrészről lehet betölteni az adatokat
-  • Tipikusan csak fejlesztéshez kell
+  • Fejlesztéshez könnyedén hozzáadható egy másolat, vagy helyi tárhely (pl.:http://localhost:8000)
 ```
 
 #### **b) Auto Refresh**
@@ -100,7 +107,6 @@ A header felső sáv tartalmazza az összes főbb vezérlést és beállítást.
   • AJAX-alapú → NEM tölti újra az oldalt
   • Letölti a `/sens_out.json` fájlt
   • Frissíti az UI-t az új adatokkal
-  • Fallback: Ha MyIOLive nem elérhető, az `sendForm()` használódik
 
 💾 Tárolás:
   • localStorage-ban mentődik: `myio.autoRefresh.enabled` és `myio.autoRefresh.interval`
@@ -141,7 +147,7 @@ A header felső sáv tartalmazza az összes főbb vezérlést és beállítást.
 ```
 
 #### **e) Export / Import (Backup)**
-**Cél:** Beállítások mentése és visszaállítása
+**Cél:** Beállítások mentése és visszaállítása. Segítségével egyik böngészőből egy másikba átvihetőek a beállítások.
 
 ```
 💾 Export (Biztonsági Mentés):
@@ -162,7 +168,7 @@ A header felső sáv tartalmazza az összes főbb vezérlést és beállítást.
   • Kártyák/Szekciók sorrendje
   • Booster konfigurálása
   • Nyelv választása
-  • Egyéb localStorage értékek (myio.* ključevi)
+  • Egyéb localStorage értékek
 ```
 
 #### **f) Logout (Kilépés)**
@@ -192,16 +198,16 @@ Az index.js modul felépíti és kezeli a kártyákat tartalmazó dashboard-ot.
 │              Header (nav.js)                │
 ├─────────────────────────────────────────────┤
 │                                             │
-│  [Szekció 1: Világítás]                    │
-│  ┌──────────────┐ ┌──────────────┐         │
-│  │ Nappali      │ │ Hálószoba    │         │
-│  │ Dolgozó      │ │ Konyha       │         │
-│  └──────────────┘ └──────────────┘         │
+│  [Szekció 1: Világítás]                     │
+│  ┌──────────────┐ ┌──────────────┐          │
+│  │ Nappali      │ │ Hálószoba    │          │
+│  │ Dolgozó      │ │ Konyha       │          │
+│  └──────────────┘ └──────────────┘          │
 │                                             │
-│  [Szekció 2: Fűtés]                        │
-│  ┌──────────────┐ ┌──────────────┐         │
-│  │ Termosztát  │ │ Radiátor     │         │
-│  └──────────────┘ └──────────────┘         │
+│  [Szekció 2: Fűtés]                         │
+│  ┌──────────────┐ ┌──────────────┐          │
+│  │ Termosztát   │ │ Radiátor     │          │
+│  └──────────────┘ └──────────────┘          │
 │                                             │
 └─────────────────────────────────────────────┘
 ```
