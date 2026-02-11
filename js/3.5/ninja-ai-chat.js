@@ -63,6 +63,9 @@ Ha a felhasználó eszközöket szeretne beállítani, adj ki parancsokat a vál
 [COMMAND]pca_set(5, 75)[/COMMAND]
 [COMMAND]pwm_on(10)[/COMMAND]
 [COMMAND]pwm_set(10, 50)[/COMMAND]
+[COMMAND]thermo_target(pca, 1, 25.0)[/COMMAND]
+[COMMAND]thermo_on(relay, 3, 24.0)[/COMMAND]
+[COMMAND]thermo_off(pca, 2, 26.5)[/COMMAND]
 
 NAGYON FONTOS - FORMÁTUM SZABÁLY:
 - KIZÁRÓLAG a [COMMAND]...[/COMMAND] formátumot használd!
