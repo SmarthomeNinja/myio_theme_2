@@ -118,7 +118,7 @@ let isDraggingCard = false;
 
       requestAnimationFrame(() => document.documentElement.classList.remove("myio-noanim"));
 
-      try { window.onpageshow = () => window.scrollTo(window.scrollX, window.scrollY); } catch { }
+      try { window.onpageshow = () => window.scrollTo(x, y); } catch { }
       try { if (typeof enableThumbOnlyRanges === "function") enableThumbOnlyRanges(document); } catch { }
       try { if (typeof myioRO !== "undefined" && myioRO) myioRO.observe(document.body); } catch { }
 
