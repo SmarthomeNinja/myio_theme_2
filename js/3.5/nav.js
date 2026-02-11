@@ -453,28 +453,6 @@ function buildHeader() {
 		contentBody.appendChild(addContainer);
 
 		contentBody.appendChild(content);
-		const closeBtn = document.createElement("button");
-		closeBtn.type = "button";
-		closeBtn.style.cssText = `
-			width: 100%;
-			background: rgba(255,255,255,0.1);
-			color: #fff;
-			border: 1px solid rgba(255,255,255,0.2);
-			border-radius: 6px;
-			padding: 10px;
-			cursor: pointer;
-			font-size: 0.9em;
-			font-weight: 700;
-			transition: background 0.2s;
-		`;
-		closeBtn.textContent = typeof str_Close !== "undefined" ? str_Close : "Bezárás";
-		closeBtn.onmouseover = () => closeBtn.style.background = "rgba(255,255,255,0.15)";
-		closeBtn.onmouseout = () => closeBtn.style.background = "rgba(255,255,255,0.1)";
-		closeBtn.onclick = () => {
-			modal.style.display = "none";
-			document.body.removeChild(modal);
-		};
-		content.appendChild(closeBtn);
 
 		// Escape-re bezárás
 		const onKeyDown = (e) => {
