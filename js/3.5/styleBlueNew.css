@@ -1884,6 +1884,97 @@ input::placeholder,
 	height: 20px;
 }
 
+/* --- Ninja header kiegeszitesek (multi-provider) --- */
+
+.ninja-model-badge {
+	font-size: 11px;
+	font-weight: 500;
+	background: rgba(3, 151, 214, 0.25);
+	color: #43E7F6;
+	padding: 3px 10px;
+	border-radius: 12px;
+	cursor: pointer;
+	transition: all 0.2s;
+	border: 1px solid rgba(67, 231, 246, 0.2);
+	white-space: nowrap;
+}
+
+.ninja-model-badge:hover {
+	background: rgba(3, 151, 214, 0.4);
+	border-color: rgba(67, 231, 246, 0.4);
+}
+
+.ninja-header-btns {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.ninja-settings-btn {
+	background: none;
+	border: none;
+	color: #8899aa;
+	font-size: 20px;
+	cursor: pointer;
+	padding: 4px 8px;
+	border-radius: 6px;
+	transition: all 0.2s;
+	line-height: 1;
+}
+
+.ninja-settings-btn:hover {
+	color: #43E7F6;
+	background: rgba(67, 231, 246, 0.1);
+}
+
+/* --- Ninja settings panel --- */
+
+.ninja-settings-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.ninja-settings-row label {
+	min-width: 75px;
+	font-size: 13px;
+	color: #8899aa;
+	font-weight: 500;
+}
+
+.ninja-select {
+	flex: 1;
+	padding: 8px 12px;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba(3, 151, 214, 0.3);
+	border-radius: 8px;
+	color: #fff;
+	font-size: 13px;
+	cursor: pointer;
+	appearance: none;
+	-webkit-appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2343E7F6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 10px center;
+	padding-right: 30px;
+}
+
+.ninja-select:focus {
+	outline: none;
+	border-color: #43E7F6;
+	box-shadow: 0 0 0 3px rgba(67, 231, 246, 0.1);
+}
+
+.ninja-select option {
+	background: #1a2a3a;
+	color: #fff;
+}
+
+.ninja-key-status {
+	font-size: 12px;
+	padding: 4px 0;
+}
+
 .ninja-api-setup {
 	padding: 20px;
 	border-top: 1px solid rgba(3, 151, 214, 0.3);
