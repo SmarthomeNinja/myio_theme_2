@@ -1460,6 +1460,66 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
     }
   }
 
+  // --- Provider/Modell beallitasok segédfuggvenyei ---
+
+  // Beallitasok panel megnyitasa/bezarasa
+  function toggleSettings() {
+    const setup = document.getElementById('ninja-api-setup');
+    if (setup) {
+      setup.style.display = setup.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+
+  // Modell lista feltoltese az aktualis provider alapjan
+  function populateModelSelect() {
+    const select = document.getElementById('ninja-model-select');
+    if (!select) return;
+    const provider = PROVIDERS[currentProvider];
+    // Ha a mentett modell nem letezik az uj providernel, az elsot valasztjuk
+    const validModel = provider.models.find(m => m.id === currentModel);
+    if (!validModel) {
+      currentModel = provider.models[0].id;
+      localStorage.setItem('NINJA_MODEL', currentModel);
+    }
+    select.innerHTML = provider.models.map(m =>
+      '<option value="' + m.id + '"' + (m.id === currentModel ? ' selected' : '') + '>' + m.name + '</option>'
+    ).join('');
+    select.onchange = function() {
+      currentModel = this.value;
+      localStorage.setItem('NINJA_MODEL', currentModel);
+      updateModelBadge();
+    };
+  }
+
+  // Provider valtas
+  function onProviderChange() {
+    const select = document.getElementById('ninja-provider-select');
+    if (!select) return;
+    currentProvider = select.value;
+    localStorage.setItem('NINJA_PROVIDER', currentProvider);
+    currentModel = PROVIDERS[currentProvider].models[0].id;
+    localStorage.setItem('NINJA_MODEL', currentModel);
+    populateModelSelect();
+    updateModelBadge();
+    // API kulcs input placeholder frissitese
+    const keyInput = document.getElementById('ninja-api-key-input');
+    if (keyInput) keyInput.placeholder = PROVIDERS[currentProvider].keyPlaceholder;
+    // Kulcs ellenorzese az uj providerhez
+    checkAPIKey();
+    // Beszelgetes torles (uj provider, uj kontextus)
+    conversationHistory = [];
+  }
+
+  // Modell badge frissitese a headerben
+  function updateModelBadge() {
+    const badge = document.getElementById('ninja-model-badge');
+    if (!badge) return;
+    const provider = PROVIDERS[currentProvider];
+    const model = provider.models.find(m => m.id === currentModel);
+    badge.textContent = model ? model.name : currentModel;
+    badge.title = provider.name + ' - Kattints a beallitasokhoz';
+  }
+
   // Open Ninja modal
   function openNinja() {
     if (!document.getElementById('ninja-modal')) {
