@@ -867,6 +867,7 @@ function buildHeader() {
 
 	const btnInfo = document.createElement("button");
 	btnInfo.type = "button";
+	btnInfo.padding = "3";
 	btnInfo.className = "myio-btn small";
 	btnInfo.textContent = ("?");
 	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
