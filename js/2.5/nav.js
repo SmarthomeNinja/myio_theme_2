@@ -165,8 +165,8 @@ function buildHeader() {
 	const btnInfo = document.createElement("button");
 	btnInfo.type = "button";
 	btnInfo.className = "myio-btn small";
-	btnInfo.textContent = ("info");
-	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "/chart"; };
+	btnInfo.textContent = ("Info");
+	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
 
 
 	menuPanel.appendChild(btnInfo);
