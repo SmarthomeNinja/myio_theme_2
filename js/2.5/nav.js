@@ -973,6 +973,7 @@ function buildHeader() {
 
 	const btnInfo = document.createElement("button");
 	btnInfo.type = "button";
+	btnInfo.className = "myio-settingsBtn";
 	btnSettings.setAttribute("aria-label", btnSettings.title);
 	btnInfo.textContent = ("i" /* info ikon */);
 	btnInfo.fontSize = "10pxem";
