@@ -169,9 +169,7 @@ function buildHeader() {
 	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "/chart"; };
 
 
-
-	navRow.append(btnInfo);
-	menuPanel.appendChild(navRow);
+	menuPanel.appendChild(btnInfo);
 
 
 	const btnChartMenu = document.createElement("button");
