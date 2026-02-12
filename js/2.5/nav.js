@@ -163,6 +163,7 @@ function buildHeader() {
 
 	const navRow2 = document.createElement("div");
 	navRow2.className = "myio-menuRow myio-menuRowNav";
+
 	const btnInfo = document.createElement("button");
 	btnInfo.type = "button";
 	btnInfo.className = "myio-btn small";
@@ -170,7 +171,7 @@ function buildHeader() {
 	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
 
     navRow2.appendChild(btnInfo);
-	menuPanel.appendChild(nav);
+	menuPanel.appendChild(navRow2);
 
 
 	const btnChartMenu = document.createElement("button");
