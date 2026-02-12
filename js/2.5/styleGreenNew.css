@@ -1670,6 +1670,7 @@ input::placeholder,
 	gap: 16px;
 	min-height: 300px;
 	max-height: 500px;
+	
 }
 
 .ninja-messages::-webkit-scrollbar {
