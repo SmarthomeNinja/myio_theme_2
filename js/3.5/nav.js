@@ -144,6 +144,11 @@ function buildHeader() {
 	const menuPanel = document.createElement("div");
 	menuPanel.className = "myio-menuPanel";
 	// ===== Menu: Chart + Settings gombok =====
+	
+	const navRow = document.createElement("div");
+	navRow.className = "myio-menuRow myio-menuRowNav";
+	const menuWrap = document.createElement("div");
+	menuWrap.style.position = "relative";
 
 	const navRow2 = document.createElement("div");
 	navRow2.className = "myio-menuRow myio-menuRowNav";
@@ -156,11 +161,6 @@ function buildHeader() {
 
     navRow2.appendChild(btnInfo);
 	menuPanel.appendChild(navRow2);
-
-	const navRow = document.createElement("div");
-	navRow.className = "myio-menuRow myio-menuRowNav";
-	const menuWrap = document.createElement("div");
-	menuWrap.style.position = "relative";
 
 	const btnMenu = document.createElement("button");
 	btnMenu.type = "button";
