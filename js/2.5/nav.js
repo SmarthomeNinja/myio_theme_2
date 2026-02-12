@@ -169,7 +169,7 @@ function buildHeader() {
 	btnInfo.textContent = ("Info");
 	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
 
-navRow2.appendChild(btnInfo);
+    navRow2.appendChild(btnInfo);
 	menuPanel.appendChild(nav);
 
 
