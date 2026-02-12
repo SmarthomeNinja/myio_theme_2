@@ -7,13 +7,13 @@
 - A HTML verziótól függően eldönti: `/js/2.5` vagy `/js/3.5` könyvtárból töltődnek a file-ok
 
 ## Fejlesztési fókusz
-⚠️ **FONTOS: Csak a `/js/3.5` könyvtárban dolgozz!**
+⚠️ **FONTOS: Csak a `/js/2.5` könyvtárban dolgozz!**
 - Jelenleg a **főoldalt** fejlesztjük
 - A `/setup` és `/chart` oldalakat **hagyd figyelmen kívül**
 
 ## Fő komponensek
 
-### [nav.js](js/3.5/nav.js) - Header & Navigáció
+### [nav.js](js/2.5/nav.js) - Header & Navigáció
 - Fejléc (header) kezelése
 - **Menü funkciók:**
   - Booster (toggle + host input)
@@ -25,7 +25,7 @@
   - Chart gomb → `/chart`
   - Settings gomb → `/setup`
 
-### [index.js](js/3.5/index.js) - Főmodul (Dashboard)
+### [index.js](js/2.5/index.js) - Főmodul (Dashboard)
 - Az okos otthonban beállított eszközök megjelenítése kártyákban
 - Kártyák szekciókba rendezve
 - **Drag & Drop:** szekciók és kártyák áthelyezhetők
@@ -78,7 +78,7 @@
 - **Tesztelés:** Nyisd meg a böngészőt developer tools-szal
 
 ## Fontos szabályok
-1. **MINDIG** a `/js/3.5` könyvtárban dolgozz
+1. **MINDIG** a `/js/2.5` könyvtárban dolgozz
 2. **NE módosítsd** a `/setup` és `/chart` oldalakat
 3. **Böngésző** ha szükséges a böngészőben (disable cache!) eléred a weboldalt. mindig innen nyisd meg az oldalt: `http://myio.local/`, felhasználőnév:admin, password :admin
 4. **Használj** magyar kommenteket a kódban
