@@ -75,7 +75,7 @@
       document.head.appendChild(link);
     }
   }
-  loadCSS('style-chart-modal.css');
+  loadCSS('style-chart-modal-blue.css');
   // Chart.js nem igényel külön CSS;
 
   // --- Sunrise/Sunset SVG ikonok ---
