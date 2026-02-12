@@ -973,10 +973,10 @@ function buildHeader() {
 
 	const btnInfo = document.createElement("button");
 	btnInfo.type = "button";
-	btnInfo.className = "myio-iconBtn myio-settingsBtn";
+	btnInfo.className = "myio-iconBtn";
 	btnSettings.setAttribute("aria-label", btnSettings.title);
 	btnInfo.textContent = ("i" /* info ikon */);
-	btnInfo.fontSize = "0.1em !important;";
+	btnInfo.fontSize = "10pxem";
 	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
 
 	right.appendChild(btnInfo);
