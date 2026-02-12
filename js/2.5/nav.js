@@ -868,7 +868,7 @@ function buildHeader() {
 	const btnInfo = document.createElement("button");
 	btnInfo.type = "button";
 	btnInfo.className = "myio-btn small";
-	btnInfo.textContent = (str_Settings || "Settings");
+	btnInfo.textContent = ("Info");
 	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
 	footer.appendChild(btnInfo);
 	// Export / Import
