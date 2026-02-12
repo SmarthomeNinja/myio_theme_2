@@ -149,18 +149,7 @@ function buildHeader() {
 	navRow.className = "myio-menuRow myio-menuRowNav";
 	const menuWrap = document.createElement("div");
 	menuWrap.style.position = "relative";
-
-	const navRow2 = document.createElement("div");
-	navRow2.className = "myio-menuRow myio-menuRowNav";
-
-	const btnInfo = document.createElement("button");
-	btnInfo.type = "button";
-	btnInfo.className = "myio-btn small";
-	btnInfo.textContent = ("Info");
-	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
-
-    navRow2.appendChild(btnInfo);
-	menuPanel.appendChild(navRow2);
+	
 
 	const btnMenu = document.createElement("button");
 	btnMenu.type = "button";
