@@ -865,14 +865,7 @@ function buildHeader() {
 	
 	footer.appendChild(btnLogout);
 
-	const btnInfo = document.createElement("button");
-	btnInfo.type = "button";
-	btnInfo.margin = "3px 8px";
-	btnInfo.className = "myio-btn small";
-	btnInfo.textContent = ("?");
-	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
-
-	footer.appendChild(btnInfo);
+	
 	// Export / Import
 	const dataRow = document.createElement("div");
 	dataRow.className = "myio-menuRow";
