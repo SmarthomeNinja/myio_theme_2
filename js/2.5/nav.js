@@ -976,7 +976,7 @@ function buildHeader() {
 	btnInfo.className = "myio-iconBtn myio-settingsBtn";
 	btnSettings.setAttribute("aria-label", btnSettings.title);
 	btnInfo.textContent = ("i" /* info ikon */);
-	btnInfo.fontSize = "10px";
+	btnInfo.fontSize = "5px";
 	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
 
 	right.appendChild(btnInfo);
