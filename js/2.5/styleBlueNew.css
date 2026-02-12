@@ -65,7 +65,7 @@ body {
 	right: 0;
 	top: 0;
 	height: calc(var(--myio-header-h) - 16px);
-	z-index: 109;
+	z-index: 50;
 	pointer-events: none;
 	background:
 		radial-gradient(ellipse 1400px 900px at 10% 0%, rgba(3, 151, 214, .15), transparent 65%),
