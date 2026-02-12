@@ -1,0 +1,20 @@
+{
+    "languages":{
+        "0":{
+            "code":"EN",
+            "desc":"English"            
+        },
+        "1":{
+            "code":"HU",
+            "desc":"Hungarian"            
+        },
+        "2":{
+            "code":"FR",
+            "desc":"French"     
+        },
+        "3":{
+            "code":"DE",
+            "desc":"Deutsch"         
+        }
+      }
+   }
