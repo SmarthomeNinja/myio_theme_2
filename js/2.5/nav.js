@@ -161,6 +161,16 @@ function buildHeader() {
 	t.textContent = (typeof str_Menu !== "undefined" ? str_Menu : "Menu");
 	menuPanel.appendChild(t);
 
+	const btnInfo = document.createElement("button");
+	btnInfo.type = "button";
+	btnInfo.className = "myio-iconBtn myio-settingsBtn";
+	btnSettings.setAttribute("aria-label", btnSettings.title);
+	btnInfo.textContent = ("i" /* info ikon */);
+	btnInfo.fontSize = "1.0em";
+	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
+
+	navRow.append(btnInfo);
+
 	const btnChartMenu = document.createElement("button");
 	btnChartMenu.type = "button";
 	btnChartMenu.className = "myio-btn small";
@@ -969,17 +979,7 @@ function buildHeader() {
 	};
 
 	// 👉 menü gomb BAL oldalára
-	//right.append(btnSettings);
-
-	const btnInfo = document.createElement("button");
-	btnInfo.type = "button";
-	btnInfo.className = "myio-iconBtn myio-settingsBtn";
-	btnSettings.setAttribute("aria-label", btnSettings.title);
-	btnInfo.textContent = ("i" /* info ikon */);
-	btnInfo.fontSize = "10pxem";
-	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
-
-	right.appendChild(btnInfo);
+	//right.append(btnSettings);	
 
 	right.append(menuWrap);
 
