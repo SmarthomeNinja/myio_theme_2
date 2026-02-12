@@ -1,4 +1,20 @@
 
+(() => {
+	try {
+
+		const href = host + 'styleBlueNew.css';
+
+		if (!document.querySelector(`link[rel="stylesheet"][href="${href}"]`)) {
+			const link = document.createElement('link');
+			link.rel = 'stylesheet';
+			link.href = href;
+			link.onerror = () => console.error('Nem sikerült betölteni a styles.css fájlt:', href);
+			document.head.appendChild(link);
+		}
+	} catch (e) {
+		console.error('Stíluslap betöltése közben hiba történt:', e);
+	}
+})();
 (function ensureViewportMeta() {
 	let m = document.querySelector('meta[name="viewport"]');
 	if(!m){
