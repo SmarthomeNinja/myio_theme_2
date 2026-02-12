@@ -145,7 +145,6 @@ function buildHeader() {
 	menuPanel.className = "myio-menuPanel";
 	// ===== Menu: Chart + Settings gombok =====
 
-
 	const navRow2 = document.createElement("div");
 	navRow2.className = "myio-menuRow myio-menuRowNav";
 
@@ -157,6 +156,7 @@ function buildHeader() {
 
     navRow2.appendChild(btnInfo);
 	menuPanel.appendChild(navRow2);
+
 	const navRow = document.createElement("div");
 	navRow.className = "myio-menuRow myio-menuRowNav";
 	const menuWrap = document.createElement("div");
