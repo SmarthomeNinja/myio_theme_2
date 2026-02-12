@@ -161,7 +161,18 @@ function buildHeader() {
 	t.textContent = (typeof str_Menu !== "undefined" ? str_Menu : "Menu");
 	menuPanel.appendChild(t);
 
-	
+
+	const btnInfo = document.createElement("button");
+	btnInfo.type = "button";
+	btnInfo.className = "myio-btn small";
+	btnInfo.textContent = (str_Chart || "Chart");
+	btnChabtnInfortMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/chart"; };
+
+
+
+	navRow.append(btnInfo);
+	menuPanel.appendChild(navRow);
+
 
 	const btnChartMenu = document.createElement("button");
 	btnChartMenu.type = "button";
