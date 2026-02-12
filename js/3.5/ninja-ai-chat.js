@@ -265,7 +265,6 @@ Kedves, barátságos és segítőkész vagy. Magyar nyelven kommunikálsz.`
         <div class="ninja-suggested-prompts" id="ninja-suggestions">
           <button class="ninja-suggestion">🏠 Milyen eszközeim vannak?</button>
           <button class="ninja-suggestion">💡 Kapcsold be a hálószoba lámpát</button>
-          <button class="ninja-suggestion">🌈 Állítsd a nappali LED-et 150-re</button>
           <button class="ninja-suggestion">🌡️ Mi a jelenlegi hőmérséklet?</button>
         </div>
         
