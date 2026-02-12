@@ -801,7 +801,7 @@ html.myio-noanim .myio-sectionBody {
 	border: 1px solid rgba(255, 255, 255, .1);
 	box-shadow: 0 4px 24px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .08);
 	backdrop-filter: blur(12px);
-	z-index: 120; !important;
+	z-index: 120;
 }
 
 .header .myio-nav .myio-left,
