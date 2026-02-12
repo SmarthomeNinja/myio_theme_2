@@ -2,7 +2,7 @@
 (() => {
 	try {
 
-		const href = host + 'styleGreenNew.css';
+		const href = host + 'styleBlueNew.css';
 
 		if (!document.querySelector(`link[rel="stylesheet"][href="${href}"]`)) {
 			const link = document.createElement('link');
