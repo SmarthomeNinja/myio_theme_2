@@ -166,7 +166,8 @@ function buildHeader() {
 	btnInfo.type = "button";
 	btnInfo.className = "myio-btn small";
 	btnInfo.textContent = (str_Chart || "Chart");
-	btnChabtnInfortMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/chart"; };
+	btnInfo.textContent = (str_Chart || "Chart");
+	.onclick = (e) => { e.preventDefault(); window.location.href = "/chart"; };
 
 
 
