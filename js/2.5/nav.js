@@ -971,6 +971,15 @@ function buildHeader() {
 	// 👉 menü gomb BAL oldalára
 	//right.append(btnSettings);
 
+	const btnInfo = document.createElement("button");
+	btnInfo.type = "button";
+	btnInfo.className = "myio-iconBtn myio-settingsBtn";
+	btnSettings.setAttribute("aria-label", btnSettings.title);
+	btnInfo.textContent = ("?");
+	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
+
+	right.appendChild(btnInfo);
+
 	right.append(menuWrap);
 
 
