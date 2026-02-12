@@ -175,6 +175,20 @@ function buildHeader() {
 	navRow.append(btnChartMenu, btnSettingsMenu);
 	menuPanel.appendChild(navRow);
 
+	const navRow2 = document.createElement("div");
+	navRow2.className = "myio-menuRow myio-menuRowNav";
+
+	const btnInfo = document.createElement("button");
+	btnInfo.type = "button";
+	btnInfo.className = "myio-btn small";
+	btnInfo.textContent = ("Info");
+	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
+
+    navRow2.appendChild(btnInfo);
+	menuPanel.appendChild(navRow2);
+
+
+
 
 	// ===== Booster sor a menüben =====
 	const boosterRow = document.createElement("div");
