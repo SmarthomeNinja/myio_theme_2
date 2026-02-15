@@ -185,9 +185,9 @@ function buildHeader() {
 		btnSettingsMenu.className = "myio-btn small";
 		btnSettingsMenu.textContent = (str_Settings || "Settings");
 		btnSettingsMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/setup"; };
-	
-		navRow.append(btnChartMenu, btnSettingsMenu);
-		*/
+	*/
+	navRow.append(btnInfo, btnSettingsMenu);
+
 	menuPanel.appendChild(navRow);
 
 
