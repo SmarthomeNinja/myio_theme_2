@@ -179,13 +179,13 @@ function buildHeader() {
 		btnChartMenu.className = "myio-btn small";
 		btnChartMenu.textContent = (str_Chart || "Chart");
 		btnChartMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/chart"; };
-	
-		const btnSettingsMenu = document.createElement("button");
-		btnSettingsMenu.type = "button";
-		btnSettingsMenu.className = "myio-btn small";
-		btnSettingsMenu.textContent = (str_Settings || "Settings");
-		btnSettingsMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/setup"; };
 	*/
+	const btnSettingsMenu = document.createElement("button");
+	btnSettingsMenu.type = "button";
+	btnSettingsMenu.className = "myio-btn small";
+	btnSettingsMenu.textContent = (str_Settings || "Settings");
+	btnSettingsMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/setup"; };
+
 	navRow.append(btnInfo, btnSettingsMenu);
 
 	menuPanel.appendChild(navRow);
