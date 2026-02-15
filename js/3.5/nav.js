@@ -173,13 +173,6 @@ function buildHeader() {
 	//navRow2.appendChild(btnInfo);
 	menuPanel.appendChild(navRow2);
 
-	/*
-		const btnChartMenu = document.createElement("button");
-		btnChartMenu.type = "button";
-		btnChartMenu.className = "myio-btn small";
-		btnChartMenu.textContent = (str_Chart || "Chart");
-		btnChartMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/chart"; };
-	*/
 	const btnSettingsMenu = document.createElement("button");
 	btnSettingsMenu.type = "button";
 	btnSettingsMenu.className = "myio-btn small";
