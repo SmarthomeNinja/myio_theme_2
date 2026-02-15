@@ -144,11 +144,11 @@ function buildHeader() {
 	const menuPanel = document.createElement("div");
 	menuPanel.className = "myio-menuPanel";
 	// ===== Menu: Chart + Settings gombok =====
-	
+
 	const navRow = document.createElement("div");
 	navRow.className = "myio-menuRow myio-menuRowNav";
 	const menuWrap = document.createElement("div");
-	menuWrap.style.position = "relative";	
+	menuWrap.style.position = "relative";
 
 	const btnMenu = document.createElement("button");
 	btnMenu.type = "button";
@@ -170,23 +170,24 @@ function buildHeader() {
 	btnInfo.textContent = ("Info");
 	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
 
-    navRow2.appendChild(btnInfo);
+	navRow2.appendChild(btnInfo);
 	menuPanel.appendChild(navRow2);
 
-
-	const btnChartMenu = document.createElement("button");
-	btnChartMenu.type = "button";
-	btnChartMenu.className = "myio-btn small";
-	btnChartMenu.textContent = (str_Chart || "Chart");
-	btnChartMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/chart"; };
-
-	const btnSettingsMenu = document.createElement("button");
-	btnSettingsMenu.type = "button";
-	btnSettingsMenu.className = "myio-btn small";
-	btnSettingsMenu.textContent = (str_Settings || "Settings");
-	btnSettingsMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/setup"; };
-
-	navRow.append(btnChartMenu, btnSettingsMenu);
+	/*
+		const btnChartMenu = document.createElement("button");
+		btnChartMenu.type = "button";
+		btnChartMenu.className = "myio-btn small";
+		btnChartMenu.textContent = (str_Chart || "Chart");
+		btnChartMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/chart"; };
+	
+		const btnSettingsMenu = document.createElement("button");
+		btnSettingsMenu.type = "button";
+		btnSettingsMenu.className = "myio-btn small";
+		btnSettingsMenu.textContent = (str_Settings || "Settings");
+		btnSettingsMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/setup"; };
+	
+		navRow.append(btnChartMenu, btnSettingsMenu);
+		*/
 	menuPanel.appendChild(navRow);
 
 
@@ -259,28 +260,28 @@ function buildHeader() {
 	function createBoosterModal() {
 		const modal = document.createElement("div");
 		modal.className = "myio-settings-overlay";
-		
+
 		const content = document.createElement("div");
 		content.className = "myio-settings-modal";
 
 		// Header
 		const header = document.createElement("div");
 		header.className = "myio-settings-header";
-		
+
 		const titleWrap = document.createElement("div");
 		const title = document.createElement("h3");
 		title.className = "myio-settings-title";
 		title.textContent = typeof str_Host !== "undefined" ? str_Host : "Host";
 		titleWrap.appendChild(title);
-		
+
 		const closeBtn = document.createElement("button");
 		closeBtn.className = "myio-settings-close";
 		closeBtn.type = "button";
 		closeBtn.textContent = "×";
-		
+
 		header.append(titleWrap, closeBtn);
 		content.appendChild(header);
-		
+
 		// Content konténer
 		const contentBody = document.createElement("div");
 		contentBody.className = "myio-settings-content";
@@ -292,7 +293,7 @@ function buildHeader() {
 				if (modal.parentNode) document.body.removeChild(modal);
 			}, 200);
 		};
-		
+
 		closeBtn.onclick = closeModal;
 
 		// Host lista
@@ -486,7 +487,7 @@ function buildHeader() {
 			}
 		};
 		document.addEventListener("keydown", onKeyDown);
-		
+
 		// Overlay klikre bezárás
 		modal.addEventListener('click', (e) => {
 			if (e.target === modal) closeModal();
@@ -494,10 +495,10 @@ function buildHeader() {
 
 		content.appendChild(contentBody);
 		modal.appendChild(content);
-		
+
 		// is-open osztály hozzáadása az animációhoz
 		requestAnimationFrame(() => modal.classList.add('is-open'));
-		
+
 		return modal;
 	}
 
