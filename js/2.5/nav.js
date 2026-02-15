@@ -169,7 +169,7 @@ function buildHeader() {
 	btnInfo.className = "myio-btn small";
 	btnInfo.textContent = ("Info");
 	btnInfo.onclick = (e) => { e.preventDefault(); window.location.href = "https://smarthomeninja.hu/dashboard/"; };
-
+/*
     navRow2.appendChild(btnInfo);
 	menuPanel.appendChild(navRow2);
 
@@ -179,14 +179,14 @@ function buildHeader() {
 	btnChartMenu.className = "myio-btn small";
 	btnChartMenu.textContent = (str_Chart || "Chart");
 	btnChartMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/chart"; };
-
+*/
 	const btnSettingsMenu = document.createElement("button");
 	btnSettingsMenu.type = "button";
 	btnSettingsMenu.className = "myio-btn small";
 	btnSettingsMenu.textContent = (str_Settings || "Settings");
 	btnSettingsMenu.onclick = (e) => { e.preventDefault(); window.location.href = "/setup"; };
 
-	navRow.append(btnChartMenu, btnSettingsMenu);
+	navRow.append(btnInfo, btnSettingsMenu);
 	menuPanel.appendChild(navRow);
 
 
