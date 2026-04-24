@@ -274,6 +274,24 @@ html.myio-noanim .myio-sectionBody {
 	color: #fff;
 }
 
+.myio-zone-filter {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: clamp(10px, calc(11px * var(--myio-zoom)), 16px);
+	color: rgba(255, 255, 255, .75);
+	cursor: pointer;
+	white-space: nowrap;
+	user-select: none;
+}
+
+.myio-zone-filter input[type=checkbox] {
+	cursor: pointer;
+	accent-color: rgba(255, 200, 50, .9);
+	width: 14px;
+	height: 14px;
+}
+
 .myio-section.is-dragging {
 	outline: 2px dashed rgba(255, 180, 50, .6);
 	outline-offset: 4px;

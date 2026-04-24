@@ -56,11 +56,40 @@
   }
 
   // ============================================================
+  // === Zóna szűrő checkbox a forrás szekciók fejlécébe
+  // ============================================================
+
+  function addZoneFilter(head, grid, sectionKey) {
+    const filterKey = sectionKey + '.hideZoned';
+
+    const label = el('label', { class: 'myio-zone-filter', title: 'Zónát kapott bejegyzések elrejtése' });
+    label.addEventListener('click', e => e.stopPropagation());
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = localStorage.getItem(filterKey) === '1';
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(' Zónás elrejtés'));
+
+    const applyFilter = () => {
+      localStorage.setItem(filterKey, cb.checked ? '1' : '0');
+      grid.querySelectorAll('.myio-card[data-cardid]').forEach(c => {
+        c.style.display = (cb.checked && window.myioStorage.getCardZones(c.dataset.cardid).length > 0) ? 'none' : '';
+      });
+    };
+
+    cb.addEventListener('change', applyFilter);
+    head.insertBefore(label, head.querySelector('.myio-dragHandle'));
+
+    if (cb.checked) applyFilter();
+  }
+
+  // ============================================================
   // === Sensors
   // ============================================================
 
   function renderSensors(root) {
-    const { section, grid } = makeSection(str('Sensors', 'Sensors'), '', 'myio.section.sensors');
+    const { section, grid, head } = makeSection(str('Sensors', 'Sensors'), '', 'myio.section.sensors');
     let count = 0;
 
     // Fogyasztás
@@ -118,7 +147,7 @@
       }
     }
 
-    if (count) root.append(section);
+    if (count) { addZoneFilter(head, grid, 'myio.section.sensors'); root.append(section); }
   }
 
   // ============================================================
@@ -133,7 +162,7 @@
     const hasAny = switchEnabled.some((v, i) => v !== 0 && switchDesc?.[i + 1] != null);
     if (!hasAny) return;
 
-    const { section, grid } = makeSection(str('Input', 'Input'), '', 'myio.section.switches');
+    const { section, grid, head } = makeSection(str('Input', 'Input'), '', 'myio.section.switches');
     for (let i = 0; i < switchEnabled.length; i++) {
       if (switchEnabled[i] === 0 || switchDesc[i + 1] == null) continue;
       const id = `switch:${i + 1}`;
@@ -149,6 +178,7 @@
       registerCardFactory(id, makeFn);
       grid.append(makeFn());
     }
+    addZoneFilter(head, grid, 'myio.section.switches');
     root.append(section);
   }
 
@@ -175,7 +205,7 @@
     });
     if (!hasAny) return;
 
-    const { section, grid } = makeSection(str('PCA_Output', 'PCA Output'), '', 'myio.section.pca');
+    const { section, grid, head } = makeSection(str('PCA_Output', 'PCA Output'), '', 'myio.section.pca');
 
     decoded.forEach((d, i) => {
       const isSunrise = pcaThermoAct[i] === 255;
@@ -215,6 +245,7 @@
       grid.append(makeFn());
     });
 
+    addZoneFilter(head, grid, 'myio.section.pca');
     root.append(section);
   }
 
@@ -234,7 +265,7 @@
     const hasAny = decoded.some((d, i) => (d.read || d.write) && fetDesc[i + 1] != null);
     if (!hasAny) return;
 
-    const { section, grid } = makeSection(str('PWM', 'PWM'), '', 'myio.section.fet');
+    const { section, grid, head } = makeSection(str('PWM', 'PWM'), '', 'myio.section.fet');
 
     decoded.forEach((d, i) => {
       if (!((d.read || d.write) && fetDesc[i + 1] != null)) return;
@@ -265,6 +296,7 @@
       grid.append(makeFn());
     });
 
+    addZoneFilter(head, grid, 'myio.section.fet');
     root.append(section);
   }
 
@@ -287,7 +319,7 @@
     });
     if (!hasAny) return;
 
-    const { section, grid } = makeSection(str('Output', 'Output'), '', 'myio.section.relays');
+    const { section, grid, head } = makeSection(str('Output', 'Output'), '', 'myio.section.relays');
 
     relays.forEach((val, i) => {
       const isSunrise = thermoAct[i] === 255;
@@ -317,6 +349,7 @@
       grid.append(makeFn());
     });
 
+    addZoneFilter(head, grid, 'myio.section.relays');
     root.append(section);
   }
 
