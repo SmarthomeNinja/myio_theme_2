@@ -894,6 +894,7 @@ function buildHeader() {
 		const data = {};
 		for (let i = 0; i < localStorage.length; i++) {
 			const key = localStorage.key(i);
+			if (key.startsWith("myio.sync.")) continue;
 			if (key.startsWith("myio.") || ["Language", "Booster", "Host", "AutoRefresh"].includes(key)) {
 				data[key] = localStorage.getItem(key);
 			}
@@ -942,6 +943,98 @@ function buildHeader() {
 
 	dataRow.append(btnExport, btnImport);
 	menuPanel.appendChild(dataRow);
+
+	// Sync szekció
+	const syncRow = document.createElement("div");
+	syncRow.style.cssText = "padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);margin-top:8px;display:flex;flex-direction:column;gap:6px;";
+
+	const syncLabel = document.createElement("div");
+	syncLabel.textContent = "Sync";
+	syncLabel.style.cssText = "font-size:11px;color:rgba(255,255,255,0.45);text-align:center;letter-spacing:0.5px;";
+
+	const syncProviderSelect = document.createElement("select");
+	syncProviderSelect.className = "myio-setting-input";
+	syncProviderSelect.innerHTML = '<option value="">— szolgáltató —</option><option value="jsonbin">JSONBin.io</option>';
+	syncProviderSelect.value = localStorage.getItem("myio.sync.provider") || "";
+
+	const syncProviderFields = document.createElement("div");
+	syncProviderFields.style.cssText = "display:flex;flex-direction:column;gap:6px;";
+	syncProviderFields.style.display = syncProviderSelect.value === "jsonbin" ? "flex" : "none";
+
+	const syncBinInput = document.createElement("input");
+	syncBinInput.type = "text";
+	syncBinInput.className = "myio-setting-input";
+	syncBinInput.placeholder = "Bin ID";
+	syncBinInput.value = localStorage.getItem("myio.sync.binId") || "";
+
+	const syncKeyInput = document.createElement("input");
+	syncKeyInput.type = "password";
+	syncKeyInput.className = "myio-setting-input";
+	syncKeyInput.placeholder = "Master Key";
+	syncKeyInput.value = localStorage.getItem("myio.sync.apiKey") || "";
+
+	const syncBtnRow = document.createElement("div");
+	syncBtnRow.style.cssText = "display:flex;gap:8px;";
+
+	const btnPull = document.createElement("button");
+	btnPull.type = "button";
+	btnPull.className = "myio-btn small";
+	btnPull.textContent = "⬇ Pull";
+	btnPull.style.flex = "1";
+
+	const btnPush = document.createElement("button");
+	btnPush.type = "button";
+	btnPush.className = "myio-btn small";
+	btnPush.textContent = "⬆ Push";
+	btnPush.style.flex = "1";
+
+	syncProviderSelect.onchange = () => {
+		localStorage.setItem("myio.sync.provider", syncProviderSelect.value);
+		syncProviderFields.style.display = syncProviderSelect.value === "jsonbin" ? "flex" : "none";
+	};
+
+	btnPull.onclick = async () => {
+		const binId = syncBinInput.value.trim();
+		const apiKey = syncKeyInput.value.trim();
+		if (!binId || !apiKey) { alert("Add meg a Bin ID-t és a Master Key-t!"); return; }
+		window.myioSync.saveSyncConfig(binId, apiKey);
+		btnPull.disabled = true; btnPull.textContent = "...";
+		try {
+			const data = await window.myioSync.syncPull(binId, apiKey);
+			const conf = (typeof str_ConfirmImport !== "undefined" ? str_ConfirmImport : "Valóban felülírod a helyi beállításokat? Az oldal újra fog töltődni.");
+			if (confirm(conf)) {
+				window.myioSync.applySettingsSnapshot(data);
+				window.location.reload();
+			}
+		} catch (e) {
+			alert("Pull hiba: " + e.message);
+		} finally {
+			btnPull.disabled = false; btnPull.textContent = "⬇ Pull";
+		}
+	};
+
+	btnPush.onclick = async () => {
+		const binId = syncBinInput.value.trim();
+		const apiKey = syncKeyInput.value.trim();
+		if (!binId || !apiKey) { alert("Add meg a Bin ID-t és a Master Key-t!"); return; }
+		window.myioSync.saveSyncConfig(binId, apiKey);
+		btnPush.disabled = true; btnPush.textContent = "...";
+		try {
+			await window.myioSync.syncPush(binId, apiKey, window.myioSync.getSettingsSnapshot());
+			if (window.myioUtils && window.myioUtils.toast) window.myioUtils.toast("✅ Sync kész!");
+			else alert("Feltöltés sikeres!");
+		} catch (e) {
+			alert("Push hiba: " + e.message);
+		} finally {
+			btnPush.disabled = false; btnPush.textContent = "⬆ Push";
+		}
+	};
+
+	syncBtnRow.append(btnPull, btnPush);
+	syncProviderFields.append(syncBinInput, syncKeyInput, syncBtnRow);
+	syncRow.append(syncLabel, syncProviderSelect, syncProviderFields);
+	menuPanel.appendChild(syncRow);
+
 	menuPanel.appendChild(footer);
 
 	// nyit/zár
@@ -1125,6 +1218,11 @@ function enableThumbOnlyRanges(root = document) {
 const myioRO = window.ResizeObserver ? new ResizeObserver(() => enableThumbOnlyRanges(document)) : null;
 window.addEventListener('resize', () => enableThumbOnlyRanges(document));
 
+
+// Sync modul betöltése
+if (typeof host !== 'undefined') {
+	document.write('<script src="' + host + 'sync.js"/><\/script>');
+}
 
 // Ninja AI Chatbot betöltése
 if (typeof host !== 'undefined') {

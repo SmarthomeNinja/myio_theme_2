@@ -62,26 +62,24 @@
   function addZoneFilter(head, grid, sectionKey) {
     const filterKey = sectionKey + '.hideZoned';
 
-    const label = el('label', { class: 'myio-zone-filter', title: 'Zónát kapott bejegyzések elrejtése' });
-    label.addEventListener('click', e => e.stopPropagation());
+    const isActive = localStorage.getItem(filterKey) === '1';
 
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = localStorage.getItem(filterKey) === '1';
-    label.appendChild(cb);
-    label.appendChild(document.createTextNode(' Zónás elrejtés'));
+    const btn = el('button', { type: 'button', class: 'myio-zone-filter' + (isActive ? ' is-active' : ''), title: 'Zónát kapott bejegyzések elrejtése' });
+    btn.textContent = 'Zónás elrejtés';
+    btn.addEventListener('click', e => e.stopPropagation());
 
-    const applyFilter = () => {
-      localStorage.setItem(filterKey, cb.checked ? '1' : '0');
+    const applyFilter = (active) => {
+      localStorage.setItem(filterKey, active ? '1' : '0');
+      btn.classList.toggle('is-active', active);
       grid.querySelectorAll('.myio-card[data-cardid]').forEach(c => {
-        c.style.display = (cb.checked && window.myioStorage.getCardZones(c.dataset.cardid).length > 0) ? 'none' : '';
+        c.style.display = (active && window.myioStorage.getCardZones(c.dataset.cardid).length > 0) ? 'none' : '';
       });
     };
 
-    cb.addEventListener('change', applyFilter);
-    head.insertBefore(label, head.querySelector('.myio-dragHandle'));
+    btn.addEventListener('click', () => applyFilter(!btn.classList.contains('is-active')));
+    head.insertBefore(btn, head.querySelector('.myio-dragHandle'));
 
-    if (cb.checked) applyFilter();
+    if (isActive) applyFilter(true);
   }
 
   // ============================================================
