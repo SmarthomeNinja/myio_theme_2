@@ -952,14 +952,29 @@ function buildHeader() {
 	syncLabel.textContent = "Sync";
 	syncLabel.style.cssText = "font-size:11px;color:rgba(255,255,255,0.45);text-align:center;letter-spacing:0.5px;";
 
-	const syncProviderSelect = document.createElement("select");
-	syncProviderSelect.className = "myio-setting-input";
-	syncProviderSelect.innerHTML = '<option value="">— szolgáltató —</option><option value="jsonbin">JSONBin.io</option>';
-	syncProviderSelect.value = localStorage.getItem("myio.sync.provider") || "";
+	const currentProvider = localStorage.getItem("myio.sync.provider") || "";
+
+	const syncProviderRow = document.createElement("div");
+	syncProviderRow.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;";
+
+	const btnJsonbin = document.createElement("button");
+	btnJsonbin.type = "button";
+	btnJsonbin.className = "myio-zone-filter" + (currentProvider === "jsonbin" ? " is-active" : "");
+	btnJsonbin.textContent = "JSONBin.io";
 
 	const syncProviderFields = document.createElement("div");
 	syncProviderFields.style.cssText = "display:flex;flex-direction:column;gap:6px;";
-	syncProviderFields.style.display = syncProviderSelect.value === "jsonbin" ? "flex" : "none";
+	syncProviderFields.style.display = currentProvider === "jsonbin" ? "flex" : "none";
+
+	btnJsonbin.addEventListener("click", (e) => {
+		e.stopPropagation();
+		const newVal = btnJsonbin.classList.contains("is-active") ? "" : "jsonbin";
+		btnJsonbin.classList.toggle("is-active", newVal === "jsonbin");
+		localStorage.setItem("myio.sync.provider", newVal);
+		syncProviderFields.style.display = newVal === "jsonbin" ? "flex" : "none";
+	});
+
+	syncProviderRow.appendChild(btnJsonbin);
 
 	const syncBinInput = document.createElement("input");
 	syncBinInput.type = "text";
@@ -987,11 +1002,6 @@ function buildHeader() {
 	btnPush.className = "myio-btn small";
 	btnPush.textContent = "⬆ Push";
 	btnPush.style.flex = "1";
-
-	syncProviderSelect.onchange = () => {
-		localStorage.setItem("myio.sync.provider", syncProviderSelect.value);
-		syncProviderFields.style.display = syncProviderSelect.value === "jsonbin" ? "flex" : "none";
-	};
 
 	btnPull.onclick = async () => {
 		const binId = syncBinInput.value.trim();
@@ -1032,7 +1042,7 @@ function buildHeader() {
 
 	syncBtnRow.append(btnPull, btnPush);
 	syncProviderFields.append(syncBinInput, syncKeyInput, syncBtnRow);
-	syncRow.append(syncLabel, syncProviderSelect, syncProviderFields);
+	syncRow.append(syncLabel, syncProviderRow, syncProviderFields);
 	menuPanel.appendChild(syncRow);
 
 	menuPanel.appendChild(footer);
