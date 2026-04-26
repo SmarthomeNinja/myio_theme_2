@@ -1136,7 +1136,7 @@ function buildHeader() {
 			</div>
 			<div class="myio-info-section">
 				<div class="myio-info-label">Bin létrehozása</div>
-				<p>Bejelentkezés után kattints a <strong>+ Create Bin</strong> gombra. A bin tartalma kezdetben lehet egyszerűen <code>{}</code>. Mentés után a bin URL-jéből olvasható ki a <strong>Bin ID</strong> (a végén lévő hosszú kód, pl. <code>6703...abc</code>).</p>
+				<p>Bejelentkezés után kattints a <strong>+ Create Bin</strong> gombra. A bin tartalma kezdetben lehet egyszerűen <code>{}</code>. A <strong>Bin ID</strong>-t a binek felsorolásánál, vagy a bin kiválasztása után a jobb oldali részletek panelen találod.</p>
 			</div>
 			<div class="myio-info-section">
 				<div class="myio-info-label">Master Key</div>
