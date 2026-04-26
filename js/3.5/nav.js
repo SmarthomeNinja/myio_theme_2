@@ -794,7 +794,7 @@ function buildHeader() {
 	const btnEditMenu = document.createElement("button");
 	btnEditMenu.type = "button";
 	btnEditMenu.className = "myio-btn small myio-menuEditBtn";
-	btnEditMenu.textContent = "Szerkesztés";
+	btnEditMenu.textContent = (typeof str_EditMode !== "undefined" ? str_EditMode : "Edit");
 
 	const editToggle = document.createElement("label");
 	editToggle.className = "myio-miniToggle myio-miniToggleMenu";
@@ -815,7 +815,7 @@ function buildHeader() {
 	editTimeoutRow.style.cssText = "display:flex;align-items:center;gap:10px;margin-bottom:8px;";
 
 	const editTimeoutLabel = document.createElement("label");
-	editTimeoutLabel.textContent = "Auto-zár:";
+	editTimeoutLabel.textContent = (typeof str_AutoLock !== "undefined" ? str_AutoLock : "Auto-lock:");
 	editTimeoutLabel.style.cssText = "color:rgba(255,255,255,.85);font-weight:800;white-space:nowrap;font-size:0.95em;";
 
 	const editTimeoutValueEl = document.createElement("div");
@@ -835,13 +835,14 @@ function buildHeader() {
 	editTimeoutSlider.style.cssText = "width:100%;box-sizing:border-box;cursor:pointer;";
 
 	function updateEditCountdown() {
+		const label = typeof str_EditMode !== "undefined" ? str_EditMode : "Edit";
 		const remaining = Math.max(0, Math.ceil((editTimerEnd - Date.now()) / 1000));
 		if (remaining > 0 && editInput.checked) {
 			const m = Math.floor(remaining / 60);
 			const s = remaining % 60;
-			btnEditMenu.textContent = "Szerkesztés " + m + ":" + String(s).padStart(2, "0");
+			btnEditMenu.textContent = label + " " + m + ":" + String(s).padStart(2, "0");
 		} else {
-			btnEditMenu.textContent = "Szerkesztés";
+			btnEditMenu.textContent = label;
 		}
 	}
 
@@ -870,14 +871,14 @@ function buildHeader() {
 			startEditTimer(secs);
 		} else {
 			stopEditTimer();
-			btnEditMenu.textContent = "Szerkesztés";
+			btnEditMenu.textContent = (typeof str_EditMode !== "undefined" ? str_EditMode : "Edit");
 		}
 	}
 
 	function updateEditTimeoutDisplay() {
 		const min = parseInt(editTimeoutSlider.value, 10);
 		const secs = min * 60;
-		editTimeoutValueEl.textContent = min + " p";
+		editTimeoutValueEl.textContent = min + " " + (typeof str_MinShort !== "undefined" ? str_MinShort : "min");
 		localStorage.setItem(EDIT_TIMEOUT_KEY, String(secs));
 		if (editInput.checked) startEditTimer(secs);
 	}

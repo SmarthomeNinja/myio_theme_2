@@ -66,7 +66,7 @@
     wrapper.appendChild(starBtn);
 
     // Kártya drag handle (csak szerkesztési módban látszik — CSS .myio-edit-enabled vezérli)
-    const cardDragHandle = el("span", { class: "myio-cardDragHandle", title: "Mozgatás" }, [document.createTextNode("⠿")]);
+    const cardDragHandle = el("span", { class: "myio-cardDragHandle", title: (typeof str_MoveCard !== "undefined" ? str_MoveCard : "Move") }, [document.createTextNode("⠿")]);
     wrapper.appendChild(cardDragHandle);
 
     // Megjegyzés ikon
