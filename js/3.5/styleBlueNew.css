@@ -295,6 +295,48 @@ html.myio-noanim .myio-sectionBody {
 	color: #fff;
 }
 
+.myio-sync-info-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	border: 1px solid rgba(255, 255, 255, .3);
+	background: transparent;
+	color: rgba(255, 255, 255, .55);
+	font-size: 13px;
+	cursor: pointer;
+	transition: background .15s, color .15s;
+	flex-shrink: 0;
+}
+
+.myio-sync-info-btn:hover {
+	background: rgba(255, 255, 255, .1);
+	color: #fff;
+}
+
+.myio-info-section {
+	border-left: 2px solid rgba(3, 151, 214, .6);
+	padding-left: 10px;
+}
+
+.myio-info-label {
+	font-size: 11px;
+	font-weight: 700;
+	color: rgba(3, 151, 214, 1);
+	letter-spacing: 0.4px;
+	margin-bottom: 3px;
+	text-transform: uppercase;
+}
+
+.myio-settings-content code {
+	background: rgba(255, 255, 255, .1);
+	padding: 1px 5px;
+	border-radius: 4px;
+	font-size: 12px;
+}
+
 .myio-section.is-dragging {
 	outline: 2px dashed rgba(255, 180, 50, .6);
 	outline-offset: 4px;

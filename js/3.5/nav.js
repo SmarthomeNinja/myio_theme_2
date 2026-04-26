@@ -997,6 +997,16 @@ function buildHeader() {
 		btnJsonbin.className = "myio-zone-filter" + (currentProvider === "jsonbin" ? " is-active" : "");
 		btnJsonbin.textContent = "JSONBin.io";
 
+		const btnJsonbinInfo = document.createElement("button");
+		btnJsonbinInfo.type = "button";
+		btnJsonbinInfo.className = "myio-sync-info-btn";
+		btnJsonbinInfo.title = "Információ";
+		btnJsonbinInfo.textContent = "ℹ";
+		btnJsonbinInfo.addEventListener("click", (e) => {
+			e.stopPropagation();
+			openJsonbinInfoModal();
+		});
+
 		const syncProviderFields = document.createElement("div");
 		syncProviderFields.style.cssText = "display:flex;flex-direction:column;gap:6px;";
 		syncProviderFields.style.display = currentProvider === "jsonbin" ? "flex" : "none";
@@ -1009,7 +1019,7 @@ function buildHeader() {
 			syncProviderFields.style.display = newVal === "jsonbin" ? "flex" : "none";
 		});
 
-		syncProviderRow.appendChild(btnJsonbin);
+		syncProviderRow.append(btnJsonbin, btnJsonbinInfo);
 
 		const syncBinInput = document.createElement("input");
 		syncBinInput.type = "text";
@@ -1029,13 +1039,13 @@ function buildHeader() {
 		const btnPull = document.createElement("button");
 		btnPull.type = "button";
 		btnPull.className = "myio-btn small";
-		btnPull.textContent = "⬇ Pull";
+		btnPull.textContent = "⬇ Betöltés";
 		btnPull.style.flex = "1";
 
 		const btnPush = document.createElement("button");
 		btnPush.type = "button";
 		btnPush.className = "myio-btn small";
-		btnPush.textContent = "⬆ Push";
+		btnPush.textContent = "⬆ Mentés";
 		btnPush.style.flex = "1";
 
 		btnPull.onclick = async () => {
@@ -1052,9 +1062,9 @@ function buildHeader() {
 					window.location.reload();
 				}
 			} catch (e) {
-				alert("Pull hiba: " + e.message);
+				alert("Betöltési hiba: " + e.message);
 			} finally {
-				btnPull.disabled = false; btnPull.textContent = "⬇ Pull";
+				btnPull.disabled = false; btnPull.textContent = "⬇ Betöltés";
 			}
 		};
 
@@ -1069,9 +1079,9 @@ function buildHeader() {
 				if (window.myioUtils && window.myioUtils.toast) window.myioUtils.toast("✅ Sync kész!");
 				else alert("Feltöltés sikeres!");
 			} catch (e) {
-				alert("Push hiba: " + e.message);
+				alert("Mentési hiba: " + e.message);
 			} finally {
-				btnPush.disabled = false; btnPush.textContent = "⬆ Push";
+				btnPush.disabled = false; btnPush.textContent = "⬆ Mentés";
 			}
 		};
 
@@ -1079,6 +1089,68 @@ function buildHeader() {
 		syncProviderFields.append(syncBinInput, syncKeyInput, syncBtnRow);
 		syncSeparator.append(syncLabel, syncProviderRow, syncProviderFields);
 		body.append(dataLabel, dataButtonRow, syncSeparator);
+		content.append(header, body);
+		modal.appendChild(content);
+
+		const closeModal = () => {
+			modal.classList.remove("is-open");
+			setTimeout(() => { if (modal.parentNode) modal.remove(); }, 200);
+		};
+
+		btnClose.onclick = closeModal;
+		modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+		document.addEventListener("keydown", function onKey(e) {
+			if (e.key === "Escape") { closeModal(); document.removeEventListener("keydown", onKey); }
+		});
+
+		document.body.appendChild(modal);
+		requestAnimationFrame(() => modal.classList.add("is-open"));
+	}
+
+	function openJsonbinInfoModal() {
+		const modal = document.createElement("div");
+		modal.className = "myio-settings-overlay";
+
+		const content = document.createElement("div");
+		content.className = "myio-settings-modal";
+
+		const header = document.createElement("div");
+		header.className = "myio-settings-header";
+		const title = document.createElement("h3");
+		title.className = "myio-settings-title";
+		title.textContent = "JSONBin.io – Hálózati szinkronizáció";
+		const btnClose = document.createElement("button");
+		btnClose.type = "button";
+		btnClose.className = "myio-settings-close";
+		btnClose.textContent = "×";
+		header.append(title, btnClose);
+
+		const body = document.createElement("div");
+		body.className = "myio-settings-content";
+		body.style.cssText = "display:flex;flex-direction:column;gap:12px;line-height:1.6;font-size:13px;color:rgba(255,255,255,0.85);";
+		body.innerHTML = `
+			<p>A <strong>JSONBin.io</strong> egy ingyenes felhőalapú JSON tároló. A megjelenítési beállításaidat (ikonok, nevek, zónák, sorrend) itt mentheted el, és bármely eszközödről visszatöltheted.</p>
+			<div class="myio-info-section">
+				<div class="myio-info-label">Regisztráció</div>
+				<p>Látogasd meg a <strong>jsonbin.io</strong> oldalt, és hozz létre egy ingyenes fiókot.</p>
+			</div>
+			<div class="myio-info-section">
+				<div class="myio-info-label">Bin létrehozása</div>
+				<p>Bejelentkezés után kattints a <strong>+ Create Bin</strong> gombra. A bin tartalma kezdetben lehet egyszerűen <code>{}</code>. Mentés után a bin URL-jéből olvasható ki a <strong>Bin ID</strong> (a végén lévő hosszú kód, pl. <code>6703...abc</code>).</p>
+			</div>
+			<div class="myio-info-section">
+				<div class="myio-info-label">Master Key</div>
+				<p>A fiókbeállításokban (<strong>Account → API Keys</strong>) találod a <strong>Master Key</strong>-t. Ez szükséges az íráshoz és olvasáshoz egyaránt. Ne oszd meg másokkal!</p>
+			</div>
+			<div class="myio-info-section">
+				<div class="myio-info-label">Megosztás másokkal</div>
+				<p>Ha valaki a te beállításaidat szeretné kiindulópontként használni, add meg neki a Bin ID-det és a Master Key-det. Ő betöltheti a beállításaidat, majd létrehozhatja a saját binjét, és attól fogva azt használja.</p>
+			</div>
+			<div class="myio-info-section">
+				<div class="myio-info-label">Mentés / Betöltés</div>
+				<p><strong>Mentés</strong>: a jelenlegi beállításokat feltölti a binbe (felülírja a korábbit).<br><strong>Betöltés</strong>: a binből visszatölti a beállításokat, és újraindítja az oldalt.</p>
+			</div>`;
+
 		content.append(header, body);
 		modal.appendChild(content);
 
