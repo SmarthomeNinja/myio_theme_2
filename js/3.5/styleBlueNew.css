@@ -1624,12 +1624,13 @@ input[type="range"]::-moz-range-thumb {
 .myio-cardDragHandle {
 	display: none;
 	cursor: grab;
-	font-size: 13px;
+	font-size: calc(20px * var(--myio-zoom));
 	line-height: 1;
 	color: rgba(255, 255, 255, 0.38);
 	user-select: none;
 	text-align: center;
 	padding: 2px 4px;
+	margin-top: 6px;
 	border-radius: 4px;
 	touch-action: none;
 	transition: color .15s, background .15s;
