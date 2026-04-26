@@ -240,6 +240,8 @@
       btn.dataset.longpressAttached = 'true';
 
       const start = (e) => {
+        if (window.myioIsEditEnabled && !window.myioIsEditEnabled()) return;
+        if (e.target.closest(".myio-cardDragHandle")) return;
         startX = e.touches ? e.touches[0].clientX : e.clientX;
         startY = e.touches ? e.touches[0].clientY : e.clientY;
         lpDetected = false;

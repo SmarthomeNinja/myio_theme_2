@@ -207,7 +207,7 @@
     let isAnimating = false, lastSwapTime = 0;
 
     const isInteractiveTarget = (t) => t && !!t.closest(
-      ".myio-cardTitle,.myio-headRow,.myio-headTitleBtn,.myio-titleBtn,button,a,input,textarea,select,label,.myio-btnRow,.myio-miniToggle,.myio-pcaRow,.myio-thermo-circular,.myio-thermo-handle,.myio-thermo-svg,.myio-thermo-btn,.myio-thermo-buttons"
+      ".myio-cardTitle,.myio-headRow,.myio-headTitleBtn,.myio-titleBtn,button,a,input,textarea,select,label,.myio-btnRow,.myio-miniToggle,.myio-pcaRow,.myio-thermo-circular,.myio-thermo-handle,.myio-thermo-svg,.myio-thermo-btn,.myio-thermo-buttons,.myio-cardDragHandle"
     );
 
     const pickCardEmptyAreaTarget = (e) => {
@@ -335,10 +335,21 @@
 
     const clearLP = () => { if (lpTimer) clearTimeout(lpTimer); lpTimer = null; lpMoved = false; };
 
+    // Kártya drag handle: azonnali drag szerkesztési módban
+    document.addEventListener("pointerdown", (e) => {
+      const handle = e.target.closest(".myio-cardDragHandle");
+      if (!handle) return;
+      if (!window.myioIsEditEnabled || !window.myioIsEditEnabled()) return;
+      const card = handle.closest(".myio-card");
+      if (!card || !card.dataset.cardid) return;
+      startDrag(card, e.clientX, e.clientY);
+    }, { passive: true });
+
     document.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
       const card = pickCardEmptyAreaTarget(e);
       if (!card) return;
+      if (window.myioIsEditEnabled && !window.myioIsEditEnabled()) return; // zárolt
       card.__myioPointerId = e.pointerId;
       card.style.touchAction = "none";
       clearLP();

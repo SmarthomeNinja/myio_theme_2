@@ -1618,6 +1618,64 @@ input[type="range"]::-moz-range-thumb {
 	-ms-user-select: none;
 }
 
+/* ===== Szerkesztési mód ===== */
+
+/* Kártya drag handle */
+.myio-cardDragHandle {
+	display: none;
+	cursor: grab;
+	font-size: 13px;
+	line-height: 1;
+	color: rgba(255, 255, 255, 0.38);
+	user-select: none;
+	text-align: center;
+	padding: 2px 4px;
+	border-radius: 4px;
+	touch-action: none;
+	transition: color .15s, background .15s;
+}
+
+.myio-cardDragHandle:hover {
+	color: rgba(255, 255, 255, 0.75);
+	background: rgba(255, 255, 255, 0.08);
+}
+
+.myio-cardDragHandle:active {
+	cursor: grabbing;
+	color: #fff;
+}
+
+/* Edit mód aktív: kártya drag handle látszik */
+.myio-edit-enabled .myio-cardDragHandle {
+	display: block;
+}
+
+/* Zárolt: csillag nem interaktív */
+body:not(.myio-edit-enabled) .myio-favInTitle {
+	opacity: 0.28;
+	cursor: default;
+	pointer-events: none;
+}
+
+/* Zárolt: szekció drag handle halványabb, nem interaktív */
+body:not(.myio-edit-enabled) .myio-dragHandle {
+	opacity: 0.15;
+	cursor: default;
+	pointer-events: none;
+}
+
+/* Szerkesztési mód sub-panel */
+.myio-menuPanel.is-editSubOpen .myio-editSub {
+	display: block;
+}
+
+/* Szerkesztés gomb aktív (edit on) */
+.myio-menuEditBtn.is-on {
+	background: rgba(3, 151, 214, 0.2) !important;
+	border-color: rgba(3, 151, 214, 0.6) !important;
+	color: var(--accent) !important;
+}
+
 input,
 textarea,
 input::placeholder,

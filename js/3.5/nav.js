@@ -779,6 +779,125 @@ function buildHeader() {
 	menuPanel.append(autoRefreshRow, autoRefreshPanel);
 
 
+	// ===== Szerkesztési mód =====
+	const EDIT_TIMEOUT_KEY = "myio.editMode.timeout";
+	const EDIT_DEFAULT_TIMEOUT_SEC = 300; // 5 perc
+
+	let editTimerEnd = 0;
+	let editCountdownInterval = null;
+
+	window.myioIsEditEnabled = () => document.body.classList.contains("myio-edit-enabled");
+
+	const editRow = document.createElement("div");
+	editRow.className = "myio-menuRow myio-menuRowEdit";
+
+	const btnEditMenu = document.createElement("button");
+	btnEditMenu.type = "button";
+	btnEditMenu.className = "myio-btn small myio-menuEditBtn";
+	btnEditMenu.textContent = "Szerkesztés";
+
+	const editToggle = document.createElement("label");
+	editToggle.className = "myio-miniToggle myio-miniToggleMenu";
+
+	const editInput = document.createElement("input");
+	editInput.type = "checkbox";
+	editInput.checked = false; // oldalletöltéskor mindig zárolt
+
+	const editTrack = document.createElement("span");
+	editTrack.className = "myio-miniTrack";
+
+	editToggle.append(editInput, editTrack);
+
+	const editSubPanel = document.createElement("div");
+	editSubPanel.className = "myio-menuSub myio-editSub";
+
+	const editTimeoutRow = document.createElement("div");
+	editTimeoutRow.style.cssText = "display:flex;align-items:center;gap:10px;margin-bottom:8px;";
+
+	const editTimeoutLabel = document.createElement("label");
+	editTimeoutLabel.textContent = "Auto-zár:";
+	editTimeoutLabel.style.cssText = "color:rgba(255,255,255,.85);font-weight:800;white-space:nowrap;font-size:0.95em;";
+
+	const editTimeoutValueEl = document.createElement("div");
+	editTimeoutValueEl.style.cssText = "color:rgba(255,255,255,.9);font-weight:700;min-width:3.2em;text-align:center;font-size:1.05em;";
+
+	editTimeoutRow.append(editTimeoutLabel, editTimeoutValueEl);
+
+	const savedEditTimeout = parseInt(localStorage.getItem(EDIT_TIMEOUT_KEY) || String(EDIT_DEFAULT_TIMEOUT_SEC), 10);
+
+	const editTimeoutSlider = document.createElement("input");
+	editTimeoutSlider.type = "range";
+	editTimeoutSlider.min = "1";
+	editTimeoutSlider.max = "30";
+	editTimeoutSlider.step = "1";
+	editTimeoutSlider.value = String(Math.max(1, Math.min(30, Math.round(savedEditTimeout / 60))));
+	editTimeoutSlider.className = "myio-intervalSlider";
+	editTimeoutSlider.style.cssText = "width:100%;box-sizing:border-box;cursor:pointer;";
+
+	function updateEditCountdown() {
+		const remaining = Math.max(0, Math.ceil((editTimerEnd - Date.now()) / 1000));
+		if (remaining > 0 && editInput.checked) {
+			const m = Math.floor(remaining / 60);
+			const s = remaining % 60;
+			btnEditMenu.textContent = "Szerkesztés " + m + ":" + String(s).padStart(2, "0");
+		} else {
+			btnEditMenu.textContent = "Szerkesztés";
+		}
+	}
+
+	function stopEditTimer() {
+		if (editCountdownInterval) { clearInterval(editCountdownInterval); editCountdownInterval = null; }
+		editTimerEnd = 0;
+	}
+
+	function startEditTimer(secs) {
+		stopEditTimer();
+		editTimerEnd = Date.now() + secs * 1000;
+		updateEditCountdown();
+		editCountdownInterval = setInterval(() => {
+			const remaining = Math.ceil((editTimerEnd - Date.now()) / 1000);
+			if (remaining <= 0) { setEditMode(false); return; }
+			updateEditCountdown();
+		}, 1000);
+	}
+
+	function setEditMode(on) {
+		document.body.classList.toggle("myio-edit-enabled", on);
+		editInput.checked = on;
+		btnEditMenu.classList.toggle("is-on", on);
+		if (on) {
+			const secs = parseInt(localStorage.getItem(EDIT_TIMEOUT_KEY) || String(EDIT_DEFAULT_TIMEOUT_SEC), 10);
+			startEditTimer(secs);
+		} else {
+			stopEditTimer();
+			btnEditMenu.textContent = "Szerkesztés";
+		}
+	}
+
+	function updateEditTimeoutDisplay() {
+		const min = parseInt(editTimeoutSlider.value, 10);
+		const secs = min * 60;
+		editTimeoutValueEl.textContent = min + " p";
+		localStorage.setItem(EDIT_TIMEOUT_KEY, String(secs));
+		if (editInput.checked) startEditTimer(secs);
+	}
+
+	editTimeoutSlider.addEventListener("input", updateEditTimeoutDisplay);
+	updateEditTimeoutDisplay();
+
+	editInput.addEventListener("change", () => setEditMode(editInput.checked));
+
+	btnEditMenu.addEventListener("click", (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		menuPanel.classList.toggle("is-editSubOpen");
+	});
+
+	editSubPanel.append(editTimeoutRow, editTimeoutSlider);
+	editRow.append(btnEditMenu, editToggle);
+	menuPanel.append(editRow, editSubPanel);
+
+
 	// ===== Language sor (külön, a menüben) =====
 	if (typeof langJSON !== "undefined" && langJSON.languages != undefined) {
 		const langWrap = document.createElement("div");
