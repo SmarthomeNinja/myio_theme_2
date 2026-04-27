@@ -93,6 +93,7 @@ var str_Min='Minute';
 var str_MinShort='min';
 var str_Mixer='Mixer';
 var str_MoveCard='Move';
+var str_OnlyOn='Only ON';
 var str_MixerTimer='Mixer setting interval';
 var str_Month = 'Month';
 var str_MultiChart = "Multi Chart";

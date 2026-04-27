@@ -94,6 +94,7 @@ var str_Min='Minute';
 var str_MinShort='Min.';
 var str_Mixer='Mixer';
 var str_MoveCard='Verschieben';
+var str_OnlyOn='Nur EIN';
 var str_MixerTimer='Mixer Kontrollintervall';
 var str_Month='Monat';
 var str_MultiChart = "Weitere Grafiken";

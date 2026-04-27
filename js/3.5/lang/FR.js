@@ -92,6 +92,7 @@ var str_Min="Minute";
 var str_MinShort='min';
 var str_Mixer = "Mélangeur";
 var str_MoveCard='Déplacer';
+var str_OnlyOn='Allumés';
 var str_MixerTimer="Intervalle de réglage du mélangeur";
 var str_Month = "Mois";
 var str_MultiChart = "Graphique Multiple";

@@ -93,6 +93,7 @@ var str_Min='Perc';
 var str_MinShort='p';
 var str_Mixer='Mixer';
 var str_MoveCard='Mozgatás';
+var str_OnlyOn='Bekapcsolt';
 var str_MixerTimer='Mixer ellenőrzés időköz';
 var str_Month = 'Hó';
 var str_MultiChart = "Több grafikon";

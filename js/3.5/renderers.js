@@ -82,6 +82,29 @@
     if (isActive) applyFilter(true);
   }
 
+  function addOnFilter(head, grid, section, sectionKey) {
+    const filterKey = sectionKey + '.showOnlyOn';
+    let active = localStorage.getItem(filterKey) === '1';
+
+    const label = typeof str_OnlyOn !== 'undefined' ? str_OnlyOn : 'Only ON';
+    const btn = el('button', {
+      type: 'button',
+      class: 'myio-on-filter' + (active ? ' is-active' : ''),
+      title: label
+    }, [document.createTextNode(label)]);
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      active = !active;
+      localStorage.setItem(filterKey, active ? '1' : '0');
+      btn.classList.toggle('is-active', active);
+      section.classList.toggle('myio-onfilter-active', active);
+    });
+
+    head.insertBefore(btn, head.querySelector('.myio-dragHandle'));
+    if (active) section.classList.add('myio-onfilter-active');
+  }
+
   // ============================================================
   // === Sensors
   // ============================================================
@@ -244,6 +267,7 @@
     });
 
     addZoneFilter(head, grid, 'myio.section.pca');
+    addOnFilter(head, grid, section, 'myio.section.pca');
     root.append(section);
   }
 
@@ -295,6 +319,7 @@
     });
 
     addZoneFilter(head, grid, 'myio.section.fet');
+    addOnFilter(head, grid, section, 'myio.section.fet');
     root.append(section);
   }
 
@@ -348,6 +373,7 @@
     });
 
     addZoneFilter(head, grid, 'myio.section.relays');
+    addOnFilter(head, grid, section, 'myio.section.relays');
     root.append(section);
   }
 
