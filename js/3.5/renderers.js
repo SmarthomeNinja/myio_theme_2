@@ -56,11 +56,61 @@
   }
 
   // ============================================================
+  // === Zóna szűrő checkbox a forrás szekciók fejlécébe
+  // ============================================================
+
+  function addZoneFilter(head, grid, sectionKey) {
+    const filterKey = sectionKey + '.hideZoned';
+
+    const isActive = localStorage.getItem(filterKey) === '1';
+
+    const btn = el('button', { type: 'button', class: 'myio-zone-filter' + (isActive ? ' is-active' : ''), title: 'Zónát kapott bejegyzések elrejtése' });
+    btn.textContent = 'Zónás elrejtés';
+    btn.addEventListener('click', e => e.stopPropagation());
+
+    const applyFilter = (active) => {
+      localStorage.setItem(filterKey, active ? '1' : '0');
+      btn.classList.toggle('is-active', active);
+      grid.querySelectorAll('.myio-card[data-cardid]').forEach(c => {
+        c.style.display = (active && window.myioStorage.getCardZones(c.dataset.cardid).length > 0) ? 'none' : '';
+      });
+    };
+
+    btn.addEventListener('click', () => applyFilter(!btn.classList.contains('is-active')));
+    head.insertBefore(btn, head.querySelector('.myio-dragHandle'));
+
+    if (isActive) applyFilter(true);
+  }
+
+  function addOnFilter(head, grid, section, sectionKey) {
+    const filterKey = sectionKey + '.showOnlyOn';
+    let active = localStorage.getItem(filterKey) === '1';
+
+    const label = typeof str_OnlyOn !== 'undefined' ? str_OnlyOn : 'Only ON';
+    const btn = el('button', {
+      type: 'button',
+      class: 'myio-on-filter' + (active ? ' is-active' : ''),
+      title: label
+    }, [document.createTextNode(label)]);
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      active = !active;
+      localStorage.setItem(filterKey, active ? '1' : '0');
+      btn.classList.toggle('is-active', active);
+      section.classList.toggle('myio-onfilter-active', active);
+    });
+
+    head.insertBefore(btn, head.querySelector('.myio-dragHandle'));
+    if (active) section.classList.add('myio-onfilter-active');
+  }
+
+  // ============================================================
   // === Sensors
   // ============================================================
 
   function renderSensors(root) {
-    const { section, grid } = makeSection(str('Sensors', 'Sensors'), '', 'myio.section.sensors');
+    const { section, grid, head } = makeSection(str('Sensors', 'Sensors'), '', 'myio.section.sensors');
     let count = 0;
 
     // Fogyasztás
@@ -118,7 +168,7 @@
       }
     }
 
-    if (count) root.append(section);
+    if (count) { addZoneFilter(head, grid, 'myio.section.sensors'); root.append(section); }
   }
 
   // ============================================================
@@ -133,7 +183,7 @@
     const hasAny = switchEnabled.some((v, i) => v !== 0 && switchDesc?.[i + 1] != null);
     if (!hasAny) return;
 
-    const { section, grid } = makeSection(str('Input', 'Input'), '', 'myio.section.switches');
+    const { section, grid, head } = makeSection(str('Input', 'Input'), '', 'myio.section.switches');
     for (let i = 0; i < switchEnabled.length; i++) {
       if (switchEnabled[i] === 0 || switchDesc[i + 1] == null) continue;
       const id = `switch:${i + 1}`;
@@ -149,6 +199,7 @@
       registerCardFactory(id, makeFn);
       grid.append(makeFn());
     }
+    addZoneFilter(head, grid, 'myio.section.switches');
     root.append(section);
   }
 
@@ -175,7 +226,7 @@
     });
     if (!hasAny) return;
 
-    const { section, grid } = makeSection(str('PCA_Output', 'PCA Output'), '', 'myio.section.pca');
+    const { section, grid, head } = makeSection(str('PCA_Output', 'PCA Output'), '', 'myio.section.pca');
 
     decoded.forEach((d, i) => {
       const isSunrise = pcaThermoAct[i] === 255;
@@ -215,6 +266,8 @@
       grid.append(makeFn());
     });
 
+    addZoneFilter(head, grid, 'myio.section.pca');
+    addOnFilter(head, grid, section, 'myio.section.pca');
     root.append(section);
   }
 
@@ -234,7 +287,7 @@
     const hasAny = decoded.some((d, i) => (d.read || d.write) && fetDesc[i + 1] != null);
     if (!hasAny) return;
 
-    const { section, grid } = makeSection(str('PWM', 'PWM'), '', 'myio.section.fet');
+    const { section, grid, head } = makeSection(str('PWM', 'PWM'), '', 'myio.section.fet');
 
     decoded.forEach((d, i) => {
       if (!((d.read || d.write) && fetDesc[i + 1] != null)) return;
@@ -265,6 +318,8 @@
       grid.append(makeFn());
     });
 
+    addZoneFilter(head, grid, 'myio.section.fet');
+    addOnFilter(head, grid, section, 'myio.section.fet');
     root.append(section);
   }
 
@@ -287,7 +342,7 @@
     });
     if (!hasAny) return;
 
-    const { section, grid } = makeSection(str('Output', 'Output'), '', 'myio.section.relays');
+    const { section, grid, head } = makeSection(str('Output', 'Output'), '', 'myio.section.relays');
 
     relays.forEach((val, i) => {
       const isSunrise = thermoAct[i] === 255;
@@ -317,6 +372,8 @@
       grid.append(makeFn());
     });
 
+    addZoneFilter(head, grid, 'myio.section.relays');
+    addOnFilter(head, grid, section, 'myio.section.relays');
     root.append(section);
   }
 

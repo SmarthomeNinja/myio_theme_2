@@ -32,6 +32,7 @@
     starBtn.addEventListener("click", (e) => {
       e.preventDefault();
       e.stopPropagation();
+      if (window.myioIsEditEnabled && !window.myioIsEditEnabled()) return;
 
       const wasFav = isFav(cardId);
       const before = loadFavs();
@@ -63,6 +64,10 @@
     });
 
     wrapper.appendChild(starBtn);
+
+    // Kártya drag handle (csak szerkesztési módban látszik — CSS .myio-edit-enabled vezérli)
+    const cardDragHandle = el("span", { class: "myio-cardDragHandle", title: (typeof str_MoveCard !== "undefined" ? str_MoveCard : "Move") }, [document.createTextNode("⠿")]);
+    wrapper.appendChild(cardDragHandle);
 
     // Megjegyzés ikon
     if (noteContent && noteContent.trim()) {
