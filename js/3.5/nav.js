@@ -779,6 +779,126 @@ function buildHeader() {
 	menuPanel.append(autoRefreshRow, autoRefreshPanel);
 
 
+	// ===== Szerkesztési mód =====
+	const EDIT_TIMEOUT_KEY = "myio.editMode.timeout";
+	const EDIT_DEFAULT_TIMEOUT_SEC = 300; // 5 perc
+
+	let editTimerEnd = 0;
+	let editCountdownInterval = null;
+
+	window.myioIsEditEnabled = () => document.body.classList.contains("myio-edit-enabled");
+
+	const editRow = document.createElement("div");
+	editRow.className = "myio-menuRow myio-menuRowEdit";
+
+	const btnEditMenu = document.createElement("button");
+	btnEditMenu.type = "button";
+	btnEditMenu.className = "myio-btn small myio-menuEditBtn";
+	btnEditMenu.textContent = (typeof str_EditMode !== "undefined" ? str_EditMode : "Edit");
+
+	const editToggle = document.createElement("label");
+	editToggle.className = "myio-miniToggle myio-miniToggleMenu";
+
+	const editInput = document.createElement("input");
+	editInput.type = "checkbox";
+	editInput.checked = false; // oldalletöltéskor mindig zárolt
+
+	const editTrack = document.createElement("span");
+	editTrack.className = "myio-miniTrack";
+
+	editToggle.append(editInput, editTrack);
+
+	const editSubPanel = document.createElement("div");
+	editSubPanel.className = "myio-menuSub myio-editSub";
+
+	const editTimeoutRow = document.createElement("div");
+	editTimeoutRow.style.cssText = "display:flex;align-items:center;gap:10px;margin-bottom:8px;";
+
+	const editTimeoutLabel = document.createElement("label");
+	editTimeoutLabel.textContent = (typeof str_AutoLock !== "undefined" ? str_AutoLock : "Auto-lock:");
+	editTimeoutLabel.style.cssText = "color:rgba(255,255,255,.85);font-weight:800;white-space:nowrap;font-size:0.95em;";
+
+	const editTimeoutValueEl = document.createElement("div");
+	editTimeoutValueEl.style.cssText = "color:rgba(255,255,255,.9);font-weight:700;min-width:3.2em;text-align:center;font-size:1.05em;";
+
+	editTimeoutRow.append(editTimeoutLabel, editTimeoutValueEl);
+
+	const savedEditTimeout = parseInt(localStorage.getItem(EDIT_TIMEOUT_KEY) || String(EDIT_DEFAULT_TIMEOUT_SEC), 10);
+
+	const editTimeoutSlider = document.createElement("input");
+	editTimeoutSlider.type = "range";
+	editTimeoutSlider.min = "1";
+	editTimeoutSlider.max = "30";
+	editTimeoutSlider.step = "1";
+	editTimeoutSlider.value = String(Math.max(1, Math.min(30, Math.round(savedEditTimeout / 60))));
+	editTimeoutSlider.className = "myio-intervalSlider";
+	editTimeoutSlider.style.cssText = "width:100%;box-sizing:border-box;cursor:pointer;";
+
+	function updateEditCountdown() {
+		const label = typeof str_EditMode !== "undefined" ? str_EditMode : "Edit";
+		const remaining = Math.max(0, Math.ceil((editTimerEnd - Date.now()) / 1000));
+		if (remaining > 0 && editInput.checked) {
+			const m = Math.floor(remaining / 60);
+			const s = remaining % 60;
+			btnEditMenu.textContent = label + " " + m + ":" + String(s).padStart(2, "0");
+		} else {
+			btnEditMenu.textContent = label;
+		}
+	}
+
+	function stopEditTimer() {
+		if (editCountdownInterval) { clearInterval(editCountdownInterval); editCountdownInterval = null; }
+		editTimerEnd = 0;
+	}
+
+	function startEditTimer(secs) {
+		stopEditTimer();
+		editTimerEnd = Date.now() + secs * 1000;
+		updateEditCountdown();
+		editCountdownInterval = setInterval(() => {
+			const remaining = Math.ceil((editTimerEnd - Date.now()) / 1000);
+			if (remaining <= 0) { setEditMode(false); return; }
+			updateEditCountdown();
+		}, 1000);
+	}
+
+	function setEditMode(on) {
+		document.body.classList.toggle("myio-edit-enabled", on);
+		editInput.checked = on;
+		btnEditMenu.classList.toggle("is-on", on);
+		if (on) {
+			const secs = parseInt(localStorage.getItem(EDIT_TIMEOUT_KEY) || String(EDIT_DEFAULT_TIMEOUT_SEC), 10);
+			startEditTimer(secs);
+		} else {
+			stopEditTimer();
+			btnEditMenu.textContent = (typeof str_EditMode !== "undefined" ? str_EditMode : "Edit");
+		}
+	}
+
+	function updateEditTimeoutDisplay() {
+		const min = parseInt(editTimeoutSlider.value, 10);
+		const secs = min * 60;
+		editTimeoutValueEl.textContent = min + " " + (typeof str_MinShort !== "undefined" ? str_MinShort : "min");
+		localStorage.setItem(EDIT_TIMEOUT_KEY, String(secs));
+		if (editInput.checked) startEditTimer(secs);
+	}
+
+	editTimeoutSlider.addEventListener("input", updateEditTimeoutDisplay);
+	updateEditTimeoutDisplay();
+
+	editInput.addEventListener("change", () => setEditMode(editInput.checked));
+
+	btnEditMenu.addEventListener("click", (e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		menuPanel.classList.toggle("is-editSubOpen");
+	});
+
+	editSubPanel.append(editTimeoutRow, editTimeoutSlider);
+	editRow.append(btnEditMenu, editToggle);
+	menuPanel.append(editRow, editSubPanel);
+
+
 	// ===== Language sor (külön, a menüben) =====
 	if (typeof langJSON !== "undefined" && langJSON.languages != undefined) {
 		const langWrap = document.createElement("div");
@@ -876,73 +996,298 @@ function buildHeader() {
 
 	footer.appendChild(btnLogout);
 
-	// Export / Import
-	const dataRow = document.createElement("div");
-	dataRow.className = "myio-menuRow";
-	dataRow.style.justifyContent = "center";
-	dataRow.style.gap = "8px";
-	dataRow.style.marginTop = "8px";
-	dataRow.style.paddingTop = "8px";
-	dataRow.style.borderTop = "1px solid rgba(255,255,255,0.1)";
+	// Megjelenítési beállítások gomb
+	const displayRow = document.createElement("div");
+	displayRow.style.cssText = "display:flex;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.1);";
 
-	const btnExport = document.createElement("button");
-	btnExport.type = "button";
-	btnExport.className = "myio-btn small";
-	btnExport.textContent = (typeof str_Export !== "undefined" ? str_Export : "Export");
-	btnExport.style.flex = "1";
-	btnExport.onclick = () => {
-		const data = {};
-		for (let i = 0; i < localStorage.length; i++) {
-			const key = localStorage.key(i);
-			if (key.startsWith("myio.") || ["Language", "Booster", "Host", "AutoRefresh"].includes(key)) {
-				data[key] = localStorage.getItem(key);
-			}
-		}
-		const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement("a");
-		const name = (typeof MYIOname === "string" && MYIOname.trim()) ? MYIOname.trim() : "myio";
-		a.href = url;
-		a.download = `${name}_backup_${new Date().toISOString().split('T')[0]}.json`;
-		a.click();
-		URL.revokeObjectURL(url);
-	};
+	const btnDisplaySettings = document.createElement("button");
+	btnDisplaySettings.type = "button";
+	btnDisplaySettings.className = "myio-btn small";
+	btnDisplaySettings.textContent = "Megjelenítés";
+	btnDisplaySettings.style.flex = "1";
+	btnDisplaySettings.onclick = openDisplaySettingsModal;
 
-	const btnImport = document.createElement("button");
-	btnImport.type = "button";
-	btnImport.className = "myio-btn small";
-	btnImport.textContent = (typeof str_Import !== "undefined" ? str_Import : "Import");
-	btnImport.style.flex = "1";
-	btnImport.onclick = () => {
-		const input = document.createElement("input");
-		input.type = "file";
-		input.accept = ".json";
-		input.onchange = (e) => {
-			const file = e.target.files[0];
-			if (!file) return;
-			const reader = new FileReader();
-			reader.onload = (re) => {
-				try {
-					const data = JSON.parse(re.target.result);
-					const conf = (typeof str_ConfirmImport !== "undefined" ? str_ConfirmImport : "Valóban visszaállítja a beállításokat? Az oldal újra fog töltődni.");
-					if (confirm(conf)) {
-						Object.keys(data).forEach(key => {
-							localStorage.setItem(key, data[key]);
-						});
-						window.location.reload();
-					}
-				} catch (err) {
-					alert((typeof str_ImportError !== "undefined" ? str_ImportError : "Hiba a fájl beolvasása közben!"));
-				}
-			};
-			reader.readAsText(file);
-		};
-		input.click();
-	};
-
-	dataRow.append(btnExport, btnImport);
-	menuPanel.appendChild(dataRow);
+	displayRow.appendChild(btnDisplaySettings);
+	menuPanel.appendChild(displayRow);
 	menuPanel.appendChild(footer);
+
+	function openDisplaySettingsModal() {
+		const modal = document.createElement("div");
+		modal.className = "myio-settings-overlay";
+
+		const content = document.createElement("div");
+		content.className = "myio-settings-modal";
+
+		const header = document.createElement("div");
+		header.className = "myio-settings-header";
+		const title = document.createElement("h3");
+		title.className = "myio-settings-title";
+		title.textContent = "Megjelenítési beállítások";
+		const btnClose = document.createElement("button");
+		btnClose.type = "button";
+		btnClose.className = "myio-settings-close";
+		btnClose.textContent = "×";
+		header.append(title, btnClose);
+
+		const body = document.createElement("div");
+		body.className = "myio-settings-content";
+		body.style.display = "flex";
+		body.style.flexDirection = "column";
+		body.style.gap = "8px";
+
+		// --- Adatok szekció ---
+		const dataLabel = document.createElement("div");
+		dataLabel.textContent = "Adatok";
+		dataLabel.style.cssText = "font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:0.5px;";
+
+		const dataButtonRow = document.createElement("div");
+		dataButtonRow.style.cssText = "display:flex;gap:8px;";
+
+		const btnExport = document.createElement("button");
+		btnExport.type = "button";
+		btnExport.className = "myio-btn small";
+		btnExport.textContent = (typeof str_Export !== "undefined" ? str_Export : "Export");
+		btnExport.style.flex = "1";
+		btnExport.onclick = () => {
+			const data = {};
+			for (let i = 0; i < localStorage.length; i++) {
+				const key = localStorage.key(i);
+				if (key.startsWith("myio.sync.")) continue;
+				if (key.startsWith("myio.") || ["Language", "Booster", "Host", "AutoRefresh"].includes(key)) {
+					data[key] = localStorage.getItem(key);
+				}
+			}
+			const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			const name = (typeof MYIOname === "string" && MYIOname.trim()) ? MYIOname.trim() : "myio";
+			a.href = url;
+			a.download = `${name}_backup_${new Date().toISOString().split('T')[0]}.json`;
+			a.click();
+			URL.revokeObjectURL(url);
+		};
+
+		const btnImport = document.createElement("button");
+		btnImport.type = "button";
+		btnImport.className = "myio-btn small";
+		btnImport.textContent = (typeof str_Import !== "undefined" ? str_Import : "Import");
+		btnImport.style.flex = "1";
+		btnImport.onclick = () => {
+			const input = document.createElement("input");
+			input.type = "file";
+			input.accept = ".json";
+			input.onchange = (e) => {
+				const file = e.target.files[0];
+				if (!file) return;
+				const reader = new FileReader();
+				reader.onload = (re) => {
+					try {
+						const data = JSON.parse(re.target.result);
+						const conf = (typeof str_ConfirmImport !== "undefined" ? str_ConfirmImport : "Valóban visszaállítja a beállításokat? Az oldal újra fog töltődni.");
+						if (confirm(conf)) {
+							Object.keys(data).forEach(key => { localStorage.setItem(key, data[key]); });
+							window.location.reload();
+						}
+					} catch (err) {
+						alert((typeof str_ImportError !== "undefined" ? str_ImportError : "Hiba a fájl beolvasása közben!"));
+					}
+				};
+				reader.readAsText(file);
+			};
+			input.click();
+		};
+
+		dataButtonRow.append(btnExport, btnImport);
+
+		// --- Hálózati szinkronizáció szekció ---
+		const syncSeparator = document.createElement("div");
+		syncSeparator.style.cssText = "border-top:1px solid rgba(255,255,255,0.1);margin-top:6px;padding-top:12px;display:flex;flex-direction:column;gap:8px;";
+
+		const syncLabel = document.createElement("div");
+		syncLabel.textContent = "Hálózati szinkronizáció";
+		syncLabel.style.cssText = "font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:0.5px;";
+
+		const currentProvider = localStorage.getItem("myio.sync.provider") || "";
+
+		const syncProviderRow = document.createElement("div");
+		syncProviderRow.style.cssText = "display:flex;gap:6px;flex-wrap:wrap;";
+
+		const btnJsonbin = document.createElement("button");
+		btnJsonbin.type = "button";
+		btnJsonbin.className = "myio-zone-filter" + (currentProvider === "jsonbin" ? " is-active" : "");
+		btnJsonbin.textContent = "JSONBin.io";
+
+		const btnJsonbinInfo = document.createElement("button");
+		btnJsonbinInfo.type = "button";
+		btnJsonbinInfo.className = "myio-sync-info-btn";
+		btnJsonbinInfo.title = "Információ";
+		btnJsonbinInfo.textContent = "ℹ";
+		btnJsonbinInfo.addEventListener("click", (e) => {
+			e.stopPropagation();
+			openJsonbinInfoModal();
+		});
+
+		const syncProviderFields = document.createElement("div");
+		syncProviderFields.style.cssText = "display:flex;flex-direction:column;gap:6px;";
+		syncProviderFields.style.display = currentProvider === "jsonbin" ? "flex" : "none";
+
+		btnJsonbin.addEventListener("click", (e) => {
+			e.stopPropagation();
+			const newVal = btnJsonbin.classList.contains("is-active") ? "" : "jsonbin";
+			btnJsonbin.classList.toggle("is-active", newVal === "jsonbin");
+			localStorage.setItem("myio.sync.provider", newVal);
+			syncProviderFields.style.display = newVal === "jsonbin" ? "flex" : "none";
+		});
+
+		syncProviderRow.append(btnJsonbin, btnJsonbinInfo);
+
+		const syncBinInput = document.createElement("input");
+		syncBinInput.type = "text";
+		syncBinInput.className = "myio-setting-input";
+		syncBinInput.placeholder = "Bin ID";
+		syncBinInput.value = localStorage.getItem("myio.sync.binId") || "";
+
+		const syncKeyInput = document.createElement("input");
+		syncKeyInput.type = "password";
+		syncKeyInput.className = "myio-setting-input";
+		syncKeyInput.placeholder = "Master Key";
+		syncKeyInput.value = localStorage.getItem("myio.sync.apiKey") || "";
+
+		const syncBtnRow = document.createElement("div");
+		syncBtnRow.style.cssText = "display:flex;gap:8px;";
+
+		const btnPull = document.createElement("button");
+		btnPull.type = "button";
+		btnPull.className = "myio-btn small";
+		btnPull.textContent = "⬇ Betöltés";
+		btnPull.style.flex = "1";
+
+		const btnPush = document.createElement("button");
+		btnPush.type = "button";
+		btnPush.className = "myio-btn small";
+		btnPush.textContent = "⬆ Mentés";
+		btnPush.style.flex = "1";
+
+		btnPull.onclick = async () => {
+			const binId = syncBinInput.value.trim();
+			const apiKey = syncKeyInput.value.trim();
+			if (!binId || !apiKey) { alert("Add meg a Bin ID-t és a Master Key-t!"); return; }
+			window.myioSync.saveSyncConfig(binId, apiKey);
+			btnPull.disabled = true; btnPull.textContent = "...";
+			try {
+				const data = await window.myioSync.syncPull(binId, apiKey);
+				const conf = (typeof str_ConfirmImport !== "undefined" ? str_ConfirmImport : "Valóban felülírod a helyi beállításokat? Az oldal újra fog töltődni.");
+				if (confirm(conf)) {
+					window.myioSync.applySettingsSnapshot(data);
+					window.location.reload();
+				}
+			} catch (e) {
+				alert("Betöltési hiba: " + e.message);
+			} finally {
+				btnPull.disabled = false; btnPull.textContent = "⬇ Betöltés";
+			}
+		};
+
+		btnPush.onclick = async () => {
+			const binId = syncBinInput.value.trim();
+			const apiKey = syncKeyInput.value.trim();
+			if (!binId || !apiKey) { alert("Add meg a Bin ID-t és a Master Key-t!"); return; }
+			window.myioSync.saveSyncConfig(binId, apiKey);
+			btnPush.disabled = true; btnPush.textContent = "...";
+			try {
+				await window.myioSync.syncPush(binId, apiKey, window.myioSync.getSettingsSnapshot());
+				if (window.myioUtils && window.myioUtils.toast) window.myioUtils.toast("✅ Sync kész!");
+				else alert("Feltöltés sikeres!");
+			} catch (e) {
+				alert("Mentési hiba: " + e.message);
+			} finally {
+				btnPush.disabled = false; btnPush.textContent = "⬆ Mentés";
+			}
+		};
+
+		syncBtnRow.append(btnPull, btnPush);
+		syncProviderFields.append(syncBinInput, syncKeyInput, syncBtnRow);
+		syncSeparator.append(syncLabel, syncProviderRow, syncProviderFields);
+		body.append(dataLabel, dataButtonRow, syncSeparator);
+		content.append(header, body);
+		modal.appendChild(content);
+
+		const closeModal = () => {
+			modal.classList.remove("is-open");
+			setTimeout(() => { if (modal.parentNode) modal.remove(); }, 200);
+		};
+
+		btnClose.onclick = closeModal;
+		modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+		document.addEventListener("keydown", function onKey(e) {
+			if (e.key === "Escape") { closeModal(); document.removeEventListener("keydown", onKey); }
+		});
+
+		document.body.appendChild(modal);
+		requestAnimationFrame(() => modal.classList.add("is-open"));
+	}
+
+	function openJsonbinInfoModal() {
+		const modal = document.createElement("div");
+		modal.className = "myio-settings-overlay";
+
+		const content = document.createElement("div");
+		content.className = "myio-settings-modal";
+
+		const header = document.createElement("div");
+		header.className = "myio-settings-header";
+		const title = document.createElement("h3");
+		title.className = "myio-settings-title";
+		title.textContent = "JSONBin.io – Hálózati szinkronizáció";
+		const btnClose = document.createElement("button");
+		btnClose.type = "button";
+		btnClose.className = "myio-settings-close";
+		btnClose.textContent = "×";
+		header.append(title, btnClose);
+
+		const body = document.createElement("div");
+		body.className = "myio-settings-content";
+		body.style.cssText = "display:flex;flex-direction:column;gap:12px;line-height:1.6;font-size:13px;color:rgba(255,255,255,0.85);";
+		body.innerHTML = `
+			<p>A <strong>JSONBin.io</strong> egy ingyenes felhőalapú JSON tároló. A megjelenítési beállításaidat (ikonok, nevek, zónák, sorrend) itt mentheted el, és bármely eszközödről visszatöltheted.</p>
+			<div class="myio-info-section">
+				<div class="myio-info-label">Regisztráció</div>
+				<p>Látogasd meg a <strong>jsonbin.io</strong> oldalt, és hozz létre egy ingyenes fiókot.</p>
+			</div>
+			<div class="myio-info-section">
+				<div class="myio-info-label">Bin létrehozása</div>
+				<p>Bejelentkezés után kattints a <strong>+ Create Bin</strong> gombra. A bin tartalma kezdetben lehet egyszerűen <code>{}</code>. A <strong>Bin ID</strong>-t a binek felsorolásánál, vagy a bin kiválasztása után a jobb oldali részletek panelen találod.</p>
+			</div>
+			<div class="myio-info-section">
+				<div class="myio-info-label">Master Key</div>
+				<p>A fiókbeállításokban (<strong>Account → API Keys</strong>) találod a <strong>Master Key</strong>-t. Ez szükséges az íráshoz és olvasáshoz egyaránt. Ne oszd meg másokkal!</p>
+			</div>
+			<div class="myio-info-section">
+				<div class="myio-info-label">Megosztás másokkal</div>
+				<p>Ha valaki a te beállításaidat szeretné kiindulópontként használni, add meg neki a Bin ID-det és a Master Key-det. Ő betöltheti a beállításaidat, majd létrehozhatja a saját binjét, és attól fogva azt használja.</p>
+			</div>
+			<div class="myio-info-section">
+				<div class="myio-info-label">Mentés / Betöltés</div>
+				<p><strong>Mentés</strong>: a jelenlegi beállításokat feltölti a binbe (felülírja a korábbit).<br><strong>Betöltés</strong>: a binből visszatölti a beállításokat, és újraindítja az oldalt.</p>
+			</div>`;
+
+		content.append(header, body);
+		modal.appendChild(content);
+
+		const closeModal = () => {
+			modal.classList.remove("is-open");
+			setTimeout(() => { if (modal.parentNode) modal.remove(); }, 200);
+		};
+
+		btnClose.onclick = closeModal;
+		modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+		document.addEventListener("keydown", function onKey(e) {
+			if (e.key === "Escape") { closeModal(); document.removeEventListener("keydown", onKey); }
+		});
+
+		document.body.appendChild(modal);
+		requestAnimationFrame(() => modal.classList.add("is-open"));
+	}
 
 	// nyit/zár
 	btnMenu.onclick = (e) => {
@@ -1125,6 +1470,11 @@ function enableThumbOnlyRanges(root = document) {
 const myioRO = window.ResizeObserver ? new ResizeObserver(() => enableThumbOnlyRanges(document)) : null;
 window.addEventListener('resize', () => enableThumbOnlyRanges(document));
 
+
+// Sync modul betöltése
+if (typeof host !== 'undefined') {
+	document.write('<script src="' + host + 'sync.js"/><\/script>');
+}
 
 // Ninja AI Chatbot betöltése
 if (typeof host !== 'undefined') {

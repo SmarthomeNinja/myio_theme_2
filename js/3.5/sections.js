@@ -34,6 +34,7 @@
 
     const handle = head.querySelector(".myio-dragHandle");
     handle.addEventListener("pointerdown", (e) => {
+      if (window.myioIsEditEnabled && !window.myioIsEditEnabled()) return;
       section.dataset.dragok = "1";
       section.draggable = true;
       e.stopPropagation();

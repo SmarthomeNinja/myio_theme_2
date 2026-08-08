@@ -274,6 +274,94 @@ html.myio-noanim .myio-sectionBody {
 	color: #fff;
 }
 
+.myio-zone-filter {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 9px;
+	border-radius: 20px;
+	border: 1px solid rgba(255, 255, 255, .3);
+	background: transparent;
+	font-size: clamp(10px, calc(12px * var(--myio-zoom)), 18px);
+	color: rgba(255, 255, 255, .75);
+	cursor: pointer;
+	white-space: nowrap;
+	user-select: none;
+	transition: background .15s, border-color .15s, color .15s;
+}
+
+.myio-zone-filter.is-active {
+	background: rgba(3, 151, 214, .85);
+	border-color: rgba(3, 151, 214, 1);
+	color: #fff;
+}
+
+.myio-on-filter {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 9px;
+	border-radius: 20px;
+	border: 1px solid rgba(255, 255, 255, .3);
+	background: transparent;
+	font-size: clamp(10px, calc(12px * var(--myio-zoom)), 18px);
+	color: rgba(255, 255, 255, .75);
+	cursor: pointer;
+	white-space: nowrap;
+	user-select: none;
+	transition: background .15s, border-color .15s, color .15s;
+}
+
+.myio-on-filter.is-active {
+	background: rgba(34, 197, 94, .75);
+	border-color: rgba(34, 197, 94, 1);
+	color: #fff;
+}
+
+.myio-onfilter-active .myio-card.myio-off {
+	display: none;
+}
+
+.myio-sync-info-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	border: 1px solid rgba(255, 255, 255, .3);
+	background: transparent;
+	color: rgba(255, 255, 255, .55);
+	font-size: 13px;
+	cursor: pointer;
+	transition: background .15s, color .15s;
+	flex-shrink: 0;
+}
+
+.myio-sync-info-btn:hover {
+	background: rgba(255, 255, 255, .1);
+	color: #fff;
+}
+
+.myio-info-section {
+	border-left: 2px solid rgba(3, 151, 214, .6);
+	padding-left: 10px;
+}
+
+.myio-info-label {
+	font-size: 11px;
+	font-weight: 700;
+	color: rgba(3, 151, 214, 1);
+	letter-spacing: 0.4px;
+	margin-bottom: 3px;
+	text-transform: uppercase;
+}
+
+.myio-settings-content code {
+	background: rgba(255, 255, 255, .1);
+	padding: 1px 5px;
+	border-radius: 4px;
+	font-size: 12px;
+}
+
 .myio-section.is-dragging {
 	outline: 2px dashed rgba(255, 180, 50, .6);
 	outline-offset: 4px;
@@ -1553,6 +1641,65 @@ input[type="range"]::-moz-range-thumb {
 	-webkit-user-select: none;
 	-moz-user-select: none;
 	-ms-user-select: none;
+}
+
+/* ===== Szerkesztési mód ===== */
+
+/* Kártya drag handle */
+.myio-cardDragHandle {
+	display: none;
+	cursor: grab;
+	font-size: calc(20px * var(--myio-zoom));
+	line-height: 1;
+	color: rgba(255, 255, 255, 0.38);
+	user-select: none;
+	text-align: center;
+	padding: 2px 4px;
+	margin-top: 6px;
+	border-radius: 4px;
+	touch-action: none;
+	transition: color .15s, background .15s;
+}
+
+.myio-cardDragHandle:hover {
+	color: rgba(255, 255, 255, 0.75);
+	background: rgba(255, 255, 255, 0.08);
+}
+
+.myio-cardDragHandle:active {
+	cursor: grabbing;
+	color: #fff;
+}
+
+/* Edit mód aktív: kártya drag handle látszik */
+.myio-edit-enabled .myio-cardDragHandle {
+	display: block;
+}
+
+/* Zárolt: csillag nem interaktív */
+body:not(.myio-edit-enabled) .myio-favInTitle {
+	opacity: 0.28;
+	cursor: default;
+	pointer-events: none;
+}
+
+/* Zárolt: szekció drag handle halványabb, nem interaktív */
+body:not(.myio-edit-enabled) .myio-dragHandle {
+	opacity: 0.15;
+	cursor: default;
+	pointer-events: none;
+}
+
+/* Szerkesztési mód sub-panel */
+.myio-menuPanel.is-editSubOpen .myio-editSub {
+	display: block;
+}
+
+/* Szerkesztés gomb aktív (edit on) */
+.myio-menuEditBtn.is-on {
+	background: rgba(3, 151, 214, 0.2) !important;
+	border-color: rgba(3, 151, 214, 0.6) !important;
+	color: var(--accent) !important;
 }
 
 input,
